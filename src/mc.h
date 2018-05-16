@@ -15,7 +15,6 @@
 #include "dump.h"
 #include "mctools.h"
 #include "lattice.h"
-#include "configuration.h"
 
 class mc
 {
@@ -69,6 +68,4 @@ class mc
 		int measure_static_cnt = 0;
 		int dyn_bin_cnt = 0;
 		int static_bin_cnt = 0;
-
-		configuration config;
 };
