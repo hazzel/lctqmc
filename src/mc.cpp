@@ -9,7 +9,7 @@
 #endif
 
 mc::mc(const std::string& dir)
-	: rng(Random()), qmc(rng), config(rng, measure)
+	: rng(Random()), qmc(rng), gf(lat)
 {
 	//Read parameters
 	pars.read_file(dir);
@@ -20,16 +20,40 @@ mc::mc(const std::string& dir)
 	n_warmup = pars.value_or_default<int>("warmup", 100000);
 	n_prebin = pars.value_or_default<int>("prebin", 500);
 
+	/*
 	std::string static_obs_string = pars.value_or_default<std::string>("static_obs", "M2");
 	boost::split(config.param.static_obs, static_obs_string, boost::is_any_of(","));
 	std::string obs_string = pars.value_or_default<std::string>("obs", "M2");
 	boost::split(config.param.obs, obs_string, boost::is_any_of(","));
+	*/
 	if (pars.defined("seed"))
 		rng.NewRng(pars.value_of<int>("seed"));
 
 	//Initialize lattice
-
-	//Initialize configuration class
+	int L = 2;
+	honeycomb hc(L, L);
+	lat.generate_graph(hc);
+	hc.generate_maps(lat);
+	
+	//Build H0
+	green_function::matrix_t K(lat.n_sites(), lat.n_sites());
+	for (auto& a : lat.bonds("nearest neighbors"))
+		K(a.first, a.second) = -1.;
+	//for (auto& a : lat.bonds("t3_bonds"))
+	//	H0(a.first+as, a.second+as) = -param.tprime;
+	gf.set_K_matrix(K);
+	theta = 10;
+	block_size = 0.5;
+	unsigned Nv = 10;
+	green_function::vlist_t vlist;
+	for (int i = 0; i < Nv; ++i)
+	{
+		double tau = rng() * theta;
+		auto& b = lat.bonds("nearest neighbors")[rng() * 2 * lat.n_bonds()];
+		vlist.push_back({tau, b.first, b.second});
+	}
+	std::sort(vlist.begin(), vlist.end(), vertex::less());
+	gf.initialize(vlist, theta, block_size);
 
 	//Set up events
 
@@ -74,7 +98,6 @@ void mc::write(const std::string& dir)
 	d.write(sweep);
 	d.write(static_bin_cnt);
 	d.write(dyn_bin_cnt);
-	config.serialize(d);
 	d.close();
 	seed_write(dir+"seed");
 	std::ofstream f(dir+"bins");
@@ -82,9 +105,9 @@ void mc::write(const std::string& dir)
 	{
 		f << "Thermalization: Done." << std::endl
 			<< "Sweeps: " << (sweep - n_warmup) << std::endl
-			<< "Static bins: " << static_cast<int>(static_bin_cnt / (config.param.n_tau_slices / n_static_cycles))
+			<< "Static bins: "
 			<< std::endl
-			<< "Dynamic bins: " << static_cast<int>(dyn_bin_cnt / n_prebin)
+			<< "Dynamic bins: "
 			<< std::endl;
 	}
 	else
@@ -110,7 +133,6 @@ bool mc::read(const std::string& dir)
 		d.read(sweep);
 		d.read(static_bin_cnt);
 		d.read(dyn_bin_cnt);
-		config.serialize(d);
 		d.close();
 		return true;
 	}
@@ -137,7 +159,22 @@ bool mc::is_thermalized()
 
 void mc::do_update()
 {
-	//std::cout << "Starting to update..." << std::endl;
+	std::cout << "sweep = " << sweep << std::endl;
+	
+	
+	for (int i = 0; i < theta / block_size; ++i)
+	{
+		gf.wrap(i * block_size);
+		gf.measure();
+	}
+	/*
+	for (int i = block_size - 1; i >= 0; --i)
+	{
+		gf.wrap(i * block_size);
+		gf.measure();
+	}
+	*/
+	
 	++sweep;
 }
 
