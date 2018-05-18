@@ -31,6 +31,7 @@ class move_base
 		}
 		double accept() { ++n_accepted; return accept_fun(); }
 		void reject() { reject_fun(); }
+		void init() { init_fun(); }
 		std::string name() { return name_str; }
 		double proposal_rate() const { return prop_rate; }
 		void proposal_rate(double prop_rate_) { prop_rate = prop_rate_; }
@@ -45,6 +46,7 @@ class move_base
 			attempt_fun = [functor]() { return functor->attempt(); };
 			accept_fun = [functor]() { return functor->accept(); };
 			reject_fun = [functor]() { functor->reject(); };
+			init_fun = [functor]() { functor->init(); };
 			clone_fun = [functor, this]() { return move_base(*functor, name_str,
 				prop_rate); };
 		}
@@ -53,6 +55,7 @@ class move_base
 		std::function<double()> attempt_fun;
 		std::function<double()> accept_fun;
 		std::function<void()> reject_fun;
+		std::function<void()> init_fun;
 		std::function<move_base()> clone_fun;
 		std::string name_str;
 		double prop_rate;

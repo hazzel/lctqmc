@@ -42,7 +42,7 @@ class mctools
 			measures.push_back(measure_base(std::forward<T>(functor), name));
 		}
 
-		void do_update(measurements& measure_sign)
+		void do_update()
 		{
 			double r = rng();
 			for (int i = 0; i < moves.size(); ++i)
@@ -50,11 +50,9 @@ class mctools
 				if (r < proposal[i])
 				{
 					double q = moves[i].attempt();
-					if (q < -std::pow(10., -16.) && verbose)
+					if (q < -std::pow(10., -15.) && verbose)
 						std::cout << "Negative sign at " << moves[i].name()
 							<< " with value " << q << "." << std::endl;
-					if (q != 0.0)
-						measure_sign.add("sign", (q >= 0.0) - (q < 0.0));
 					if (rng() < std::abs(q))
 						moves[i].accept();
 					else
@@ -68,6 +66,12 @@ class mctools
 		{
 			//map[] operators requires constructor() without arguments
 			events.find(name)->second.trigger();
+		}
+		
+		void init_moves()
+		{
+			for (auto it = moves.begin(); it != moves.end(); ++it)
+				it->init();
 		}
 		
 		void init_events()

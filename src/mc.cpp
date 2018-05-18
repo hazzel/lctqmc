@@ -4,12 +4,14 @@
 #include <boost/algorithm/string.hpp>
 #include "mc.h"
 #include "honeycomb.h"
+#include "move_functors.h"
+#include "measure_functors.h"
 #ifdef PROFILER
 	#include "gperftools/profiler.h"
 #endif
 
 mc::mc(const std::string& dir)
-	: rng(Random()), qmc(rng), gf(lat)
+	: rng(Random()), qmc(rng), gf(rng, param, lat)
 {
 	//Read parameters
 	pars.read_file(dir);
@@ -19,6 +21,11 @@ mc::mc(const std::string& dir)
 	n_dyn_cycles = pars.value_or_default<int>("dyn_cycles", 300);
 	n_warmup = pars.value_or_default<int>("warmup", 100000);
 	n_prebin = pars.value_or_default<int>("prebin", 500);
+	
+	param.L = pars.value_or_default<int>("L", 2);
+	param.theta = pars.value_or_default<double>("theta", 40);
+	param.block_size = pars.value_or_default<double>("block_size", 1);
+	param.V = pars.value_or_default<double>("V", 1.0);
 
 	/*
 	std::string static_obs_string = pars.value_or_default<std::string>("static_obs", "M2");
@@ -28,10 +35,13 @@ mc::mc(const std::string& dir)
 	*/
 	if (pars.defined("seed"))
 		rng.NewRng(pars.value_of<int>("seed"));
+	
+	qmc.add_move(move_insert{rng, measure, param, lat, gf}, "insert", 1.0);
+	qmc.add_move(move_remove{rng, measure, param, lat, gf}, "remove", 1.0);
+	qmc.add_measure(measure_M{measure, pars}, "measurement");
 
 	//Initialize lattice
-	int L = 2;
-	honeycomb hc(L, L);
+	honeycomb hc(param.L, param.L);
 	lat.generate_graph(hc);
 	hc.generate_maps(lat);
 	
@@ -42,18 +52,16 @@ mc::mc(const std::string& dir)
 	//for (auto& a : lat.bonds("t3_bonds"))
 	//	H0(a.first+as, a.second+as) = -param.tprime;
 	gf.set_K_matrix(K);
-	theta = 10;
-	block_size = 0.5;
-	unsigned Nv = 10;
+	unsigned Nv = 40;
 	green_function::vlist_t vlist;
 	for (int i = 0; i < Nv; ++i)
 	{
-		double tau = rng() * theta;
+		double tau = rng() * param.theta;
 		auto& b = lat.bonds("nearest neighbors")[rng() * 2 * lat.n_bonds()];
 		vlist.push_back({tau, b.first, b.second});
 	}
 	std::sort(vlist.begin(), vlist.end(), vertex::less());
-	gf.initialize(vlist, theta, block_size);
+	gf.initialize(vlist);
 
 	//Set up events
 
@@ -88,6 +96,7 @@ void mc::random_read(idump& d)
 
 void mc::init()
 {
+	qmc.init_moves();
 	qmc.init_events();
 }
 
@@ -159,19 +168,23 @@ bool mc::is_thermalized()
 
 void mc::do_update()
 {
-	std::cout << "sweep = " << sweep << std::endl;
-	
-	
-	for (int i = 0; i < theta / block_size; ++i)
+	for (int i = 0; i < param.theta / param.block_size - 1; ++i)
 	{
-		gf.wrap(i * block_size);
+		std::cout << "i = " << i << std::endl;
+		gf.wrap(i * param.block_size);
+		qmc.do_update();
+		gf.rebuild();
 		gf.measure();
+		std::cout << "pert_order = " << gf.pert_order() << std::endl;
 	}
 	/*
-	for (int i = block_size - 1; i >= 0; --i)
+	for (int i = param.block_size - 1; i > 0; --i)
 	{
-		gf.wrap(i * block_size);
+		gf.wrap(i * param.block_size);
+		qmc.do_update();
+		gf.rebuild();
 		gf.measure();
+		std::cout << "pert_order = " << gf.pert_order() << std::endl;
 	}
 	*/
 	

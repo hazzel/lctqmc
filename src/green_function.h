@@ -5,13 +5,21 @@
 #include <Eigen/QR>
 #include <cassert>
 #include <vector>
+#include "Random.h"
 #include "lattice.h"
+#include "parameters.h"
+
+template<typename T, typename Pred>
+typename std::vector<T>::iterator insert_sorted(std::vector<T>& vec, const T& item, Pred pred)
+{
+	return vec.insert(std::upper_bound(vec.begin(), vec.end(), item, pred), item);
+}
 
 struct vertex
 {
 	double tau;
-	unsigned int si;
-	unsigned int sj;
+	int si;
+	int sj;
 	
 	struct less
 	{
@@ -54,8 +62,8 @@ class green_function
 		using matrix_t = Eigen::Matrix<numeric_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>;
 		using vlist_t = std::vector<vertex>;
 
-		green_function(lattice& lat_)
-			: lat(lat_)
+		green_function(Random& rng_, parameters& param_, lattice& lat_)
+			: rng(rng_), param(param_), lat(lat_)
 		{}
 		
 		void set_K_matrix(const matrix_t& K_)
@@ -69,6 +77,11 @@ class green_function
 			uKdagP = uKdag * solver.eigenvectors().leftCols(lat.n_sites()/2);
 			Eigen::JacobiSVD<matrix_t> svd(uKdagP, Eigen::ComputeThinU);
 			uKdagP = svd.matrixU();
+		}
+		
+		unsigned int pert_order() const
+		{
+			return vlist.size();
 		}
 		
 		// it can do  B(tau_m)... B(tau_n) * A  when sign = -1
@@ -109,7 +122,7 @@ class green_function
 			vlist_t::const_iterator lower = std::lower_bound(vlist.begin(), vlist.end(), tau_n, vertex::less_equal());	//equal is exclude
 			vlist_t::const_iterator upper = std::upper_bound(vlist.begin(), vlist.end(), tau_m, vertex::less());
 			
-			//upper > tau1 > lower > tau2 
+			//upper > tau_m > lower > tau_n
 			if (lower == upper)	// there is no vertex in between tau1 and tau2 
 				K_prop(sign, tau_m - tau_n, side, A); 
 			else
@@ -134,17 +147,17 @@ class green_function
 
 			if (side == "L")
 			{	//  exp(tau * w) * A 
-				for (unsigned l=0; l<lat.n_sites(); ++l) 
-					A.row(l) *= std::exp(sign * tau * wK(l));
+				for (int l=0; l<lat.n_sites(); ++l) 
+					A.row(l) *= std::exp(sign * tau * wK[l]);
 			}
 			else if (side == "R")
 			{	// A * exp(tau * w)
-				for (unsigned l=0; l<lat.n_sites(); ++l) 
-					A.col(l) *= std::exp(sign * tau * wK(l));
+				for (int l=0; l<lat.n_sites(); ++l) 
+					A.col(l) *= std::exp(sign * tau * wK[l]);
 			}
 		}
 
-		void V_prop(unsigned int si, unsigned int sj, const std::string& side,  matrix_t& A) const // A*U^{dagger} V U or U^{dagger} V U * A 
+		void V_prop(int si, int sj, const std::string& side,  matrix_t& A) const // A*U^{dagger} V U or U^{dagger} V U * A 
 		{
 			if (side == "L")
 				A.noalias() -= 2.* uKdag.col(si) * (uK.row(si)* A) + 2.* uKdag.col(sj) * (uK.row(sj)* A); 
@@ -152,22 +165,21 @@ class green_function
 				A.noalias() -= 2.* (A*uKdag.col(si))* uK.row(si) + 2.* (A*uKdag.col(sj)) * uK.row(sj);
 		}
 
-		void initialize(const std::vector<vertex>& vlist_, double theta_, double block_size_)
+		void initialize(const std::vector<vertex>& vlist_)
 		{
-			block_size = block_size_;
-			theta = theta_;
-			storage.resize(theta / block_size + 1);
+			storage.resize(param.theta / param.block_size + 1);
 
 			vlist = vlist_;
-			tpos = vlist.begin()->tau;
+			//tpos = vlist.begin()->tau;
+			tpos = 0.;
 			
-			int block = tpos / block_size;
+			int block = tpos / param.block_size;
 			storage[0] = uKdagP;
 			
 			for (int i=0; i < block; ++i)
 			{
 				matrix_t UR = storage[i];
-				prop_from_left(-1, (i+1)*block_size, i*block_size, UR);
+				prop_from_left(-1, (i+1)*param.block_size, i*param.block_size, UR);
 
 				Eigen::JacobiSVD<matrix_t> svd(UR, Eigen::ComputeThinU); 
 				storage[i+1] = svd.matrixU();
@@ -177,7 +189,7 @@ class green_function
 			for (int i = storage.size()-2; i>block; --i)
 			{
 				matrix_t VL = storage[i+1];
-				prop_from_right(-1, (i+1)*block_size, i*block_size, VL);
+				prop_from_right(-1, (i+1)*param.block_size, i*param.block_size, VL);
 
 				Eigen::JacobiSVD<matrix_t> svd(VL, Eigen::ComputeThinV); 
 				storage[i] = svd.matrixV().adjoint();
@@ -187,15 +199,20 @@ class green_function
 			measure();
 		}
 		
+		void rebuild()
+		{
+			g_tau = g_stable();
+		}
+		
 		matrix_t g_stable()
 		{
-			int block = tpos / block_size;
+			int block = tpos / param.block_size;
 
 			matrix_t UR = storage[block];
-			prop_from_left(-1, tpos, block*block_size, UR);
+			prop_from_left(-1, tpos, block*param.block_size, UR);
 		
 			matrix_t VL = storage[block+1];
-			prop_from_right(-1, (block+1)*block_size, tpos, VL);
+			prop_from_right(-1, (block+1)*param.block_size, tpos, VL);
 			
 			matrix_t res = -UR * ((VL*UR).inverse() * VL);
 			for (int l = 0; l < lat.n_sites(); ++l)
@@ -209,17 +226,15 @@ class green_function
 			matrix_t UR = uKdagP;
 			prop_from_left(-1, tpos, 0, UR);
 			matrix_t VL = uKdagP.adjoint();
-			prop_from_right(-1, theta, tpos, VL);
+			prop_from_right(-1, param.theta, tpos, VL);
 			matrix_t id = matrix_t::Identity(lat.n_sites(), lat.n_sites());
 			return id - UR * (VL * UR).inverse() * VL;
 		}
 		
 		void wrap(double tau)
 		{
-			int old_block = tpos / block_size;
-			int new_block = tau / block_size;
-			
-			std::cout << "wrap from tau = " << tpos << " to " << tau << ", from block " << old_block << " to " << new_block << std::endl;
+			int old_block = tpos / param.block_size;
+			int new_block = tau / param.block_size;
 			
 			//wrap Green's function 
 			if (tau >= tpos)
@@ -239,17 +254,109 @@ class green_function
 			
 			//when we wrap to a new block we need to update storage 
 			if (new_block > old_block)
-			{// move to a larger block on the left  
-				prop_from_left(-1, new_block*block_size, old_block*block_size, storage[old_block]);
-				Eigen::JacobiSVD<matrix_t> svd(storage[old_block], Eigen::ComputeThinU); 
+			{// move to a larger block on the left
+				matrix_t UR = storage[old_block];
+				std::cout << "UR(old_block = " << old_block << "): " << UR.rows() << " x " << UR.cols() << std::endl;
+				prop_from_left(-1, new_block*param.block_size, old_block*param.block_size, UR);
+				Eigen::JacobiSVD<matrix_t> svd(UR, Eigen::ComputeThinU); 
 				storage[new_block] = svd.matrixU();
 			}
 			else if (new_block < old_block)
-			{// move to smaller block 
-				prop_from_right(-1, (old_block+1)*block_size, old_block*block_size, storage[old_block+1]);
-				Eigen::JacobiSVD<matrix_t> svd(storage[old_block+1], Eigen::ComputeThinV);
+			{// move to smaller block
+				matrix_t VL = storage[old_block+1];
+				prop_from_right(-1, (old_block+1)*param.block_size, old_block*param.block_size, VL);
+				Eigen::JacobiSVD<matrix_t> svd(VL, Eigen::ComputeThinV);
 				storage[new_block+1] = svd.matrixV().adjoint();
 			}
+		}
+		
+		double gij(const int si, const int sj) const
+		{	// current g in the site basis 
+			// (U gtau U^{dagger} )_ij 
+			return  (uK.row(si) * g_tau) * uKdag.col(sj);  
+		}
+		
+		//update changes g_tau 
+		void update(const int si, const int sj, const double gij, const double gji)
+		{
+			//update g_tau
+			Eigen::RowVectorXd ri = uK.row(si) * g_tau - uK.row(si); 
+			Eigen::RowVectorXd rj = uK.row(sj) * g_tau - uK.row(sj); 
+
+			g_tau.noalias() -= (g_tau*uKdag.col(sj)) * ri/gij + (g_tau*uKdag.col(si)) * rj/gji; 
+
+			/*
+			if (itau_%blocksize_==0)
+			{ //special treatment when update the block starting point 
+											//otherwise this vertex will be untreated in stablization 
+				//std::cout << "update: special treatment because update on the block boundary" << std::endl; 
+				Vprop(si, sj, "L",  Storage_[itau_/blocksize_]);// update U in Storage 
+			}
+			*/
+		}
+		
+		vertex generate_random_vertex()
+		{
+			int block = tpos / param.block_size;
+			double tau = (block + rng()) * param.block_size;
+			auto& b = lat.bonds("nearest neighbors")[rng() * 2. * lat.n_bonds()];
+			return vertex{tau, b.first, b.second};
+		}
+		
+		vlist_t::iterator select_random_vertex()
+		{
+			int block = tpos / param.block_size;
+			vlist_t::iterator lower = std::lower_bound(vlist.begin(), vlist.end(), block*param.block_size, vertex::less()); 
+			vlist_t::iterator upper = std::upper_bound(vlist.begin(), vlist.end(), (block+1)*param.block_size, vertex::less_equal());  //equal is exclude
+			unsigned num_vertices = std::distance(lower, upper); //number of vertices in this block
+			return std::next(lower, rng() * num_vertices);
+		}
+		
+		double add_vertex(const vertex& v, bool compute_only_weight)
+		{
+			int block = v.tau / param.block_size;
+			vlist_t::iterator lower = std::lower_bound(vlist.begin(), vlist.end(), block*param.block_size, vertex::less()); 
+			vlist_t::iterator upper = std::upper_bound(vlist.begin(), vlist.end(), (block+1)*param.block_size, vertex::less_equal());  //equal is exclude
+			unsigned num_vertices = std::distance(lower, upper); //number of vertices in this block
+			
+			wrap(v.tau);
+			double G = gij(v.si, v.sj); // rotate it to real space 
+			double ratio = -4.* G * G / (num_vertices + 1.); // gji = gij when they belongs to different sublattice 
+
+			if(!compute_only_weight)
+			{
+				update(v.si, v.sj, G, G);
+				insert_sorted<vertex, vertex::less>(vlist, v, vertex::less());
+			}
+			return ratio;
+		}
+
+		double remove_vertex(vlist_t::iterator vpos, bool compute_only_weight)
+		{
+			if (vlist.empty()) //since we will get a empty list as use this opputunity to reset all memory 
+			{
+				rebuild();
+				return 0.;
+			}
+			
+			int block = vpos->tau / param.block_size;
+			vlist_t::iterator lower = std::lower_bound(vlist.begin(), vlist.end(), block*param.block_size, vertex::less()); 
+			vlist_t::iterator upper = std::upper_bound(vlist.begin(), vlist.end(), (block+1)*param.block_size, vertex::less_equal());  //equal is exclude
+			unsigned num_vertices = std::distance(lower, upper); //number of vertices in this block
+
+			if(num_vertices < 1)
+				return 0.; 
+
+			wrap(vpos->tau);
+			double G = gij(vpos->si, vpos->sj);  
+			double ratio = -4.* G * G * num_vertices; // gji = gij when they belongs to different sublattice 
+
+			if(!compute_only_weight)
+			{
+				update(vpos->si, vpos->sj, G, G); 
+				vlist.erase(vpos);
+			}
+			return ratio; 
 		}
 		
 		void measure()
@@ -258,9 +365,11 @@ class green_function
 			
 			std::cout << "g_site at tau = " << tpos << ":" << std::endl;
 			print_matrix(g_site);
+			/*
 			std::cout << "g_exact at tau = " << tpos << ":" << std::endl;
 			g_site = uK * g_exact() * uKdag;
 			print_matrix(g_site);
+			*/
 		}
 		
 		void print_matrix(const matrix_t& m)
@@ -273,10 +382,9 @@ class green_function
 			}
 		}
 	private:
+		Random& rng;
+		parameters& param;
 		lattice& lat;
-		
-		double theta;
-		double block_size;
 		
 		vlist_t vlist;
 		double tpos;

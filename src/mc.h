@@ -14,6 +14,7 @@
 #include "types.h"
 #include "dump.h"
 #include "mctools.h"
+#include "parameters.h"
 #include "lattice.h"
 #include "green_function.h"
 
@@ -56,6 +57,7 @@ class mc
 		void status();
 	private:
 		Random rng;
+		parameters param;
 		lattice lat;
 		mctools qmc;
 		parser pars;
@@ -66,9 +68,6 @@ class mc
 		int n_warmup;
 		int n_prebin;
 		int n_tau_slices;
-		
-		double theta;
-		double block_size;
 		
 		int measure_dyn_cnt = 0;
 		int measure_static_cnt = 0;
