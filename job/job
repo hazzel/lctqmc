@@ -1,0 +1,12 @@
+SWEEPS = 1000
+warmup = 500
+prebin = 500
+
+L = 6
+theta = 40
+block_size = 0.25
+updates_per_block = 5
+
+static_obs = energy
+
+{V = 1.0}

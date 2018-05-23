@@ -168,7 +168,7 @@ void mc::do_update()
 		if (is_thermalized())
 		{
 			qmc.do_measurement();
-			qmc.trigger_event("static_measure");
+			qmc.trigger_event("static measure");
 		}
 	}
 	for (int i = param.theta / param.block_size - 1; i > 0; --i)
@@ -180,7 +180,7 @@ void mc::do_update()
 		if (is_thermalized())
 		{
 			qmc.do_measurement();
-			qmc.trigger_event("static_measure");
+			qmc.trigger_event("static measure");
 		}
 	}
 	

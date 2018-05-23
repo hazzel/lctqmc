@@ -53,7 +53,6 @@ struct event_static_measurement
 	std::vector<vector_wick_static_base<matrix_t>> vec_obs;
 	std::vector<std::string> names;
 	std::vector<std::string> vec_names;
-	int n_prebin;
 
 	event_static_measurement(Random& rng_, measurements& measure_, parameters& param_, lattice& lat_,
 		green_function& gf_)
@@ -84,15 +83,13 @@ struct event_static_measurement
 
 	void trigger()
 	{
-		/*
 		if (std::abs(gf.tau() - param.theta/2.) < param.theta/8.)
 			gf.measure_static_observable(measure, names, obs, vec_names, vec_obs);
-		*/
 	}
 	
 	void init()
 	{
 		for (int i = 0; i < obs.size(); ++i)
-			measure.add_observable(names[i], n_prebin);
+			measure.add_observable(names[i], param.n_prebin);
 	}
 };

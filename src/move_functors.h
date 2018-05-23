@@ -41,7 +41,7 @@ struct move_insert
 	
 	void init()
 	{
-		measure.add_observable("insertion", 1000);
+		measure.add_observable("insertion", 10000);
 	}
 };
 
@@ -79,6 +79,6 @@ struct move_remove
 	
 	void init()
 	{
-		measure.add_observable("removal", 1000);
+		measure.add_observable("removal", 10000);
 	}
 };

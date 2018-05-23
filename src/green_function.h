@@ -208,7 +208,14 @@ class green_function
 		
 		void rebuild()
 		{
-			g_tau = g_stable();
+			matrix_t g_stab = g_stable();
+
+			double err = (g_tau - g_stab).norm();
+
+			if (err > 1E-8)
+				std::cout << "Error: " << err << std::endl;
+
+			g_tau = g_stab;
 		}
 		
 		matrix_t g_stable()
