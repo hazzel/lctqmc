@@ -61,8 +61,8 @@ struct move_remove
 
 	double attempt()
 	{
-		vpos = gf.select_random_vertex();
-		return -4 / (param.block_size * param.V * lat.n_bonds()) * gf.remove_vertex(vpos, true);
+		int num_vertices = gf.select_random_vertex(vpos);
+		return -4 * num_vertices / (param.block_size * param.V * lat.n_bonds()) * gf.remove_vertex(vpos, true);
 	}
 
 	double accept()

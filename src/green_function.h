@@ -8,6 +8,9 @@
 #include "Random.h"
 #include "lattice.h"
 #include "parameters.h"
+#include "measurements.h"
+#include "wick_static_base.h"
+#include "vector_wick_static_base.h"
 
 template<typename T, typename Pred>
 typename std::vector<T>::iterator insert_sorted(std::vector<T>& vec, const T& item, Pred pred)
@@ -79,9 +82,14 @@ class green_function
 			uKdagP = svd.matrixU();
 		}
 		
-		unsigned int pert_order() const
+		unsigned int pert_order()
 		{
 			return vlist.size();
+		}
+		
+		double tau()
+		{
+			return tpos;
 		}
 		
 		// it can do  B(tau_m)... B(tau_n) * A  when sign = -1
@@ -196,7 +204,6 @@ class green_function
 			}
 
 			g_tau = g_stable();
-			measure();
 		}
 		
 		void rebuild()
@@ -256,7 +263,6 @@ class green_function
 			if (new_block > old_block)
 			{// move to a larger block on the left
 				matrix_t UR = storage[old_block];
-				std::cout << "UR(old_block = " << old_block << "): " << UR.rows() << " x " << UR.cols() << std::endl;
 				prop_from_left(-1, new_block*param.block_size, old_block*param.block_size, UR);
 				Eigen::JacobiSVD<matrix_t> svd(UR, Eigen::ComputeThinU); 
 				storage[new_block] = svd.matrixU();
@@ -303,13 +309,17 @@ class green_function
 			return vertex{tau, b.first, b.second};
 		}
 		
-		vlist_t::iterator select_random_vertex()
+		unsigned int select_random_vertex(vlist_t::iterator& vpos)
 		{
 			int block = tpos / param.block_size;
 			vlist_t::iterator lower = std::lower_bound(vlist.begin(), vlist.end(), block*param.block_size, vertex::less()); 
 			vlist_t::iterator upper = std::upper_bound(vlist.begin(), vlist.end(), (block+1)*param.block_size, vertex::less_equal());  //equal is exclude
 			unsigned num_vertices = std::distance(lower, upper); //number of vertices in this block
-			return std::next(lower, rng() * num_vertices);
+			if (num_vertices == 0)
+				vpos = vlist.end();
+			else
+				vpos = std::next(lower, rng() * num_vertices);
+			return num_vertices;
 		}
 		
 		double add_vertex(const vertex& v, bool compute_only_weight)
@@ -339,17 +349,13 @@ class green_function
 				return 0.;
 			}
 			
-			int block = vpos->tau / param.block_size;
-			vlist_t::iterator lower = std::lower_bound(vlist.begin(), vlist.end(), block*param.block_size, vertex::less()); 
-			vlist_t::iterator upper = std::upper_bound(vlist.begin(), vlist.end(), (block+1)*param.block_size, vertex::less_equal());  //equal is exclude
-			unsigned num_vertices = std::distance(lower, upper); //number of vertices in this block
-
-			if(num_vertices < 1)
-				return 0.; 
+			if (vpos == vlist.end())
+				return 0.;
 
 			wrap(vpos->tau);
+			
 			double G = gij(vpos->si, vpos->sj);  
-			double ratio = -4.* G * G * num_vertices; // gji = gij when they belongs to different sublattice 
+			double ratio = -4.* G * G; // gji = gij when they belongs to different sublattice 
 
 			if(!compute_only_weight)
 			{
@@ -359,17 +365,17 @@ class green_function
 			return ratio; 
 		}
 		
-		void measure()
+		void measure_static_observable(measurements& measure, const std::vector<std::string>& names,
+			const std::vector<wick_static_base<matrix_t>>& obs,
+			const std::vector<std::string>& vec_names,
+			const std::vector<vector_wick_static_base<matrix_t>>& vec_obs)
 		{
 			matrix_t g_site = uK * g_tau * uKdag;
 			
-			std::cout << "g_site at tau = " << tpos << ":" << std::endl;
-			print_matrix(g_site);
-			/*
-			std::cout << "g_exact at tau = " << tpos << ":" << std::endl;
-			g_site = uK * g_exact() * uKdag;
-			print_matrix(g_site);
-			*/
+			for (int i = 0; i < names.size(); ++i)
+				measure.add(names[i], obs[i].get_obs(g_site));
+			for (int i = 0; i < vec_names.size(); ++i)
+				measure.add(vec_names[i], vec_obs[i].get_obs(g_site));
 		}
 		
 		void print_matrix(const matrix_t& m)

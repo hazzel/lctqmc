@@ -4,6 +4,8 @@
 #include <cmath>
 #include "measurements.h"
 #include "parser.h"
+#include "parameters.h"
+#include "green_function.h"
 
 void eval_B_cdw(double& out,
 	std::vector<std::valarray<double>*>& o)
@@ -72,9 +74,18 @@ struct measure_M
 {
 	measurements& measure;
 	parser& pars;
+	parameters& param;
+	green_function& gf;
 
+	void init()
+	{
+		measure.add_observable("pert_order", param.n_prebin);
+	}
+	
 	void perform()
-	{}
+	{
+		measure.add("pert_order", gf.pert_order());
+	}
 
 	void collect(std::ostream& os)
 	{

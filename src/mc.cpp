@@ -6,6 +6,7 @@
 #include "honeycomb.h"
 #include "move_functors.h"
 #include "measure_functors.h"
+#include "event_functors.h"
 #ifdef PROFILER
 	#include "gperftools/profiler.h"
 #endif
@@ -20,50 +21,38 @@ mc::mc(const std::string& dir)
 	n_static_cycles = pars.value_or_default<int>("static_cycles", 300);
 	n_dyn_cycles = pars.value_or_default<int>("dyn_cycles", 300);
 	n_warmup = pars.value_or_default<int>("warmup", 100000);
-	n_prebin = pars.value_or_default<int>("prebin", 500);
+	param.n_prebin = pars.value_or_default<int>("prebin", 500);
 	
 	param.L = pars.value_or_default<int>("L", 2);
 	param.theta = pars.value_or_default<double>("theta", 40);
 	param.block_size = pars.value_or_default<double>("block_size", 1);
 	param.V = pars.value_or_default<double>("V", 1.0);
+	param.t = pars.value_or_default<double>("t", 1.0);
+	param.tprime = pars.value_or_default<double>("tprime", 0.0);
+	param.stag_mu = pars.value_or_default<double>("stag_mu", 0.0);
+	
+	param.n_updates_per_block = pars.value_or_default<double>("updates_per_block", 1);
 
-	/*
 	std::string static_obs_string = pars.value_or_default<std::string>("static_obs", "M2");
-	boost::split(config.param.static_obs, static_obs_string, boost::is_any_of(","));
+	boost::split(param.static_obs, static_obs_string, boost::is_any_of(","));
 	std::string obs_string = pars.value_or_default<std::string>("obs", "M2");
-	boost::split(config.param.obs, obs_string, boost::is_any_of(","));
-	*/
+	boost::split(param.obs, obs_string, boost::is_any_of(","));
+
 	if (pars.defined("seed"))
 		rng.NewRng(pars.value_of<int>("seed"));
 	
 	qmc.add_move(move_insert{rng, measure, param, lat, gf}, "insert", 1.0);
 	qmc.add_move(move_remove{rng, measure, param, lat, gf}, "remove", 1.0);
-	qmc.add_measure(measure_M{measure, pars}, "measurement");
+	qmc.add_measure(measure_M{measure, pars, param, gf}, "measurement");
 
 	//Initialize lattice
 	honeycomb hc(param.L, param.L);
 	lat.generate_graph(hc);
 	hc.generate_maps(lat);
-	
-	//Build H0
-	green_function::matrix_t K(lat.n_sites(), lat.n_sites());
-	for (auto& a : lat.bonds("nearest neighbors"))
-		K(a.first, a.second) = -1.;
-	//for (auto& a : lat.bonds("t3_bonds"))
-	//	H0(a.first+as, a.second+as) = -param.tprime;
-	gf.set_K_matrix(K);
-	unsigned Nv = 40;
-	green_function::vlist_t vlist;
-	for (int i = 0; i < Nv; ++i)
-	{
-		double tau = rng() * param.theta;
-		auto& b = lat.bonds("nearest neighbors")[rng() * 2 * lat.n_bonds()];
-		vlist.push_back({tau, b.first, b.second});
-	}
-	std::sort(vlist.begin(), vlist.end(), vertex::less());
-	gf.initialize(vlist);
 
 	//Set up events
+	qmc.add_event(event_build{rng, param, lat, gf}, "initial build");
+	qmc.add_event(event_static_measurement{rng, measure, param, lat, gf}, "static measure");
 
 	#ifdef PROFILER
 		ProfilerStart("/net/home/lxtsfs1/tpc/hesselmann/code/profiler/gperftools.prof");
@@ -98,6 +87,8 @@ void mc::init()
 {
 	qmc.init_moves();
 	qmc.init_events();
+	qmc.init_measurements();
+	qmc.trigger_event("initial build");
 }
 
 void mc::write(const std::string& dir)
@@ -168,25 +159,30 @@ bool mc::is_thermalized()
 
 void mc::do_update()
 {
-	for (int i = 0; i < param.theta / param.block_size - 1; ++i)
-	{
-		std::cout << "i = " << i << std::endl;
-		gf.wrap(i * param.block_size);
-		qmc.do_update();
-		gf.rebuild();
-		gf.measure();
-		std::cout << "pert_order = " << gf.pert_order() << std::endl;
-	}
-	/*
-	for (int i = param.block_size - 1; i > 0; --i)
+	for (int i = 0; i < param.theta / param.block_size; ++i)
 	{
 		gf.wrap(i * param.block_size);
-		qmc.do_update();
+		for (int n = 0; n < param.n_updates_per_block; ++n)
+			qmc.do_update();
 		gf.rebuild();
-		gf.measure();
-		std::cout << "pert_order = " << gf.pert_order() << std::endl;
+		if (is_thermalized())
+		{
+			qmc.do_measurement();
+			qmc.trigger_event("static_measure");
+		}
 	}
-	*/
+	for (int i = param.theta / param.block_size - 1; i > 0; --i)
+	{
+		gf.wrap(i * param.block_size);
+		for (int n = 0; n < param.n_updates_per_block; ++n)
+			qmc.do_update();
+		gf.rebuild();
+		if (is_thermalized())
+		{
+			qmc.do_measurement();
+			qmc.trigger_event("static_measure");
+		}
+	}
 	
 	++sweep;
 }

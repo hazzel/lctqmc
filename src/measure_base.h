@@ -20,6 +20,7 @@ class measure_base
 		measure_base(measure_base&& rhs) {*this = std::move(rhs);}
 		measure_base& operator=(measure_base&& rhs) = default;
 
+		void init() { init_fun(); }
 		void perform() { perform_fun(); }
 		void collect(std::ostream& os) { collect_fun(os); }
 		std::string name() { return name_str; }
@@ -28,6 +29,7 @@ class measure_base
 		void construct_delegation (T* functor)
 		{
 			impl = std::shared_ptr<T>(functor);
+			init_fun = [functor]() { functor->init(); };
 			perform_fun = [functor]() { functor->perform(); };
 			collect_fun = [functor](std::ostream& os) { functor->collect(os); };
 			clone_fun = [functor, this]() { return measure_base(*functor,
@@ -35,6 +37,7 @@ class measure_base
 		}
 	private:
 		std::shared_ptr<void> impl;
+		std::function<void()> init_fun;
 		std::function<void()> perform_fun;
 		std::function<void(std::ostream&)> collect_fun;
 		std::function<measure_base()> clone_fun;

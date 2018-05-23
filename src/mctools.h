@@ -79,6 +79,12 @@ class mctools
 			for (auto it = events.begin(); it != events.end(); ++it)
 				it->second.init();
 		}
+		
+		void init_measurements()
+		{
+			for (auto it = measures.begin(); it != measures.end(); ++it)
+				it->init();
+		}
 
 		void do_measurement()
 		{
