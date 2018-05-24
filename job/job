@@ -1,12 +1,12 @@
-SWEEPS = 1000
-warmup = 500
-prebin = 500
+SWEEPS = 100
+warmup = 5000
+prebin = 10000
 
-L = 6
+L = 2
 theta = 40
-block_size = 0.25
+block_size = 0.2
 updates_per_block = 5
 
-static_obs = energy
+static_obs = energy,epsilon,M2,S_cdw_q,kekule
 
 {V = 1.0}

@@ -78,8 +78,13 @@ class green_function
 			uKdag = solver.eigenvectors().adjoint();
 			
 			uKdagP = uKdag * solver.eigenvectors().leftCols(lat.n_sites()/2);
+			
 			Eigen::JacobiSVD<matrix_t> svd(uKdagP, Eigen::ComputeThinU);
-			uKdagP = svd.matrixU();
+			matrix_t uKdagP = svd.matrixU();
+	
+			//qr_solver.compute(uKdagP);
+			//matrix_t p_q = matrix_t::Identity(uKdagP.rows(), uKdagP.cols());
+			//uKdagP = qr_solver.matrixQ() * p_q;
 		}
 		
 		unsigned int pert_order()
@@ -191,6 +196,10 @@ class green_function
 
 				Eigen::JacobiSVD<matrix_t> svd(UR, Eigen::ComputeThinU); 
 				storage[i+1] = svd.matrixU();
+
+				//qr_solver.compute(UR);
+				//matrix_t p_q = matrix_t::Identity(UR.rows(), UR.cols());
+				//storage[i+1] = qr_solver.matrixQ() * p_q;
 			}
 
 			storage.back() = uKdagP.adjoint();
@@ -201,6 +210,16 @@ class green_function
 
 				Eigen::JacobiSVD<matrix_t> svd(VL, Eigen::ComputeThinV); 
 				storage[i] = svd.matrixV().adjoint();
+
+				//qr_solver.compute(VL);
+				//matrix_t p_q = matrix_t::Identity(VL.rows(), VL.cols());
+				//storage[i] = p_q * qr_solver.matrixQ().adjoint();
+
+				//qr_solver.compute(VL);
+				//matrix_t r = qr_solver.matrixQR().template triangularView<Eigen::Upper>();
+				//storage[i] = r * qr_solver.colsPermutation().transpose();
+				//for (int i = 0; i < storage[i].rows(); ++i)
+				//	storage[i].row(i) = 1./qr_solver.matrixQR()(i, i) * storage[i].row(i);
 			}
 
 			g_tau = g_stable();
@@ -213,9 +232,17 @@ class green_function
 			double err = (g_tau - g_stab).norm();
 
 			if (err > 1E-8)
-				std::cout << "Error: " << err << std::endl;
+				std::cout << "Error (tau = " << tpos << "): " << err << std::endl;
 
 			g_tau = g_stab;
+			/*
+			std::cout << "g_stab:" << std::endl;
+			print_matrix(g_stab);
+			std::cout << "---" << std::endl;
+			std::cout << "g_exact:" << std::endl;
+			print_matrix(g_exact());
+			std::cout << std::endl << std::endl;
+			*/
 		}
 		
 		matrix_t g_stable()
@@ -271,15 +298,31 @@ class green_function
 			{// move to a larger block on the left
 				matrix_t UR = storage[old_block];
 				prop_from_left(-1, new_block*param.block_size, old_block*param.block_size, UR);
-				Eigen::JacobiSVD<matrix_t> svd(UR, Eigen::ComputeThinU); 
+				
+				Eigen::JacobiSVD<matrix_t> svd(UR, Eigen::ComputeThinU);
 				storage[new_block] = svd.matrixU();
+
+				//qr_solver.compute(UR);
+				//matrix_t p_q = matrix_t::Identity(UR.rows(), UR.cols());
+				//storage[new_block] = qr_solver.matrixQ() * p_q;
 			}
 			else if (new_block < old_block)
 			{// move to smaller block
 				matrix_t VL = storage[old_block+1];
 				prop_from_right(-1, (old_block+1)*param.block_size, old_block*param.block_size, VL);
+				
 				Eigen::JacobiSVD<matrix_t> svd(VL, Eigen::ComputeThinV);
 				storage[new_block+1] = svd.matrixV().adjoint();
+
+				//qr_solver.compute(VL);
+				//matrix_t p_q = matrix_t::Identity(VL.rows(), VL.cols());
+				//storage[new_block+1] = p_q * qr_solver.matrixQ().adjoint();
+
+				//qr_solver.compute(VL);
+				//matrix_t r = qr_solver.matrixQR().template triangularView<Eigen::Upper>();
+				//storage[new_block+1] = r * qr_solver.colsPermutation().transpose();
+				//for (int i = 0; i < storage[new_block+1].rows(); ++i)
+				//	storage[new_block+1].row(i) = 1./qr_solver.matrixQR()(i, i) * storage[new_block+1].row(i);
 			}
 		}
 		
@@ -371,6 +414,30 @@ class green_function
 			}
 			return ratio; 
 		}
+
+		double shift_vertex(vlist_t::iterator vpos, int si_prime, int sj_prime, bool compute_only_weight)
+		{
+			if (vlist.empty()) //since we will get a empty list as use this opputunity to reset all memory 
+			{
+				rebuild();
+				return 0.;
+			}
+			
+			if (vpos == vlist.end())
+				return 0.;
+
+			wrap(vpos->tau);
+			
+			double G = gij(vpos->sj, sj_prime);
+			double ratio = 4.* G * G; // gji = gij when they belongs to different sublattice 
+
+			if(!compute_only_weight)
+			{
+				update(vpos->sj, sj_prime, G, -G);
+				vpos->sj = sj_prime;
+			}
+			return ratio; 
+		}
 		
 		void measure_static_observable(measurements& measure, const std::vector<std::string>& names,
 			const std::vector<wick_static_base<matrix_t>>& obs,
@@ -398,6 +465,7 @@ class green_function
 		Random& rng;
 		parameters& param;
 		lattice& lat;
+		Eigen::ColPivHouseholderQR<matrix_t> qr_solver;
 		
 		vlist_t vlist;
 		double tpos;

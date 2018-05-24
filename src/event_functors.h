@@ -21,9 +21,9 @@ struct event_build
 	{
 		green_function::matrix_t K(lat.n_sites(), lat.n_sites());
 		for (auto& a : lat.bonds("nearest neighbors"))
-			K(a.first, a.second) = -1.;
-		//for (auto& a : lat.bonds("t3_bonds"))
-		//	H0(a.first+as, a.second+as) = -param.tprime;
+			K(a.first, a.second) = -param.t;
+		for (auto& a : lat.bonds("t3_bonds"))
+			K(a.first, a.second) = -param.tprime;
 		gf.set_K_matrix(K);
 		unsigned Nv = 0.15 * (param.theta * lat.n_sites() * param.V);
 		green_function::vlist_t vlist;
@@ -64,6 +64,16 @@ struct event_static_measurement
 		{
 			if (param.static_obs[i] == "energy")
 				add_wick(wick_static_energy{rng, param, lat}, param.static_obs[i]);
+			else if (param.static_obs[i] == "M2")
+				add_wick(wick_static_M2{rng, param, lat}, param.static_obs[i]);
+			else if (param.static_obs[i] == "S_cdw_q")
+				add_wick(wick_static_S_cdw_q{rng, param, lat}, param.static_obs[i]);
+			else if (param.static_obs[i] == "M4")
+				add_wick(wick_static_M4{rng, param, lat}, param.static_obs[i]);
+			else if (param.static_obs[i] == "epsilon")
+				add_wick(wick_static_epsilon{rng, param, lat}, param.static_obs[i]);
+			else if (param.static_obs[i] == "kekule")
+				add_wick(wick_static_kek{rng, param, lat}, param.static_obs[i]);
 		}
 	}
 

@@ -82,3 +82,51 @@ struct move_remove
 		measure.add_observable("removal", 10000);
 	}
 };
+
+struct move_shift
+{
+	Random& rng;
+	measurements& measure;
+	parameters& param;
+	lattice& lat;
+	green_function& gf;
+	
+	green_function::vlist_t::iterator vpos;
+	int si_prime;
+	int sj_prime;
+	
+	move_shift(Random& rng_, measurements& measure_, parameters& param_, lattice& lat_, green_function& gf_)
+		: rng(rng_), measure(measure_), param(param_), lat(lat_), gf(gf_)
+	{}
+
+	double attempt()
+	{
+		int num_vertices = gf.select_random_vertex(vpos);
+		if (num_vertices > 0)
+		{
+			si_prime = vpos->si;
+			sj_prime = vpos->sj;
+			auto& neighbors = lat.neighbors(vpos->si, "nearest neighbors");
+			while (sj_prime == vpos->sj)
+				sj_prime = neighbors[rng() * neighbors.size()];
+		}
+		return gf.shift_vertex(vpos, si_prime, sj_prime, true);
+	}
+
+	double accept()
+	{
+		gf.shift_vertex(vpos, si_prime, sj_prime, false);
+		measure.add("shift", 1.0);
+		return 1.0;
+	}
+
+	void reject()
+	{
+		measure.add("shift", 0.0);
+	}
+	
+	void init()
+	{
+		measure.add_observable("shift", 10000);
+	}
+};

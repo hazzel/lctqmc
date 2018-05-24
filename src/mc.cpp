@@ -43,6 +43,7 @@ mc::mc(const std::string& dir)
 	
 	qmc.add_move(move_insert{rng, measure, param, lat, gf}, "insert", 1.0);
 	qmc.add_move(move_remove{rng, measure, param, lat, gf}, "remove", 1.0);
+	qmc.add_move(move_shift{rng, measure, param, lat, gf}, "shift", 1.0);
 	qmc.add_measure(measure_M{measure, pars, param, gf}, "measurement");
 
 	//Initialize lattice
@@ -161,7 +162,7 @@ void mc::do_update()
 {
 	for (int i = 0; i < param.theta / param.block_size; ++i)
 	{
-		gf.wrap(i * param.block_size);
+		gf.wrap((i + 0.5) * param.block_size);
 		for (int n = 0; n < param.n_updates_per_block; ++n)
 			qmc.do_update();
 		gf.rebuild();
@@ -171,9 +172,9 @@ void mc::do_update()
 			qmc.trigger_event("static measure");
 		}
 	}
-	for (int i = param.theta / param.block_size - 1; i > 0; --i)
+	for (int i = param.theta / param.block_size - 1; i >= 0; --i)
 	{
-		gf.wrap(i * param.block_size);
+		gf.wrap((i + 0.5) * param.block_size);
 		for (int n = 0; n < param.n_updates_per_block; ++n)
 			qmc.do_update();
 		gf.rebuild();
