@@ -17,15 +17,19 @@ mc::mc(const std::string& dir)
 	//Read parameters
 	pars.read_file(dir);
 	sweep = 0;
-	int n_sweeps = pars.value_or_default<int>("SWEEPS", 0);
+	param.n_sweeps = pars.value_or_default<int>("SWEEPS", 0);
 	n_static_cycles = pars.value_or_default<int>("static_cycles", 300);
 	n_dyn_cycles = pars.value_or_default<int>("dyn_cycles", 300);
 	n_warmup = pars.value_or_default<int>("warmup", 100000);
 	param.n_prebin = pars.value_or_default<int>("prebin", 500);
 	
-	param.L = pars.value_or_default<int>("L", 2);
 	param.theta = pars.value_or_default<double>("theta", 40);
-	param.block_size = pars.value_or_default<double>("block_size", 1);
+	param.block_size = pars.value_or_default<double>("block_size", 0.25);
+	param.dyn_tau_max = pars.value_or_default<double>("dyn_tau_max", 10);
+	param.dyn_delta_tau = pars.value_or_default<double>("dyn_delta_tau", 0.25);
+	param.dyn_tau_steps = param.dyn_tau_max / param.dyn_delta_tau;
+	
+	param.L = pars.value_or_default<int>("L", 2);
 	param.V = pars.value_or_default<double>("V", 1.0);
 	param.t = pars.value_or_default<double>("t", 1.0);
 	param.tprime = pars.value_or_default<double>("tprime", 0.0);
@@ -35,8 +39,8 @@ mc::mc(const std::string& dir)
 
 	std::string static_obs_string = pars.value_or_default<std::string>("static_obs", "M2");
 	boost::split(param.static_obs, static_obs_string, boost::is_any_of(","));
-	std::string obs_string = pars.value_or_default<std::string>("obs", "M2");
-	boost::split(param.obs, obs_string, boost::is_any_of(","));
+	std::string dyn_obs_string = pars.value_or_default<std::string>("obs", "M2");
+	boost::split(param.dyn_obs, dyn_obs_string, boost::is_any_of(","));
 
 	if (pars.defined("seed"))
 		rng.NewRng(pars.value_of<int>("seed"));
@@ -53,7 +57,8 @@ mc::mc(const std::string& dir)
 
 	//Set up events
 	qmc.add_event(event_build{rng, param, lat, gf}, "initial build");
-	qmc.add_event(event_static_measurement{rng, measure, param, lat, gf}, "static measure");
+	qmc.add_event(event_static_measurement{rng, measure, param, lat, gf}, "_static measure");
+	qmc.add_event(event_dynamic_measurement{rng, measure, param, lat, gf}, "dynamic measure");
 
 	#ifdef PROFILER
 		ProfilerStart("/net/home/lxtsfs1/tpc/hesselmann/code/profiler/gperftools.prof");
@@ -87,8 +92,8 @@ void mc::random_read(idump& d)
 void mc::init()
 {
 	qmc.init_moves();
-	qmc.init_events();
 	qmc.init_measurements();
+	qmc.init_events();
 	qmc.trigger_event("initial build");
 }
 
@@ -163,26 +168,28 @@ void mc::do_update()
 	for (int i = 0; i < param.theta / param.block_size; ++i)
 	{
 		gf.wrap((i + 0.5) * param.block_size);
-		for (int n = 0; n < param.n_updates_per_block; ++n)
-			qmc.do_update();
 		gf.rebuild();
 		if (is_thermalized())
 		{
 			qmc.do_measurement();
-			qmc.trigger_event("static measure");
+			qmc.trigger_event("_static measure");
+			qmc.trigger_event("dynamic measure");
 		}
+		for (int n = 0; n < param.n_updates_per_block; ++n)
+			qmc.do_update();
 	}
 	for (int i = param.theta / param.block_size - 1; i >= 0; --i)
 	{
 		gf.wrap((i + 0.5) * param.block_size);
-		for (int n = 0; n < param.n_updates_per_block; ++n)
-			qmc.do_update();
 		gf.rebuild();
 		if (is_thermalized())
 		{
 			qmc.do_measurement();
-			qmc.trigger_event("static measure");
+			qmc.trigger_event("_static measure");
+			qmc.trigger_event("dynamic measure");
 		}
+		for (int n = 0; n < param.n_updates_per_block; ++n)
+			qmc.do_update();
 	}
 	
 	++sweep;

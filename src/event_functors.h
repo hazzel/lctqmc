@@ -8,7 +8,10 @@
 #include "green_function.h"
 #include "wick_static_base.h"
 #include "vector_wick_static_base.h"
+#include "wick_base.h"
+#include "vector_wick_base.h"
 #include "wick_static_functors.h"
+#include "wick_functors.h"
 
 struct event_build
 {
@@ -94,12 +97,105 @@ struct event_static_measurement
 	void trigger()
 	{
 		if (std::abs(gf.tau() - param.theta/2.) < param.theta/8.)
-			gf.measure_static_observable(measure, names, obs, vec_names, vec_obs);
+			gf.measure_static_observables(measure, names, obs, vec_names, vec_obs);
 	}
 	
 	void init()
 	{
 		for (int i = 0; i < obs.size(); ++i)
 			measure.add_observable(names[i], param.n_prebin);
+	}
+};
+
+struct event_dynamic_measurement
+{
+	typedef green_function::matrix_t matrix_t;
+
+	Random& rng;
+	measurements& measure;
+	parameters& param;
+	lattice& lat;
+	green_function& gf;
+	std::vector<std::vector<double>> dyn_tau;
+	std::vector<wick_base<matrix_t>> obs;
+	std::vector<vector_wick_base<matrix_t>> vec_obs;
+	std::vector<std::string> names;
+	std::vector<std::string> vec_names;
+	
+	std::chrono::steady_clock::time_point tp;
+
+	event_dynamic_measurement(Random& rng_, measurements& measure_,
+		parameters& param_, lattice& lat_, green_function& gf_)
+		: rng(rng_), measure(measure_), param(param_), lat(lat_), gf(gf_)
+	{
+		obs.reserve(param.dyn_obs.size());
+		vec_obs.reserve(param.dyn_obs.size());
+		for (int i = 0; i < param.dyn_obs.size(); ++i)
+		{
+			if (param.dyn_obs[i] == "M2")
+				add_wick(wick_M2{rng, param, lat}, param.dyn_obs[i]);
+		}
+		for (int i = 0; i < obs.size(); ++i)
+			dyn_tau.push_back(std::vector<double>(param.dyn_tau_steps + 1, 0.));
+		for (int i = 0; i < vec_obs.size(); ++i)
+			for (int j = 0; j < vec_obs[i].n_values; ++j)
+				dyn_tau.push_back(std::vector<double>(param.dyn_tau_steps + 1, 0.));
+			
+		tp = std::chrono::steady_clock::now();
+	}
+
+	template<typename T>
+	void add_wick(T&& functor, const std::string& name)
+	{
+		obs.push_back(wick_base<matrix_t>(std::forward<T>(functor)));
+		names.push_back(name);
+	}
+	
+	template<typename T>
+	void add_vector_wick(T&& functor, const std::string& name, int n_values)
+	{
+		vec_obs.push_back(vector_wick_base<matrix_t>(std::forward<T>(functor), n_values));
+		vec_names.push_back(name);
+	}
+
+	void trigger()
+	{
+		if (obs.size() == 0 and vec_obs.size() == 0)
+			return;
+		
+//		if (std::abs(gf.tau() - (param.theta/2. + param.dyn_tau_max/2 + param.block_size/2.)) < 1E-6
+//			or std::abs(gf.tau() - (param.theta/2. - param.dyn_tau_max/2 + param.block_size/2.)) < 1E-6)
+		if (std::abs(gf.tau() - (param.theta/2. + param.dyn_tau_max/2 + param.block_size/2.)) < 1E-6)
+		{
+			//std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
+			//std::cout << "Time between dynamic measurements: " << std::chrono::duration_cast<std::chrono::duration<float>>(t0 - tp).count() << std::endl;
+			
+			for (int i = 0; i < dyn_tau.size(); ++i)
+				std::fill(dyn_tau[i].begin(), dyn_tau[i].end(), 0.);
+			gf.measure_dynamical_observables(dyn_tau, names, obs, vec_names, vec_obs);
+			
+			for (int i = 0; i < obs.size(); ++i)
+				measure.add("dyn_"+names[i]+"_tau", dyn_tau[i]);
+			int cnt = 0;
+			for (int i = 0; i < vec_obs.size(); ++i)
+				for (int j = 0; j < vec_obs[i].n_values; ++j)
+				{
+					measure.add("dyn_"+vec_names[i]+"_"+std::to_string(j)+"_tau", dyn_tau[obs.size()+cnt]);
+					++cnt;
+				}
+				
+			//std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+			//std::cout << "Time of dynamic measurement: " << std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count() << std::endl;
+			//tp = t1;
+		}
+	}
+	
+	void init()
+	{
+		for (int i = 0; i < obs.size(); ++i)
+			measure.add_vectorobservable("dyn_"+names[i]+"_tau", dyn_tau.size(), param.n_prebin);
+		for (int i = 0; i < vec_obs.size(); ++i)
+			for (int j = 0; j < vec_obs[i].n_values; ++j)
+				measure.add_vectorobservable("dyn_"+vec_names[i]+"_"+std::to_string(j)+"_tau", dyn_tau.size(), param.n_prebin);
 	}
 };

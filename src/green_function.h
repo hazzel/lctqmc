@@ -11,6 +11,8 @@
 #include "measurements.h"
 #include "wick_static_base.h"
 #include "vector_wick_static_base.h"
+#include "wick_base.h"
+#include "vector_wick_base.h"
 
 template<typename T, typename Pred>
 typename std::vector<T>::iterator insert_sorted(std::vector<T>& vec, const T& item, Pred pred)
@@ -439,7 +441,7 @@ class green_function
 			return ratio; 
 		}
 		
-		void measure_static_observable(measurements& measure, const std::vector<std::string>& names,
+		void measure_static_observables(measurements& measure, const std::vector<std::string>& names,
 			const std::vector<wick_static_base<matrix_t>>& obs,
 			const std::vector<std::string>& vec_names,
 			const std::vector<vector_wick_static_base<matrix_t>>& vec_obs)
@@ -450,6 +452,99 @@ class green_function
 				measure.add(names[i], obs[i].get_obs(g_site));
 			for (int i = 0; i < vec_names.size(); ++i)
 				measure.add(vec_names[i], vec_obs[i].get_obs(g_site));
+		}
+		
+		void measure_dynamical_observables(std::vector<std::vector<double>>& dyn_tau, const std::vector<std::string>& names,
+			const std::vector<wick_base<matrix_t>>& obs,
+			const std::vector<std::string>& vec_names,
+			const std::vector<vector_wick_base<matrix_t>>& vec_obs)
+		{
+			double tpos_buffer = tpos;
+			matrix_t g_tau_buffer = g_tau;
+			std::vector<matrix_t> storage_buffer = storage;
+			
+			std::vector<matrix_t> et_gf_L(param.dyn_tau_steps/2+1);
+			std::vector<matrix_t> et_gf_R(param.dyn_tau_steps/2+1);
+			matrix_t id = matrix_t::Identity(lat.n_sites(), lat.n_sites());
+			
+			matrix_t time_displaced_gf = id;
+			
+			if (tpos > param.theta/2)
+				param.direction = -1;
+			else
+				param.direction = 1;
+
+			et_gf_L[0] = g_tau;
+			for (int n = 1; n <= param.dyn_tau_steps/2; ++n)
+			{
+				wrap(tpos + param.direction * param.dyn_delta_tau);
+				rebuild();
+				et_gf_L[n] = g_tau;
+			}
+			matrix_t& et_gf_0 = et_gf_L[param.dyn_tau_steps/2];
+			et_gf_R[0] = et_gf_0;
+			for (int n = 1; n <= param.dyn_tau_steps/2; ++n)
+			{
+				wrap(tpos + param.direction * param.dyn_delta_tau);
+				rebuild();
+				et_gf_R[n] = g_tau;
+			}
+			
+			get_obs_values(dyn_tau, 0, et_gf_0, et_gf_0, et_gf_0, obs, vec_obs);
+			for (int n = 1; n <= param.dyn_tau_steps/2; ++n)
+			{
+				if (param.direction == -1)
+				{
+					matrix_t g_l = et_gf_L[et_gf_L.size() - n];
+					prop_from_left(-1, param.theta/2 + n*param.dyn_delta_tau, param.theta/2 + (n-1)*param.dyn_delta_tau, g_l);
+					matrix_t g_r = et_gf_R[n];
+					prop_from_left(-1, param.theta/2 - (n-1)*param.dyn_delta_tau, param.theta/2 - n*param.dyn_delta_tau, g_r);
+					
+					//time_displaced_gf = g_l * time_displaced_gf;
+					time_displaced_gf = g_l;
+					get_obs_values(dyn_tau, 2*n-1, et_gf_R[n-1], et_gf_L[et_gf_L.size() - n - 1], time_displaced_gf, obs, vec_obs);
+					//time_displaced_gf = time_displaced_gf * g_r;
+					time_displaced_gf = g_r;
+					get_obs_values(dyn_tau, 2*n, et_gf_R[n], et_gf_L[et_gf_L.size() - n - 1], time_displaced_gf, obs, vec_obs);
+				}
+				else
+				{
+					matrix_t g_l = et_gf_R[n];
+					prop_from_right(-1, param.theta/2 + n*param.dyn_delta_tau, param.theta/2 + (n-1)*param.dyn_delta_tau, g_l);
+					matrix_t g_r = et_gf_L[et_gf_L.size() - n];
+					prop_from_right(-1, param.theta/2 - (n-1)*param.dyn_delta_tau, param.theta/2 - n*param.dyn_delta_tau, g_r);
+					
+					time_displaced_gf = g_l * time_displaced_gf;
+					get_obs_values(dyn_tau, 2*n-1, et_gf_L[et_gf_L.size() - n], et_gf_R[n], time_displaced_gf, obs, vec_obs);
+					time_displaced_gf = time_displaced_gf * g_r;
+					get_obs_values(dyn_tau, 2*n, et_gf_L[et_gf_L.size() - n - 1], et_gf_R[n], time_displaced_gf, obs, vec_obs);
+				}
+			}
+			
+			tpos = tpos_buffer;
+			g_tau = g_tau_buffer;
+			storage = storage_buffer;
+		}
+		
+		void get_obs_values(std::vector<std::vector<double>>& dyn_tau, int tau,
+			const matrix_t& et_gf_0, const matrix_t& et_gf_t, const matrix_t& td_gf, 
+			const std::vector<wick_base<matrix_t>>& obs, const std::vector<vector_wick_base<matrix_t>>& vec_obs)
+		{
+			matrix_t et_gf_0_site = uK * et_gf_0 * uKdag;
+			matrix_t et_gf_t_site = uK * et_gf_t * uKdag;
+			matrix_t td_gf_site = uK * td_gf * uKdag;
+			for (int i = 0; i < obs.size(); ++i)
+				dyn_tau[i][tau] = obs[i].get_obs(et_gf_0_site, et_gf_t_site, td_gf_site);
+			int cnt = 0;
+			for (int i = 0; i < vec_obs.size(); ++i)
+			{
+				auto& values = vec_obs[i].get_obs(et_gf_0_site, et_gf_t_site, td_gf_site);
+				for (int j = 0; j < vec_obs[i].n_values; ++j)
+				{
+					dyn_tau[obs.size()+cnt][tau] = values[j];
+					++cnt;
+				}
+			}
 		}
 		
 		void print_matrix(const matrix_t& m)
