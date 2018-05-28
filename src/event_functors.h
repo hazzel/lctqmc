@@ -134,6 +134,8 @@ struct event_dynamic_measurement
 		{
 			if (param.dyn_obs[i] == "M2")
 				add_wick(wick_M2{rng, param, lat}, param.dyn_obs[i]);
+			if (param.dyn_obs[i] == "sp")
+				add_wick(wick_sp{rng, param, lat}, param.dyn_obs[i]);
 		}
 		for (int i = 0; i < obs.size(); ++i)
 			dyn_tau.push_back(std::vector<double>(param.dyn_tau_steps + 1, 0.));
@@ -165,7 +167,8 @@ struct event_dynamic_measurement
 		
 //		if (std::abs(gf.tau() - (param.theta/2. + param.dyn_tau_max/2 + param.block_size/2.)) < 1E-6
 //			or std::abs(gf.tau() - (param.theta/2. - param.dyn_tau_max/2 + param.block_size/2.)) < 1E-6)
-		if (std::abs(gf.tau() - (param.theta/2. + param.dyn_tau_max/2 + param.block_size/2.)) < 1E-6)
+		if (std::abs(gf.tau() - (param.theta/2. + param.dyn_tau_max/2 + param.block_size/2.)) <= 1E-6)
+		//if (std::abs(gf.tau() - (param.theta/2. - param.dyn_tau_max/2 + param.block_size/2.)) <= 1E-6)
 		{
 			//std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
 			//std::cout << "Time between dynamic measurements: " << std::chrono::duration_cast<std::chrono::duration<float>>(t0 - tp).count() << std::endl;
@@ -175,7 +178,12 @@ struct event_dynamic_measurement
 			gf.measure_dynamical_observables(dyn_tau, names, obs, vec_names, vec_obs);
 			
 			for (int i = 0; i < obs.size(); ++i)
+			{
 				measure.add("dyn_"+names[i]+"_tau", dyn_tau[i]);
+				//for (auto x : dyn_tau[i])
+				//	std::cout << x << " ";
+				//std::cout << std::endl;
+			}
 			int cnt = 0;
 			for (int i = 0; i < vec_obs.size(); ++i)
 				for (int j = 0; j < vec_obs[i].n_values; ++j)
@@ -193,9 +201,9 @@ struct event_dynamic_measurement
 	void init()
 	{
 		for (int i = 0; i < obs.size(); ++i)
-			measure.add_vectorobservable("dyn_"+names[i]+"_tau", dyn_tau.size(), param.n_prebin);
+			measure.add_vectorobservable("dyn_"+names[i]+"_tau", param.dyn_tau_steps+1, param.n_prebin);
 		for (int i = 0; i < vec_obs.size(); ++i)
 			for (int j = 0; j < vec_obs[i].n_values; ++j)
-				measure.add_vectorobservable("dyn_"+vec_names[i]+"_"+std::to_string(j)+"_tau", dyn_tau.size(), param.n_prebin);
+				measure.add_vectorobservable("dyn_"+vec_names[i]+"_"+std::to_string(j)+"_tau", param.dyn_tau_steps+1, param.n_prebin);
 	}
 };

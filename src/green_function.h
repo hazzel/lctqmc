@@ -233,7 +233,7 @@ class green_function
 
 			double err = (g_tau - g_stab).norm();
 
-			if (err > 1E-8)
+			if (err > 1E-10)
 				std::cout << "Error (tau = " << tpos << "): " << err << std::endl;
 
 			g_tau = g_stab;
@@ -499,13 +499,27 @@ class green_function
 					prop_from_left(-1, param.theta/2 + n*param.dyn_delta_tau, param.theta/2 + (n-1)*param.dyn_delta_tau, g_l);
 					matrix_t g_r = et_gf_R[n];
 					prop_from_left(-1, param.theta/2 - (n-1)*param.dyn_delta_tau, param.theta/2 - n*param.dyn_delta_tau, g_r);
-					
+
 					//time_displaced_gf = g_l * time_displaced_gf;
-					time_displaced_gf = g_l;
+					//get_obs_values(dyn_tau, 2*n-1, et_gf_R[n-1], et_gf_L[et_gf_L.size() - n - 1], time_displaced_gf, obs, vec_obs);
+					
+					/*
+					std::cout << "td (n = " << n << ")" << std::endl;
+					print_matrix(uK * time_displaced_gf * uKdag);
+					std::cout << "exact" << std::endl;
+					matrix_t b = id;
+					prop_from_left(-1, param.theta/2 + n*param.dyn_delta_tau, param.theta/2, b);
+					print_matrix(uK * b * et_gf_0 * uKdag);
+					std::cout << std::endl << "------" << std::endl;
+					*/
+					
+					matrix_t b = id;
+					prop_from_left(-1, param.theta/2 + n*param.dyn_delta_tau, param.theta/2, b);
+					time_displaced_gf = b * et_gf_0;
 					get_obs_values(dyn_tau, 2*n-1, et_gf_R[n-1], et_gf_L[et_gf_L.size() - n - 1], time_displaced_gf, obs, vec_obs);
+					
 					//time_displaced_gf = time_displaced_gf * g_r;
-					time_displaced_gf = g_r;
-					get_obs_values(dyn_tau, 2*n, et_gf_R[n], et_gf_L[et_gf_L.size() - n - 1], time_displaced_gf, obs, vec_obs);
+					//get_obs_values(dyn_tau, 2*n, et_gf_R[n], et_gf_L[et_gf_L.size() - n - 1], time_displaced_gf, obs, vec_obs);
 				}
 				else
 				{
@@ -516,6 +530,7 @@ class green_function
 					
 					time_displaced_gf = g_l * time_displaced_gf;
 					get_obs_values(dyn_tau, 2*n-1, et_gf_L[et_gf_L.size() - n], et_gf_R[n], time_displaced_gf, obs, vec_obs);
+					
 					time_displaced_gf = time_displaced_gf * g_r;
 					get_obs_values(dyn_tau, 2*n, et_gf_L[et_gf_L.size() - n - 1], et_gf_R[n], time_displaced_gf, obs, vec_obs);
 				}

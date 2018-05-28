@@ -27,7 +27,7 @@ mc::mc(const std::string& dir)
 	param.block_size = pars.value_or_default<double>("block_size", 0.25);
 	param.dyn_tau_max = pars.value_or_default<double>("dyn_tau_max", 10);
 	param.dyn_delta_tau = pars.value_or_default<double>("dyn_delta_tau", 0.25);
-	param.dyn_tau_steps = param.dyn_tau_max / param.dyn_delta_tau;
+	param.dyn_tau_steps = static_cast<int>((param.dyn_tau_max / param.dyn_delta_tau) + 0.5);
 	
 	param.L = pars.value_or_default<int>("L", 2);
 	param.V = pars.value_or_default<double>("V", 1.0);

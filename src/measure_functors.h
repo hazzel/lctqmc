@@ -84,7 +84,8 @@ struct measure_M
 	
 	void perform()
 	{
-		measure.add("pert_order", gf.pert_order());
+		if (std::abs(gf.tau() - param.theta/2.) < param.theta/8.)
+			measure.add("pert_order", gf.pert_order());
 	}
 
 	void collect(std::ostream& os)
