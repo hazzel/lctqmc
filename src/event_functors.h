@@ -165,9 +165,9 @@ struct event_dynamic_measurement
 		if (obs.size() == 0 and vec_obs.size() == 0)
 			return;
 		
-//		if (std::abs(gf.tau() - (param.theta/2. + param.dyn_tau_max/2 + param.block_size/2.)) < 1E-6
-//			or std::abs(gf.tau() - (param.theta/2. - param.dyn_tau_max/2 + param.block_size/2.)) < 1E-6)
-		if (std::abs(gf.tau() - (param.theta/2. + param.dyn_tau_max/2 + param.block_size/2.)) <= 1E-6)
+		if (std::abs(gf.tau() - (param.theta/2. + param.dyn_tau_max/2 + param.block_size/2.)) < 1E-6
+			or std::abs(gf.tau() - (param.theta/2. - param.dyn_tau_max/2 + param.block_size/2.)) < 1E-6)
+		//if (std::abs(gf.tau() - (param.theta/2. + param.dyn_tau_max/2 + param.block_size/2.)) <= 1E-6)
 		//if (std::abs(gf.tau() - (param.theta/2. - param.dyn_tau_max/2 + param.block_size/2.)) <= 1E-6)
 		{
 			//std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();

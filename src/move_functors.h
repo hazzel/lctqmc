@@ -41,7 +41,7 @@ struct move_insert
 	
 	void init()
 	{
-		measure.add_observable("insertion", param.theta / param.block_size * param.n_sweeps);
+		measure.add_observable("insertion", param.theta / param.block_size * param.n_sweeps * param.n_updates_per_block / param.n_prebin);
 	}
 };
 
@@ -79,7 +79,7 @@ struct move_remove
 	
 	void init()
 	{
-		measure.add_observable("removal", param.theta / param.block_size * param.n_sweeps);
+		measure.add_observable("removal", param.theta / param.block_size * param.n_sweeps * param.n_updates_per_block / param.n_prebin);
 	}
 };
 
@@ -127,6 +127,6 @@ struct move_shift
 	
 	void init()
 	{
-		measure.add_observable("shift", param.theta / param.block_size * param.n_sweeps);
+		measure.add_observable("shift", param.theta / param.block_size * param.n_sweeps * param.n_updates_per_block / param.n_prebin);
 	}
 };

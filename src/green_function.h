@@ -475,12 +475,15 @@ class green_function
 				param.direction = 1;
 
 			et_gf_L[0] = g_tau;
+			//std::cout << "n = " << 0 << ", tau = " << tpos << std::endl;
 			for (int n = 1; n <= param.dyn_tau_steps/2; ++n)
 			{
 				wrap(tpos + param.direction * param.dyn_delta_tau);
 				rebuild();
 				et_gf_L[n] = g_tau;
+				//std::cout << "n = " << n << ", tau = " << tpos << std::endl;
 			}
+			//std::cout << "end of L" << std::endl;
 			matrix_t& et_gf_0 = et_gf_L[param.dyn_tau_steps/2];
 			et_gf_R[0] = et_gf_0;
 			for (int n = 1; n <= param.dyn_tau_steps/2; ++n)
@@ -488,7 +491,10 @@ class green_function
 				wrap(tpos + param.direction * param.dyn_delta_tau);
 				rebuild();
 				et_gf_R[n] = g_tau;
+				//std::cout << "n = " << n << ", tau = " << tpos << std::endl;
 			}
+			//std::cout << "end of R" << std::endl;
+			//std::cout << std::endl << "------" << std::endl;
 			
 			get_obs_values(dyn_tau, 0, et_gf_0, et_gf_0, et_gf_0, obs, vec_obs);
 			for (int n = 1; n <= param.dyn_tau_steps/2; ++n)
@@ -496,37 +502,58 @@ class green_function
 				if (param.direction == -1)
 				{
 					matrix_t g_l = et_gf_L[et_gf_L.size() - n];
-					prop_from_left(-1, param.theta/2 + n*param.dyn_delta_tau, param.theta/2 + (n-1)*param.dyn_delta_tau, g_l);
+					prop_from_left(-1, param.theta/2+param.block_size/2 + n*param.dyn_delta_tau, param.theta/2+param.block_size/2 + (n-1)*param.dyn_delta_tau, g_l);
 					matrix_t g_r = et_gf_R[n];
-					prop_from_left(-1, param.theta/2 - (n-1)*param.dyn_delta_tau, param.theta/2 - n*param.dyn_delta_tau, g_r);
+					prop_from_left(-1, param.theta/2+param.block_size/2 - (n-1)*param.dyn_delta_tau, param.theta/2+param.block_size/2 - n*param.dyn_delta_tau, g_r);
 
-					//time_displaced_gf = g_l * time_displaced_gf;
-					//get_obs_values(dyn_tau, 2*n-1, et_gf_R[n-1], et_gf_L[et_gf_L.size() - n - 1], time_displaced_gf, obs, vec_obs);
+					time_displaced_gf = g_l * time_displaced_gf;
+					get_obs_values(dyn_tau, 2*n-1, et_gf_R[n-1], et_gf_L[et_gf_L.size() - n - 1], time_displaced_gf, obs, vec_obs);
+					
+					time_displaced_gf = time_displaced_gf * g_r;
+					get_obs_values(dyn_tau, 2*n, et_gf_R[n], et_gf_L[et_gf_L.size() - n - 1], time_displaced_gf, obs, vec_obs);
 					
 					/*
 					std::cout << "td (n = " << n << ")" << std::endl;
 					print_matrix(uK * time_displaced_gf * uKdag);
 					std::cout << "exact" << std::endl;
 					matrix_t b = id;
-					prop_from_left(-1, param.theta/2 + n*param.dyn_delta_tau, param.theta/2, b);
+					prop_from_left(-1, param.theta/2+param.block_size/2 + n*param.dyn_delta_tau, param.theta/2+param.block_size/2, b);
 					print_matrix(uK * b * et_gf_0 * uKdag);
-					std::cout << std::endl << "------" << std::endl;
 					*/
 					
-					matrix_t b = id;
-					prop_from_left(-1, param.theta/2 + n*param.dyn_delta_tau, param.theta/2, b);
-					time_displaced_gf = b * et_gf_0;
+					//get_obs_values(dyn_tau, 2*n-1, et_gf_R[n-1], et_gf_L[et_gf_L.size() - n - 1], b * et_gf_0, obs, vec_obs);
+					
+					/*
+					if (n == 2)
+					{
+						std::cout << "g * g" << std::endl;
+						matrix_t b2 = et_gf_L[et_gf_L.size() - 2], b1 = et_gf_L[et_gf_L.size() - 1];
+						prop_from_left(-1, param.theta/2+param.block_size/2 + 2*param.dyn_delta_tau, param.theta/2+param.block_size/2 + 1*param.dyn_delta_tau, b2);
+						prop_from_left(-1, param.theta/2+param.block_size/2 + 1*param.dyn_delta_tau, param.theta/2+param.block_size/2, b1);
+						print_matrix(uK * b2 * b1 * uKdag);
+					}
+					*/
+					//std::cout << std::endl << "------" << std::endl;
+					
+					/*
+					matrix_t b1 = id, b2 = id, b3 = id;
+					prop_from_left(-1, param.theta/2 + n*param.dyn_delta_tau, param.theta/2, b1);
+					//prop_from_right(-1, param.theta/2, param.theta/2 - (n-1)*param.dyn_delta_tau, b2);
+					//prop_from_right(-1, param.theta/2, param.theta/2 - n*param.dyn_delta_tau, b3);
+					
+					time_displaced_gf = b1 * et_gf_0 * b2;
 					get_obs_values(dyn_tau, 2*n-1, et_gf_R[n-1], et_gf_L[et_gf_L.size() - n - 1], time_displaced_gf, obs, vec_obs);
 					
-					//time_displaced_gf = time_displaced_gf * g_r;
-					//get_obs_values(dyn_tau, 2*n, et_gf_R[n], et_gf_L[et_gf_L.size() - n - 1], time_displaced_gf, obs, vec_obs);
+					//time_displaced_gf = b1 * et_gf_0 * b3;
+					//get_obs_values(dyn_tau, 2*n, et_gf_R[n-1], et_gf_L[et_gf_L.size() - n - 1], time_displaced_gf, obs, vec_obs);
+					*/
 				}
 				else
 				{
 					matrix_t g_l = et_gf_R[n];
-					prop_from_right(-1, param.theta/2 + n*param.dyn_delta_tau, param.theta/2 + (n-1)*param.dyn_delta_tau, g_l);
+					prop_from_right(-1, param.theta/2+param.block_size/2 + n*param.dyn_delta_tau, param.theta/2+param.block_size/2 + (n-1)*param.dyn_delta_tau, g_l);
 					matrix_t g_r = et_gf_L[et_gf_L.size() - n];
-					prop_from_right(-1, param.theta/2 - (n-1)*param.dyn_delta_tau, param.theta/2 - n*param.dyn_delta_tau, g_r);
+					prop_from_right(-1, param.theta/2+param.block_size/2 - (n-1)*param.dyn_delta_tau, param.theta/2+param.block_size/2 - n*param.dyn_delta_tau, g_r);
 					
 					time_displaced_gf = g_l * time_displaced_gf;
 					get_obs_values(dyn_tau, 2*n-1, et_gf_L[et_gf_L.size() - n], et_gf_R[n], time_displaced_gf, obs, vec_obs);
