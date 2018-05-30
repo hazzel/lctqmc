@@ -58,7 +58,7 @@ mc::mc(const std::string& dir)
 	lat.generate_graph(hc);
 	hc.generate_maps(lat);
 	
-	matrix_t K(lat.n_sites(), lat.n_sites());
+	green_function::matrix_t K(lat.n_sites(), lat.n_sites());
 	for (auto& a : lat.bonds("nearest neighbors"))
 		K(a.first, a.second) = -param.t;
 	for (auto& a : lat.bonds("t3_bonds"))

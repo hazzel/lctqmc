@@ -1,8 +1,8 @@
-SWEEPS = 5
-warmup = 1
-prebin = 1
+SWEEPS = 5000
+warmup = 1000
+prebin = 100
 
-L = 11
+L = 2
 theta = 80
 block_size = 0.2
 updates_per_block = 10
