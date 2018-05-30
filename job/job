@@ -1,16 +1,17 @@
-SWEEPS = 1000
-warmup = 1000
-prebin = 100
+SWEEPS = 5
+warmup = 1
+prebin = 1
 
-L = 4
+L = 11
 theta = 80
 block_size = 0.2
-updates_per_block = 5
+updates_per_block = 10
+static_measure_interval = 5
 
 dyn_tau_max = 10
 dyn_delta_tau = 0.2
 
 static_obs = energy,epsilon,M2,S_cdw_q,kekule
-obs = M2,sp
+obs = M2,sp,tp
 
 {V = 1.0}

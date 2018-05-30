@@ -81,17 +81,23 @@ class green_function
 			
 			uKdagP = uKdag * solver.eigenvectors().leftCols(lat.n_sites()/2);
 			
-			Eigen::JacobiSVD<matrix_t> svd(uKdagP, Eigen::ComputeThinU);
-			matrix_t uKdagP = svd.matrixU();
+			//Eigen::JacobiSVD<matrix_t> svd(uKdagP, Eigen::ComputeThinU);
+			//uKdagP = svd.matrixU();
 	
-			//qr_solver.compute(uKdagP);
-			//matrix_t p_q = matrix_t::Identity(uKdagP.rows(), uKdagP.cols());
-			//uKdagP = qr_solver.matrixQ() * p_q;
+			qr_solver.compute(uKdagP);
+			matrix_t p_q = matrix_t::Identity(uKdagP.rows(), uKdagP.cols());
+			uKdagP = qr_solver.matrixQ() * p_q;
 		}
 		
 		unsigned int pert_order()
 		{
 			return vlist.size();
+		}
+		
+		unsigned int pert_order(double tau)
+		{
+			vlist_t::const_iterator lower = std::lower_bound(vlist.begin(), vlist.end(), tau, vertex::less_equal());	//equal is exclude
+			return lower - vlist.begin();
 		}
 		
 		double tau()
@@ -180,13 +186,11 @@ class green_function
 				A.noalias() -= 2.* (A*uKdag.col(si))* uK.row(si) + 2.* (A*uKdag.col(sj)) * uK.row(sj);
 		}
 
-		void initialize(const std::vector<vertex>& vlist_)
+		void initialize(double tau, const std::vector<vertex>& vlist_)
 		{
 			storage.resize(param.theta / param.block_size + 1);
-
+			tpos = tau;
 			vlist = vlist_;
-			//tpos = vlist.begin()->tau;
-			tpos = 0.;
 			
 			int block = tpos / param.block_size;
 			storage[0] = uKdagP;
@@ -196,12 +200,12 @@ class green_function
 				matrix_t UR = storage[i];
 				prop_from_left(-1, (i+1)*param.block_size, i*param.block_size, UR);
 
-				Eigen::JacobiSVD<matrix_t> svd(UR, Eigen::ComputeThinU); 
-				storage[i+1] = svd.matrixU();
+				//Eigen::JacobiSVD<matrix_t> svd(UR, Eigen::ComputeThinU); 
+				//storage[i+1] = svd.matrixU();
 
-				//qr_solver.compute(UR);
-				//matrix_t p_q = matrix_t::Identity(UR.rows(), UR.cols());
-				//storage[i+1] = qr_solver.matrixQ() * p_q;
+				qr_solver.compute(UR);
+				matrix_t p_q = matrix_t::Identity(UR.rows(), UR.cols());
+				storage[i+1] = qr_solver.matrixQ() * p_q;
 			}
 
 			storage.back() = uKdagP.adjoint();
@@ -209,13 +213,13 @@ class green_function
 			{
 				matrix_t VL = storage[i+1];
 				prop_from_right(-1, (i+1)*param.block_size, i*param.block_size, VL);
+				
+				//Eigen::JacobiSVD<matrix_t> svd(VL, Eigen::ComputeThinV); 
+				//storage[i] = svd.matrixV().adjoint();
 
-				Eigen::JacobiSVD<matrix_t> svd(VL, Eigen::ComputeThinV); 
-				storage[i] = svd.matrixV().adjoint();
-
-				//qr_solver.compute(VL);
-				//matrix_t p_q = matrix_t::Identity(VL.rows(), VL.cols());
-				//storage[i] = p_q * qr_solver.matrixQ().adjoint();
+				qr_solver.compute(VL.adjoint());
+				matrix_t p_q = matrix_t::Identity(VL.rows(), VL.cols());
+				storage[i] = p_q * qr_solver.matrixQ().adjoint();
 
 				//qr_solver.compute(VL);
 				//matrix_t r = qr_solver.matrixQR().template triangularView<Eigen::Upper>();
@@ -223,28 +227,38 @@ class green_function
 				//for (int i = 0; i < storage[i].rows(); ++i)
 				//	storage[i].row(i) = 1./qr_solver.matrixQR()(i, i) * storage[i].row(i);
 			}
+			
 
-			g_tau = g_stable();
+			//g_tau = g_stable();
+			stabilize();
 		}
 		
 		void rebuild()
 		{
+			/*
 			matrix_t g_stab = g_stable();
 
 			double err = (g_tau - g_stab).norm();
-
-			if (err > 1E-10)
+			if (err > 1E-6)
 				std::cout << "Error (tau = " << tpos << "): " << err << std::endl;
 
 			g_tau = g_stab;
-			/*
-			std::cout << "g_stab:" << std::endl;
-			print_matrix(g_stab);
-			std::cout << "---" << std::endl;
-			std::cout << "g_exact:" << std::endl;
-			print_matrix(g_exact());
-			std::cout << std::endl << std::endl;
 			*/
+			
+			matrix_t g_prev;
+			calculate_gf(g_prev);
+			stabilize();
+			matrix_t g_stab;
+			calculate_gf(g_stab);
+			double err = (g_prev - g_stab).norm();
+			if (err > 1E-6)
+				std::cout << "Error (tau = " << tpos << "): " << err << std::endl;
+		}
+		
+		void calculate_gf(matrix_t& m)
+		{
+			m = matrix_t::Identity(lat.n_sites(), lat.n_sites());
+			m.noalias() -= R_tau * (W_tau * L_tau);
 		}
 		
 		matrix_t g_stable()
@@ -262,6 +276,19 @@ class green_function
 				res(l, l) += 1.0;
 
 			return res; 
+		}
+		
+		void stabilize()
+		{
+			int block = tpos / param.block_size;
+			
+			R_tau = storage[block];
+			prop_from_left(-1, tpos, block*param.block_size, R_tau);
+		
+			L_tau = storage[block+1];
+			prop_from_right(-1, (block+1)*param.block_size, tpos, L_tau);
+			
+			W_tau = (L_tau * R_tau).inverse();
 		}
 		
 		matrix_t g_exact()
@@ -283,15 +310,23 @@ class green_function
 			if (tau >= tpos)
 			{
 				// B G B^{-1}
-				prop_from_left(-1, tau, tpos, g_tau);	// B(tau1) ... B(tau2) *U_  
-				prop_from_left(1, tau, tpos, g_tau);	// V_ * B^{-1}(tau2) ... B^{-1}(tau1)
+				//prop_from_left(-1, tau, tpos, g_tau);	// B(tau1) ... B(tau2) *U_  
+				//prop_from_left(1, tau, tpos, g_tau);	// V_ * B^{-1}(tau2) ... B^{-1}(tau1)
+				
+				prop_from_left(-1, tau, tpos, R_tau);	// B(tau1) ... B(tau2) *U_  
+				prop_from_left(1, tau, tpos, L_tau);	// V_ * B^{-1}(tau2) ... B^{-1}(tau1)
+				
 				tpos = tau;
 			}
 			else
 			{
 				// B^{-1} G B 
-				prop_from_right(1, tpos, tau, g_tau);	//  B^{-1}(tau2) ... B^{-1}(tau1) * U_
-				prop_from_right(-1, tpos, tau, g_tau);	//  V_ * B(tau1) ... B(tau2)
+				//prop_from_right(1, tpos, tau, g_tau);	//  B^{-1}(tau2) ... B^{-1}(tau1) * U_
+				//prop_from_right(-1, tpos, tau, g_tau);	//  V_ * B(tau1) ... B(tau2)
+				
+				prop_from_right(1, tpos, tau, R_tau);	//  B^{-1}(tau2) ... B^{-1}(tau1) * U_
+				prop_from_right(-1, tpos, tau, L_tau);	//  V_ * B(tau1) ... B(tau2)
+				
 				tpos = tau;
 			}
 			
@@ -301,24 +336,24 @@ class green_function
 				matrix_t UR = storage[old_block];
 				prop_from_left(-1, new_block*param.block_size, old_block*param.block_size, UR);
 				
-				Eigen::JacobiSVD<matrix_t> svd(UR, Eigen::ComputeThinU);
-				storage[new_block] = svd.matrixU();
+				//Eigen::JacobiSVD<matrix_t> svd(UR, Eigen::ComputeThinU);
+				//storage[new_block] = svd.matrixU();
 
-				//qr_solver.compute(UR);
-				//matrix_t p_q = matrix_t::Identity(UR.rows(), UR.cols());
-				//storage[new_block] = qr_solver.matrixQ() * p_q;
+				qr_solver.compute(UR);
+				matrix_t p_q = matrix_t::Identity(UR.rows(), UR.cols());
+				storage[new_block] = qr_solver.matrixQ() * p_q;
 			}
 			else if (new_block < old_block)
 			{// move to smaller block
 				matrix_t VL = storage[old_block+1];
 				prop_from_right(-1, (old_block+1)*param.block_size, old_block*param.block_size, VL);
 				
-				Eigen::JacobiSVD<matrix_t> svd(VL, Eigen::ComputeThinV);
-				storage[new_block+1] = svd.matrixV().adjoint();
+				//Eigen::JacobiSVD<matrix_t> svd(VL, Eigen::ComputeThinV);
+				//storage[new_block+1] = svd.matrixV().adjoint();
 
-				//qr_solver.compute(VL);
-				//matrix_t p_q = matrix_t::Identity(VL.rows(), VL.cols());
-				//storage[new_block+1] = p_q * qr_solver.matrixQ().adjoint();
+				qr_solver.compute(VL.adjoint());
+				matrix_t p_q = matrix_t::Identity(VL.rows(), VL.cols());
+				storage[new_block+1] = p_q * qr_solver.matrixQ().adjoint();
 
 				//qr_solver.compute(VL);
 				//matrix_t r = qr_solver.matrixQR().template triangularView<Eigen::Upper>();
@@ -331,26 +366,24 @@ class green_function
 		double gij(const int si, const int sj) const
 		{	// current g in the site basis 
 			// (U gtau U^{dagger} )_ij 
-			return  (uK.row(si) * g_tau) * uKdag.col(sj);  
+			//return  (uK.row(si) * g_tau) * uKdag.col(sj);
+			
+			return (si==sj) ? 1.0 : 0.0 - (uK.row(si) * R_tau) *  W_tau * (L_tau*uKdag.col(sj));  
 		}
 		
 		//update changes g_tau 
 		void update(const int si, const int sj, const double gij, const double gji)
 		{
+			/*
 			//update g_tau
 			Eigen::RowVectorXd ri = uK.row(si) * g_tau - uK.row(si); 
 			Eigen::RowVectorXd rj = uK.row(sj) * g_tau - uK.row(sj); 
 
 			g_tau.noalias() -= (g_tau*uKdag.col(sj)) * ri/gij + (g_tau*uKdag.col(si)) * rj/gji; 
-
-			/*
-			if (itau_%blocksize_==0)
-			{ //special treatment when update the block starting point 
-											//otherwise this vertex will be untreated in stablization 
-				//std::cout << "update: special treatment because update on the block boundary" << std::endl; 
-				Vprop(si, sj, "L",  Storage_[itau_/blocksize_]);// update U in Storage 
-			}
 			*/
+			
+			W_tau += ((W_tau * (L_tau* uKdag.col(sj))) * ((uK.row(si)*R_tau)*W_tau)) / gij + ((W_tau* (L_tau* uKdag.col(si))) * ((uK.row(sj)*R_tau)*W_tau)) / gji;
+			V_prop(si, sj, "L",  R_tau);
 		}
 		
 		vertex generate_random_vertex()
@@ -446,7 +479,11 @@ class green_function
 			const std::vector<std::string>& vec_names,
 			const std::vector<vector_wick_static_base<matrix_t>>& vec_obs)
 		{
-			matrix_t g_site = uK * g_tau * uKdag;
+			//matrix_t g_site = uK * g_tau * uKdag;
+			
+			matrix_t g_site;
+			calculate_gf(g_site);
+			g_site = uK * g_site * uKdag;
 			
 			for (int i = 0; i < names.size(); ++i)
 				measure.add(names[i], obs[i].get_obs(g_site));
@@ -460,7 +497,10 @@ class green_function
 			const std::vector<vector_wick_base<matrix_t>>& vec_obs)
 		{
 			double tpos_buffer = tpos;
-			matrix_t g_tau_buffer = g_tau;
+			//matrix_t g_tau_buffer = g_tau;
+			matrix_t R_tau_buffer = R_tau;
+			matrix_t L_tau_buffer = L_tau;
+			matrix_t W_tau_buffer = W_tau;
 			std::vector<matrix_t> storage_buffer = storage;
 			
 			std::vector<matrix_t> et_gf_L(param.dyn_tau_steps/2+1);
@@ -474,27 +514,26 @@ class green_function
 			else
 				param.direction = 1;
 
-			et_gf_L[0] = g_tau;
-			//std::cout << "n = " << 0 << ", tau = " << tpos << std::endl;
+			//et_gf_L[0] = g_tau;
+			calculate_gf(et_gf_L[0]);
+			
 			for (int n = 1; n <= param.dyn_tau_steps/2; ++n)
 			{
 				wrap(tpos + param.direction * param.dyn_delta_tau);
 				rebuild();
-				et_gf_L[n] = g_tau;
-				//std::cout << "n = " << n << ", tau = " << tpos << std::endl;
+				//et_gf_L[n] = g_tau;
+				calculate_gf(et_gf_L[n]);
 			}
-			//std::cout << "end of L" << std::endl;
+
 			matrix_t& et_gf_0 = et_gf_L[param.dyn_tau_steps/2];
 			et_gf_R[0] = et_gf_0;
 			for (int n = 1; n <= param.dyn_tau_steps/2; ++n)
 			{
 				wrap(tpos + param.direction * param.dyn_delta_tau);
 				rebuild();
-				et_gf_R[n] = g_tau;
-				//std::cout << "n = " << n << ", tau = " << tpos << std::endl;
+				//et_gf_R[n] = g_tau;
+				calculate_gf(et_gf_R[n]);
 			}
-			//std::cout << "end of R" << std::endl;
-			//std::cout << std::endl << "------" << std::endl;
 			
 			get_obs_values(dyn_tau, 0, et_gf_0, et_gf_0, et_gf_0, obs, vec_obs);
 			for (int n = 1; n <= param.dyn_tau_steps/2; ++n)
@@ -511,42 +550,6 @@ class green_function
 					
 					time_displaced_gf = time_displaced_gf * g_r;
 					get_obs_values(dyn_tau, 2*n, et_gf_R[n], et_gf_L[et_gf_L.size() - n - 1], time_displaced_gf, obs, vec_obs);
-					
-					/*
-					std::cout << "td (n = " << n << ")" << std::endl;
-					print_matrix(uK * time_displaced_gf * uKdag);
-					std::cout << "exact" << std::endl;
-					matrix_t b = id;
-					prop_from_left(-1, param.theta/2+param.block_size/2 + n*param.dyn_delta_tau, param.theta/2+param.block_size/2, b);
-					print_matrix(uK * b * et_gf_0 * uKdag);
-					*/
-					
-					//get_obs_values(dyn_tau, 2*n-1, et_gf_R[n-1], et_gf_L[et_gf_L.size() - n - 1], b * et_gf_0, obs, vec_obs);
-					
-					/*
-					if (n == 2)
-					{
-						std::cout << "g * g" << std::endl;
-						matrix_t b2 = et_gf_L[et_gf_L.size() - 2], b1 = et_gf_L[et_gf_L.size() - 1];
-						prop_from_left(-1, param.theta/2+param.block_size/2 + 2*param.dyn_delta_tau, param.theta/2+param.block_size/2 + 1*param.dyn_delta_tau, b2);
-						prop_from_left(-1, param.theta/2+param.block_size/2 + 1*param.dyn_delta_tau, param.theta/2+param.block_size/2, b1);
-						print_matrix(uK * b2 * b1 * uKdag);
-					}
-					*/
-					//std::cout << std::endl << "------" << std::endl;
-					
-					/*
-					matrix_t b1 = id, b2 = id, b3 = id;
-					prop_from_left(-1, param.theta/2 + n*param.dyn_delta_tau, param.theta/2, b1);
-					//prop_from_right(-1, param.theta/2, param.theta/2 - (n-1)*param.dyn_delta_tau, b2);
-					//prop_from_right(-1, param.theta/2, param.theta/2 - n*param.dyn_delta_tau, b3);
-					
-					time_displaced_gf = b1 * et_gf_0 * b2;
-					get_obs_values(dyn_tau, 2*n-1, et_gf_R[n-1], et_gf_L[et_gf_L.size() - n - 1], time_displaced_gf, obs, vec_obs);
-					
-					//time_displaced_gf = b1 * et_gf_0 * b3;
-					//get_obs_values(dyn_tau, 2*n, et_gf_R[n-1], et_gf_L[et_gf_L.size() - n - 1], time_displaced_gf, obs, vec_obs);
-					*/
 				}
 				else
 				{
@@ -564,7 +567,10 @@ class green_function
 			}
 			
 			tpos = tpos_buffer;
-			g_tau = g_tau_buffer;
+			//g_tau = g_tau_buffer;
+			R_tau = R_tau_buffer;
+			L_tau = L_tau_buffer;
+			W_tau = W_tau_buffer;
 			storage = storage_buffer;
 		}
 		
@@ -589,6 +595,40 @@ class green_function
 			}
 		}
 		
+		void serialize(odump& out)
+		{
+			out.write(param.static_measure_cnt);
+			out.write(tpos);
+			int size = vlist.size();
+			out.write(size);
+			for (auto& v : vlist)
+			{
+				out.write(v.tau);
+				out.write(v.si);
+				out.write(v.sj);
+			}
+		}
+
+		void serialize(idump& in)
+		{
+			in.read(param.static_measure_cnt);
+			in.read(tpos);
+			int size;
+			in.read(size);
+			for (int i = 0; i < size; ++i)
+			{
+				double tau;
+				in.read(tau);
+				int si;
+				in.read(si);
+				int sj;
+				in.read(sj);
+				vlist.push_back({tau, si, sj});
+			}
+			std::sort(vlist.begin(), vlist.end(), vertex::less());
+			initialize(tpos, vlist);
+		}
+		
 		void print_matrix(const matrix_t& m)
 		{
 			for (int i = 0; i < m.rows(); ++i)
@@ -608,6 +648,10 @@ class green_function
 		double tpos;
 		
 		matrix_t g_tau;
+		matrix_t L_tau;
+		matrix_t W_tau;
+		matrix_t R_tau;
+		
 		matrix_t K;
 		vector_t wK;
 		matrix_t uK;

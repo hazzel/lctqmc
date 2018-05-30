@@ -1,6 +1,7 @@
 #include <string>
 #include <fstream>
 #include <cmath>
+#include <chrono>
 #include <boost/algorithm/string.hpp>
 #include "mc.h"
 #include "honeycomb.h"
@@ -36,10 +37,12 @@ mc::mc(const std::string& dir)
 	param.stag_mu = pars.value_or_default<double>("stag_mu", 0.0);
 	
 	param.n_updates_per_block = pars.value_or_default<double>("updates_per_block", 1);
+	param.static_measure_interval = pars.value_or_default<double>("static_measure_interval", 1);
+	param.static_measure_cnt = 0;
 
-	std::string static_obs_string = pars.value_or_default<std::string>("static_obs", "M2");
+	std::string static_obs_string = pars.value_or_default<std::string>("static_obs", "");
 	boost::split(param.static_obs, static_obs_string, boost::is_any_of(","));
-	std::string dyn_obs_string = pars.value_or_default<std::string>("obs", "M2");
+	std::string dyn_obs_string = pars.value_or_default<std::string>("obs", "");
 	boost::split(param.dyn_obs, dyn_obs_string, boost::is_any_of(","));
 
 	if (pars.defined("seed"))
@@ -54,6 +57,13 @@ mc::mc(const std::string& dir)
 	honeycomb hc(param.L, param.L);
 	lat.generate_graph(hc);
 	hc.generate_maps(lat);
+	
+	matrix_t K(lat.n_sites(), lat.n_sites());
+	for (auto& a : lat.bonds("nearest neighbors"))
+		K(a.first, a.second) = -param.t;
+	for (auto& a : lat.bonds("t3_bonds"))
+		K(a.first, a.second) = -param.tprime;
+	gf.set_K_matrix(K);
 
 	//Set up events
 	qmc.add_event(event_build{rng, param, lat, gf}, "initial build");
@@ -102,8 +112,7 @@ void mc::write(const std::string& dir)
 	odump d(dir+"dump");
 	random_write(d);
 	d.write(sweep);
-	d.write(static_bin_cnt);
-	d.write(dyn_bin_cnt);
+	gf.serialize(d);
 	d.close();
 	seed_write(dir+"seed");
 	std::ofstream f(dir+"bins");
@@ -137,8 +146,7 @@ bool mc::read(const std::string& dir)
 	{
 		random_read(d);
 		d.read(sweep);
-		d.read(static_bin_cnt);
-		d.read(dyn_bin_cnt);
+		gf.serialize(d);
 		d.close();
 		return true;
 	}
@@ -165,18 +173,30 @@ bool mc::is_thermalized()
 
 void mc::do_update()
 {
-	for (int i = 0; i < param.theta / param.block_size; ++i)
+	std::chrono::steady_clock::time_point t0, t1;
+	for (int i = gf.tau() / param.block_size; i < param.theta / param.block_size; ++i)
 	{
+		t0 = std::chrono::steady_clock::now();
 		gf.wrap((i + 0.5) * param.block_size);
+		t1 = std::chrono::steady_clock::now();
+		//std::cout << "Time of wrap: " << std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count() << std::endl;
+		
+		t0 = std::chrono::steady_clock::now();
 		gf.rebuild();
+		t1 = std::chrono::steady_clock::now();
+		//std::cout << "Time of rebuild: " << std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count() << std::endl;
 		if (is_thermalized())
 		{
 			qmc.do_measurement();
 			qmc.trigger_event("_static measure");
 			qmc.trigger_event("dynamic measure");
 		}
+		t0 = std::chrono::steady_clock::now();
 		for (int n = 0; n < param.n_updates_per_block; ++n)
 			qmc.do_update();
+		t1 = std::chrono::steady_clock::now();
+		//std::cout << "Time of updates: " << std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count() << std::endl;
+		//std::cout << std::endl << "---" << std::endl;
 	}
 	for (int i = param.theta / param.block_size - 1; i >= 0; --i)
 	{

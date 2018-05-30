@@ -70,6 +70,11 @@ void eval_sign(double& out,
 	out = std::sqrt(sign_re * sign_re + sign_im * sign_im);
 }
 
+void eval_fid_suscept(double& out, std::vector<std::valarray<double>*>& o, double* p)
+{
+	out = ((*o[0])[0] - (*o[1])[0] * (*o[2])[0]) / (p[0] * p[0]);
+}
+
 struct measure_M
 {
 	measurements& measure;
@@ -80,16 +85,28 @@ struct measure_M
 	void init()
 	{
 		measure.add_observable("pert_order", param.n_prebin);
+		measure.add_observable("k_L k_R", param.n_prebin);
+		measure.add_observable("k_L", param.n_prebin);
+		measure.add_observable("k_R", param.n_prebin);
 	}
 	
 	void perform()
 	{
-		if (std::abs(gf.tau() - param.theta/2.) < param.theta/8.)
-			measure.add("pert_order", gf.pert_order());
+		if (std::abs(gf.tau() - param.theta/2.+param.block_size/2) < 1E-6)
+		{
+			unsigned k = gf.pert_order(), k_L = gf.pert_order(param.theta/2.), k_R = k - k_L;
+			measure.add("pert_order", k);
+			measure.add("k_L k_R", k_L * k_R);
+			measure.add("k_L", k_L);
+			measure.add("k_R", k_R);
+		}
 	}
 
 	void collect(std::ostream& os)
 	{
+		double eval_param[] = {param.V};
+		measure.add_evalable("fidelity susceptibility", "k_L k_R", "k_L", "k_R", eval_fid_suscept, eval_param);
+		
 		os << "PARAMETERS" << std::endl;
 		pars.get_all(os);
 		measure.get_statistics(os);

@@ -79,3 +79,40 @@ struct wick_sp
 		return std::real(sp) / N;
 	}
 };
+
+struct wick_tp
+{
+	Random& rng;
+	parameters& param;
+	lattice& lat;
+
+	wick_tp(Random& rng_, parameters& param_, lattice& lat_)
+		: rng(rng_), param(param_), lat(lat_)
+	{}
+	
+	double get_obs(const matrix_t& et_gf_0, const matrix_t& et_gf_t,
+		const matrix_t& td_gf)
+	{
+		const numeric_t *ca_td_gf = td_gf.data();
+		auto& K = lat.symmetry_point("K");
+		auto& Kp = lat.symmetry_point("Kp");
+		const int N = lat.n_sites();
+		numeric_t tp = 0.;
+		int i = 2 * static_cast<int>(rng() * N / 2);
+		auto& r_i = lat.real_space_coord(i);
+		for (int m = 0; m < N; m+=2)
+		{
+			auto& r_m = lat.real_space_coord(m);
+			int j = 2 * static_cast<int>(rng() * N / 2);
+			auto& r_j = lat.real_space_coord(j);
+			for (int n = 0; n < N; n+=2)
+			{
+				auto& r_n = lat.real_space_coord(n);
+				//double kdot = K.dot(r_i - r_j - r_m + r_n);
+				double kdot = K.dot(r_i - r_m) + Kp.dot(r_j - r_n);
+				tp += std::real(std::cos(kdot) * (ca_td_gf[i*N+m] * ca_td_gf[(j+1)*N+(n+1)] - ca_td_gf[i*N+(n+1)] * ca_td_gf[(j+1)*N+m]));
+			}
+		}
+		return tp;
+	}
+};
