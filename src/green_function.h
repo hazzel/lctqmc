@@ -68,7 +68,7 @@ class green_function
 		using vlist_t = std::vector<vertex>;
 
 		green_function(Random& rng_, parameters& param_, lattice& lat_)
-			: rng(rng_), param(param_), lat(lat_)
+			: rng(rng_), param(param_), lat(lat_), norm_error_sum(0.), norm_error_cnt(0)
 		{}
 		
 		void set_K_matrix(const matrix_t& K_)
@@ -103,6 +103,14 @@ class green_function
 		double tau()
 		{
 			return tpos;
+		}
+
+		double reset_norm_error()
+		{
+			double avg_norm_error = norm_error_sum / norm_error_cnt;
+			norm_error_sum = 0.;
+			norm_error_cnt = 0;
+			return avg_norm_error;
 		}
 		
 		// it can do  B(tau_m)... B(tau_n) * A  when sign = -1
@@ -253,6 +261,8 @@ class green_function
 			double err = (g_prev - g_stab).norm();
 			if (err > 1E-6)
 				std::cout << "Error (tau = " << tpos << "): " << err << std::endl;
+			norm_error_sum += err;
+			++norm_error_cnt;
 		}
 		
 		void calculate_gf(matrix_t& m)
@@ -310,13 +320,11 @@ class green_function
 			if (tau >= tpos)
 			{
 				// B G B^{-1}
-				//prop_from_left(-1, tau, tpos, g_tau);	// B(tau1) ... B(tau2) *U_  
+				//prop_from_left(-1, tau, tpos, g_tau);	// B(tau1) ... B(tau2) *U_
 				//prop_from_left(1, tau, tpos, g_tau);	// V_ * B^{-1}(tau2) ... B^{-1}(tau1)
 				
-				prop_from_left(-1, tau, tpos, R_tau);	// B(tau1) ... B(tau2) *U_  
+				prop_from_left(-1, tau, tpos, R_tau);	// B(tau1) ... B(tau2) *U_
 				prop_from_left(1, tau, tpos, L_tau);	// V_ * B^{-1}(tau2) ... B^{-1}(tau1)
-				
-				tpos = tau;
 			}
 			else
 			{
@@ -326,9 +334,8 @@ class green_function
 				
 				prop_from_right(1, tpos, tau, R_tau);	//  B^{-1}(tau2) ... B^{-1}(tau1) * U_
 				prop_from_right(-1, tpos, tau, L_tau);	//  V_ * B(tau1) ... B(tau2)
-				
-				tpos = tau;
 			}
+			tpos = tau;
 			
 			//when we wrap to a new block we need to update storage 
 			if (new_block > old_block)
@@ -362,6 +369,66 @@ class green_function
 				//	storage[new_block+1].row(i) = 1./qr_solver.matrixQR()(i, i) * storage[new_block+1].row(i);
 			}
 		}
+
+		void wrap_and_stabilize(double tau)
+		{
+			int old_block = tpos / param.block_size;
+			int new_block = tau / param.block_size;
+
+			//wrap Green's function 
+			if (tau >= tpos)
+			{
+				// B G B^{-1}
+				//prop_from_left(-1, tau, tpos, g_tau);	// B(tau1) ... B(tau2) *U_
+				//prop_from_left(1, tau, tpos, g_tau);	// V_ * B^{-1}(tau2) ... B^{-1}(tau1)
+				
+				prop_from_left(-1, tau, tpos, R_tau);	// B(tau1) ... B(tau2) *U_
+				prop_from_left(1, tau, tpos, L_tau);	// V_ * B^{-1}(tau2) ... B^{-1}(tau1)
+			}
+			else
+			{
+				// B^{-1} G B 
+				//prop_from_right(1, tpos, tau, g_tau);	//  B^{-1}(tau2) ... B^{-1}(tau1) * U_
+				//prop_from_right(-1, tpos, tau, g_tau);	//  V_ * B(tau1) ... B(tau2)
+				
+				prop_from_right(1, tpos, tau, R_tau);	//  B^{-1}(tau2) ... B^{-1}(tau1) * U_
+				prop_from_right(-1, tpos, tau, L_tau);	//  V_ * B(tau1) ... B(tau2)
+			}
+			tpos = tau;
+
+			//when we wrap to a new block we need to update storage 
+			if (new_block > old_block)
+			{// move to a larger block on the left
+				matrix_t UR = storage[old_block];
+				prop_from_left(-1, new_block*param.block_size, old_block*param.block_size, UR);
+				
+				//Eigen::JacobiSVD<matrix_t> svd(UR, Eigen::ComputeThinU);
+				//storage[new_block] = svd.matrixU();
+
+				qr_solver.compute(UR);
+				matrix_t p_q = matrix_t::Identity(UR.rows(), UR.cols());
+				storage[new_block] = qr_solver.matrixQ() * p_q;
+			}
+			else if (new_block < old_block)
+			{// move to smaller block
+				matrix_t VL = storage[old_block+1];
+				prop_from_right(-1, (old_block+1)*param.block_size, old_block*param.block_size, VL);
+				
+				//Eigen::JacobiSVD<matrix_t> svd(VL, Eigen::ComputeThinV);
+				//storage[new_block+1] = svd.matrixV().adjoint();
+
+				qr_solver.compute(VL.adjoint());
+				matrix_t p_q = matrix_t::Identity(VL.rows(), VL.cols());
+				storage[new_block+1] = p_q * qr_solver.matrixQ().adjoint();
+
+				//qr_solver.compute(VL);
+				//matrix_t r = qr_solver.matrixQR().template triangularView<Eigen::Upper>();
+				//storage[new_block+1] = r * qr_solver.colsPermutation().transpose();
+				//for (int i = 0; i < storage[new_block+1].rows(); ++i)
+				//	storage[new_block+1].row(i) = 1./qr_solver.matrixQR()(i, i) * storage[new_block+1].row(i);
+			}
+			stabilize();
+		}	
 		
 		double gij(const int si, const int sj) const
 		{	// current g in the site basis 
@@ -646,6 +713,8 @@ class green_function
 		
 		vlist_t vlist;
 		double tpos;
+		double norm_error_sum;
+		int norm_error_cnt;
 		
 		matrix_t g_tau;
 		matrix_t L_tau;

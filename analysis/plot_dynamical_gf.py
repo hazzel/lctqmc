@@ -5,9 +5,8 @@ import sys
 sys.path.append('/home/stephan/mc/ctqmc')
 sys.path.append("/net/home/lxtsfs1/tpc/hesselmann/mc/ctqmc")
 import numpy as np
-from cdecimal import *
 import matplotlib
-matplotlib.use('TkAgg')
+#matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import pylab
 from ParseDataOutput import *
@@ -28,24 +27,6 @@ def ExpSumFunction(x, a, b, c, d):
 
 def LinearFunction(x, a, b):
 	return a - b*x
-
-def combinatorial_factor(n, k):
-	prod = Decimal(1)
-	for j in range(n + 1):
-		if k != j:
-			kDec = Decimal(str(k))
-			jDec = Decimal(str(j))
-			prod *= (kDec + jDec) * (kDec - jDec)
-	return Decimal(1) / prod
-
-def estimator(n, beta, C, parity):
-	omega1 = Decimal(str((2. + (1.-parity)/2.) * np.pi / beta))
-	sum1 = Decimal(0)
-	sum2 = Decimal(0)
-	for k in range(n + 1):
-		sum1 += Decimal(str(k**2.)) * combinatorial_factor(n, k) * Decimal(str(C[k]))
-		sum2 += combinatorial_factor(n, k) * Decimal(str(C[k]))
-	return float(omega1 * abs(- sum1 / sum2).sqrt())
 
 def parse_ed_file(filename):
 	ed_data = []

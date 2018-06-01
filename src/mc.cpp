@@ -174,17 +174,16 @@ bool mc::is_thermalized()
 void mc::do_update()
 {
 	std::chrono::steady_clock::time_point t0, t1;
+	gf.wrap(0.5 * param.block_size);
 	for (int i = gf.tau() / param.block_size; i < param.theta / param.block_size; ++i)
 	{
 		t0 = std::chrono::steady_clock::now();
 		gf.wrap((i + 0.5) * param.block_size);
+		gf.rebuild();
+		//gf.wrap_and_stabilize((i + 0.5) * param.block_size);
 		t1 = std::chrono::steady_clock::now();
 		//std::cout << "Time of wrap: " << std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count() << std::endl;
 		
-		t0 = std::chrono::steady_clock::now();
-		gf.rebuild();
-		t1 = std::chrono::steady_clock::now();
-		//std::cout << "Time of rebuild: " << std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count() << std::endl;
 		if (is_thermalized())
 		{
 			qmc.do_measurement();
@@ -200,16 +199,25 @@ void mc::do_update()
 	}
 	for (int i = param.theta / param.block_size - 1; i >= 0; --i)
 	{
+		t0 = std::chrono::steady_clock::now();
 		gf.wrap((i + 0.5) * param.block_size);
 		gf.rebuild();
+		//gf.wrap_and_stabilize((i + 0.5) * param.block_size);
+		t1 = std::chrono::steady_clock::now();
+		//std::cout << "Time of wrap: " << std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count() << std::endl;
+
 		if (is_thermalized())
 		{
 			qmc.do_measurement();
 			qmc.trigger_event("_static measure");
 			qmc.trigger_event("dynamic measure");
 		}
+		t0 = std::chrono::steady_clock::now();
 		for (int n = 0; n < param.n_updates_per_block; ++n)
 			qmc.do_update();
+		t1 = std::chrono::steady_clock::now();
+		//std::cout << "Time of updates: " << std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count() << std::endl;
+		//std::cout << std::endl << "---" << std::endl;
 	}
 	
 	++sweep;

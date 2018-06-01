@@ -84,6 +84,7 @@ struct measure_M
 
 	void init()
 	{
+		measure.add_observable("avg_norm_error", param.n_prebin);
 		measure.add_observable("pert_order", param.n_prebin);
 		measure.add_observable("k_L k_R", param.n_prebin);
 		measure.add_observable("k_L", param.n_prebin);
@@ -99,6 +100,7 @@ struct measure_M
 			measure.add("k_L k_R", k_L * k_R);
 			measure.add("k_L", k_L);
 			measure.add("k_R", k_R);
+			measure.add("avg_norm_error", gf.reset_norm_error());
 		}
 	}
 

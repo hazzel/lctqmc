@@ -1,11 +1,11 @@
-SWEEPS = 5000
-warmup = 1000
+SWEEPS = 500
+warmup = 500
 prebin = 100
 
-L = 2
-theta = 80
+L = 8
+theta = 40
 block_size = 0.2
-updates_per_block = 10
+updates_per_block = 20
 static_measure_interval = 5
 
 dyn_tau_max = 10
