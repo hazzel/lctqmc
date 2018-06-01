@@ -6,7 +6,7 @@ sys.path.append('/home/stephan/mc/ctqmc')
 sys.path.append("/net/home/lxtsfs1/tpc/hesselmann/mc/ctqmc")
 import numpy as np
 import matplotlib
-#matplotlib.use('TkAgg')
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import pylab
 from ParseDataOutput import *
@@ -49,8 +49,8 @@ marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
 
 filelist = []
 
-filelist.append(glob.glob("../job/*.out"))
-#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*01.out"))
+#filelist.append(glob.glob("../job/*.out"))
+filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*01.out"))
 
 filelist.sort()
 
@@ -62,7 +62,7 @@ for f in filelist:
 	plist = ParseParameters(f)
 	elist = ParseEvalables(f)
 
-	obs = "M2"
+	obs = "tp"
 	if obs == "M2":
 		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{cdw}(\tau) O_{cdw}^{\dag} \right \rangle$", fontsize=16)
@@ -207,7 +207,7 @@ for f in filelist:
 			ax.plot(ed_tau, ed_data[ed_n], marker='o', color="r", markersize=10.0, linewidth=0.0, label=r'$L='+str(int(L))+'$')
 			#ax.plot(ed_tau, np.flipud(ed_data[ed_n]), marker='o', color="r", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+'$')
 		
-		
+		'''
 		j = 1
 		#f_min = 150; f_max = 300
 		f_min = 0
@@ -290,7 +290,7 @@ for f in filelist:
 			print "Delta * sqrt(N) = ", parameter[2] * (2.*L*L)**0.5, " +- ", perr[2]*(2.*L*L)**0.5
 			print "Delta = ", parameter[2], " +- ", perr[2]
 			print "------"
-		
+		'''
 		
 		'''
 		nmin = 100

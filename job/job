@@ -1,9 +1,9 @@
 SWEEPS = 500
-warmup = 500
-prebin = 100
+warmup = 5000
+prebin = 10
 
-L = 8
-theta = 40
+L = 4
+theta = 20
 block_size = 0.2
 updates_per_block = 20
 static_measure_interval = 5

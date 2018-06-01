@@ -586,8 +586,9 @@ class green_function
 			
 			for (int n = 1; n <= param.dyn_tau_steps/2; ++n)
 			{
-				wrap(tpos + param.direction * param.dyn_delta_tau);
-				rebuild();
+				//wrap(tpos + param.direction * param.dyn_delta_tau);
+				//rebuild();
+				wrap_and_stabilize(tpos + param.direction * param.dyn_delta_tau);
 				//et_gf_L[n] = g_tau;
 				calculate_gf(et_gf_L[n]);
 			}
@@ -596,8 +597,9 @@ class green_function
 			et_gf_R[0] = et_gf_0;
 			for (int n = 1; n <= param.dyn_tau_steps/2; ++n)
 			{
-				wrap(tpos + param.direction * param.dyn_delta_tau);
-				rebuild();
+				//wrap(tpos + param.direction * param.dyn_delta_tau);
+				//rebuild();
+				wrap_and_stabilize(tpos + param.direction * param.dyn_delta_tau);
 				//et_gf_R[n] = g_tau;
 				calculate_gf(et_gf_R[n]);
 			}

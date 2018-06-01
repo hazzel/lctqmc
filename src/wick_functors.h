@@ -46,6 +46,46 @@ struct wick_M2
 	}
 };
 
+/*
+// ep(tau) = sum_{<ij>,<mn>} <c_i^dag(tau) c_j(tau) c_n^dag c_m>
+struct wick_epsilon
+{
+	Random& rng;
+	parameters& param;
+	lattice& lat;
+
+	wick_epsilon(Random& rng_, parameters& param_, lattice& lat_)
+		: rng(rng_), param(param_), lat(lat_)
+	{}
+	
+	double get_obs(const matrix_t& et_gf_0, const matrix_t& et_gf_t,
+		const matrix_t& td_gf)
+	{
+		const numeric_t *ca_et_gf_0 = et_gf_0.data(), *ca_et_gf_t = et_gf_t.data(), *ca_td_gf = td_gf.data();
+		numeric_t ep = 0.;
+		auto& single_bonds = config.l.bonds("single_d1_bonds");
+		auto& bonds = config.l.bonds("nearest neighbors");
+		const int N = single_bonds.size(), M = bonds.size(), ns = config.l.n_sites();
+		for (int i = 0; i < N; ++i)
+		{
+			auto& a = single_bonds[i];
+			for (int j = 0; j < M; ++j)
+			{
+				auto& b = bonds[j];
+				
+				//ep += et_gf_t(a.second, a.first) * et_gf_0(b.first, b.second)
+				//	+ config.l.parity(a.first) * config.l.parity(b.first) * td_gf(a.first, b.first) * td_gf(a.second, b.second);
+				
+				ep += ca_et_gf_t[a.first*ns + a.second] * ca_et_gf_0[b.second*ns + b.first]
+					+ config.l.parity(a.first) * config.l.parity(b.first) * ca_td_gf[b.first*ns + a.first] * ca_td_gf[b.second*ns + a.second];
+				
+			}
+		}
+		return std::real(2.*ep) / std::pow(N, 2.);
+	}
+};
+*/
+
 // sp(tau) = sum_ij e^{-i K (r_i - r_j)} <c_i(tau) c_j^dag>
 struct wick_sp
 {
