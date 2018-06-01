@@ -258,7 +258,7 @@ class green_function
 			stabilize();
 			matrix_t g_stab;
 			calculate_gf(g_stab);
-			double err = (g_prev - g_stab).norm();
+			double err = (g_prev - g_stab).norm() / std::pow(lat.n_sites(), 2);
 			if (err > 1E-6)
 				std::cout << "Error (tau = " << tpos << "): " << err << std::endl;
 			norm_error_sum += err;

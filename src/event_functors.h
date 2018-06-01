@@ -136,6 +136,14 @@ struct event_dynamic_measurement
 		{
 			if (param.dyn_obs[i] == "M2")
 				add_wick(wick_M2{rng, param, lat}, param.dyn_obs[i]);
+			if (param.dyn_obs[i] == "epsilon")
+				add_wick(wick_epsilon{rng, param, lat}, param.dyn_obs[i]);
+			if (param.dyn_obs[i] == "kekule_s")
+				add_wick(wick_kekule_s{rng, param, lat}, param.dyn_obs[i]);
+			if (param.dyn_obs[i] == "kekule_as")
+				add_wick(wick_kekule_as{rng, param, lat}, param.dyn_obs[i]);
+			if (param.dyn_obs[i] == "gamma_mod")
+				add_wick(wick_gamma_mod{rng, param, lat}, param.dyn_obs[i]);
 			if (param.dyn_obs[i] == "sp")
 				add_wick(wick_sp{rng, param, lat}, param.dyn_obs[i]);
 			if (param.dyn_obs[i] == "tp")

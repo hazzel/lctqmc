@@ -49,8 +49,8 @@ marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
 
 filelist = []
 
-#filelist.append(glob.glob("../job/*.out"))
-filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*01.out"))
+filelist.append(glob.glob("../job/*.out"))
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*01.out"))
 
 filelist.sort()
 
@@ -62,7 +62,7 @@ for f in filelist:
 	plist = ParseParameters(f)
 	elist = ParseEvalables(f)
 
-	obs = "tp"
+	obs = "gamma_mod"
 	if obs == "M2":
 		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{cdw}(\tau) O_{cdw}^{\dag} \right \rangle$", fontsize=16)
@@ -72,7 +72,7 @@ for f in filelist:
 	elif obs == "epsilon_as":
 		ed_n = 3
 		ax.set_ylabel(r"$\left \langle O_{\epsilon_as}(\tau) O_{\epsilon_as}^{\dag} \right \rangle$", fontsize=16)
-	elif obs == "kekule":
+	elif obs == "kekule_s":
 		ed_n = 4
 		ax.set_ylabel(r"$\left \langle O_{kek}(\tau) O_{kek_s}^{\dag} \right \rangle$", fontsize=16)
 	elif obs == "kekule_as":
@@ -207,11 +207,11 @@ for f in filelist:
 			ax.plot(ed_tau, ed_data[ed_n], marker='o', color="r", markersize=10.0, linewidth=0.0, label=r'$L='+str(int(L))+'$')
 			#ax.plot(ed_tau, np.flipud(ed_data[ed_n]), marker='o', color="r", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+'$')
 		
-		'''
+		
 		j = 1
 		#f_min = 150; f_max = 300
 		f_min = 0
-		#f_max = 100
+		#f_max = 10
 		f_max = len(x_tau)-1
 		step = 1
 		fit_x = []
@@ -290,7 +290,7 @@ for f in filelist:
 			print "Delta * sqrt(N) = ", parameter[2] * (2.*L*L)**0.5, " +- ", perr[2]*(2.*L*L)**0.5
 			print "Delta = ", parameter[2], " +- ", perr[2]
 			print "------"
-		'''
+		
 		
 		'''
 		nmin = 100
