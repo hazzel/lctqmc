@@ -89,11 +89,13 @@ struct measure_M
 		measure.add_observable("k_L k_R", param.n_prebin);
 		measure.add_observable("k_L", param.n_prebin);
 		measure.add_observable("k_R", param.n_prebin);
+		measure.add_vectorobservable("dyn_Hv_tau", param.theta / param.block_size, param.n_prebin);
 	}
 	
 	void perform()
 	{
-		if (std::abs(gf.tau() - param.theta/2.+param.block_size/2) < 1E-6)
+		//if (std::abs(gf.tau() - param.theta/2.+param.block_size/2) < 1E-6)
+		if (std::abs(gf.tau() - param.theta/2.+param.block_size/2) < param.measure_window/2.)
 		{
 			unsigned k = gf.pert_order(), k_L = gf.pert_order(param.theta/2.), k_R = k - k_L;
 			measure.add("pert_order", k);
@@ -101,6 +103,8 @@ struct measure_M
 			measure.add("k_L", k_L);
 			measure.add("k_R", k_R);
 			measure.add("avg_norm_error", gf.reset_norm_error());
+			std::vector<double> hv_tau = gf.measure_Hv_tau();
+			measure.add("dyn_Hv_tau", hv_tau);
 		}
 	}
 

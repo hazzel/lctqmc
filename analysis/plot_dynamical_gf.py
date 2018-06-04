@@ -6,7 +6,7 @@ sys.path.append('/home/stephan/mc/ctqmc')
 sys.path.append("/net/home/lxtsfs1/tpc/hesselmann/mc/ctqmc")
 import numpy as np
 import matplotlib
-matplotlib.use('TkAgg')
+#matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import pylab
 from ParseDataOutput import *
@@ -17,7 +17,7 @@ from texify import *
 import scipy.integrate
 
 def FitFunctionL(x, a, b, c):
-	return b*np.exp(-c*x)
+	return b*np.exp(-c*x)+a
 
 def FitFunctionR(x, a, b, c):
 	return a + b*np.exp(c*x)
@@ -62,7 +62,7 @@ for f in filelist:
 	plist = ParseParameters(f)
 	elist = ParseEvalables(f)
 
-	obs = "gamma_mod"
+	obs = "M2"
 	if obs == "M2":
 		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{cdw}(\tau) O_{cdw}^{\dag} \right \rangle$", fontsize=16)
@@ -169,6 +169,15 @@ for f in filelist:
 		elif obs == "tp_mat":
 			y_tau = (np.array(ArrangePlot(elist[i], "dyn_tp_mat_0_tau")[0]) + np.array(ArrangePlot(elist[i], "dyn_tp_mat_3_tau")[0]))/2.
 			err_tau = np.sqrt(np.array(ArrangePlot(elist[i], "dyn_tp_mat_0_tau")[1])**2. + np.array(ArrangePlot(elist[i], "dyn_tp_mat_3_tau")[1])**2.)/2.
+		elif obs == "Hv":
+			y_tau = np.abs(y_tau[numpy.isfinite(y_tau)])
+			err_tau = err_tau[numpy.isfinite(err_tau)]
+
+			e = ArrangePlot(elist[i], "epsilon")[0][0]
+			s = ArrangePlot(elist[i], "epsilon")[1][0]
+			plt.axhline(e*e, color='r', linewidth=2.0, linestyle='--')
+			plt.axhline(e*e+2.*s*e, color='r', linewidth=1.0, linestyle='--')
+			plt.axhline(e*e-2.*s*e, color='r', linewidth=1.0, linestyle='--')
 		else:
 			y_tau = np.abs(y_tau[numpy.isfinite(y_tau)])
 			err_tau = err_tau[numpy.isfinite(err_tau)]
@@ -211,7 +220,7 @@ for f in filelist:
 		j = 1
 		#f_min = 150; f_max = 300
 		f_min = 0
-		#f_max = 10
+		#f_max = 15
 		f_max = len(x_tau)-1
 		step = 1
 		fit_x = []

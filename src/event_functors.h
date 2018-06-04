@@ -94,7 +94,7 @@ struct event_static_measurement
 			return;
 		++param.static_measure_cnt;
 		if (param.static_measure_cnt >= param.static_measure_interval)
-		if (std::abs(gf.tau() - param.theta/2.) < param.theta/8.)
+		if (std::abs(gf.tau() - param.theta/2.) < param.measure_window/2.)
 		{
 			//std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
 			gf.measure_static_observables(measure, names, obs, vec_names, vec_obs);

@@ -26,6 +26,7 @@ mc::mc(const std::string& dir)
 	
 	param.theta = pars.value_or_default<double>("theta", 40);
 	param.block_size = pars.value_or_default<double>("block_size", 0.25);
+	param.measure_window = pars.value_or_default<double>("measure_window", param.theta/4.);
 	param.dyn_tau_max = pars.value_or_default<double>("dyn_tau_max", 10);
 	param.dyn_delta_tau = pars.value_or_default<double>("dyn_delta_tau", 0.25);
 	param.dyn_tau_steps = static_cast<int>((param.dyn_tau_max / param.dyn_delta_tau) + 0.5);

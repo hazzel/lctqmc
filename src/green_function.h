@@ -96,8 +96,8 @@ class green_function
 		
 		unsigned int pert_order(double tau)
 		{
-			vlist_t::const_iterator lower = std::lower_bound(vlist.begin(), vlist.end(), tau, vertex::less_equal());	//equal is exclude
-			return lower - vlist.begin();
+			vlist_t::iterator lower = std::lower_bound(vlist.begin(), vlist.end(), tau, vertex::less_equal());	//equal is exclude
+			return std::distance(vlist.begin(), lower);
 		}
 		
 		double tau()
@@ -641,6 +641,31 @@ class green_function
 			L_tau = L_tau_buffer;
 			W_tau = W_tau_buffer;
 			storage = storage_buffer;
+		}
+
+		std::vector<double> measure_Hv_tau()
+		{
+			/*
+			std::vector<double> hv_tau(param.theta / param.block_size, 0.);
+			for(int i = 0; i < vlist.size(); ++i)
+				for(int j = i+1; j < vlist.size(); ++j)
+				{
+					int tau_block = (vlist[j].tau - vlist[i].tau) / param.dyn_delta_tau;
+					if (tau_block < hv_tau.size())
+						hv_tau[tau_block] += 1. / vlist.size();
+				}
+			*/
+
+			std::vector<double> hv_tau(param.theta / param.block_size, 0.);
+		    for (int i=0; i < param.theta / param.block_size; ++i)
+		    {
+        		auto lower = std::lower_bound(vlist.begin(), vlist.end(), i*param.block_size, vertex::less()); 
+        		auto upper = std::upper_bound(vlist.begin(), vlist.end(), (i+1)*param.block_size, vertex::less_equal());  //equal is exclude
+ 
+        		hv_tau[i] = 1.*std::distance(lower, upper) / param.V / param.V; //number of vertices in this block
+    		}
+
+			return hv_tau;
 		}
 		
 		void get_obs_values(std::vector<std::vector<double>>& dyn_tau, int tau,
