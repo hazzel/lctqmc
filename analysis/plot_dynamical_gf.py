@@ -6,7 +6,7 @@ sys.path.append('/home/stephan/mc/ctqmc')
 sys.path.append("/net/home/lxtsfs1/tpc/hesselmann/mc/ctqmc")
 import numpy as np
 import matplotlib
-#matplotlib.use('TkAgg')
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import pylab
 from ParseDataOutput import *
@@ -17,7 +17,7 @@ from texify import *
 import scipy.integrate
 
 def FitFunctionL(x, a, b, c):
-	return b*np.exp(-c*x)+a
+	return b*np.exp(-c*x)
 
 def FitFunctionR(x, a, b, c):
 	return a + b*np.exp(c*x)
@@ -49,10 +49,11 @@ marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
 
 filelist = []
 
-filelist.append(glob.glob("../job/*.out"))
-#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*01.out"))
+#filelist.append(glob.glob("../job/*.out"))
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*04.out"))
+filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/lctqmc_L7_theta40/*.out"))
 
-filelist.sort()
+filelist[0].sort()
 
 filelist = [item for sublist in filelist for item in sublist]
 figure, ax = plt.subplots(1, 1)
@@ -107,6 +108,9 @@ for f in filelist:
 		L = float(plist[i]["L"])
 		dtau = float(plist[i]["dyn_delta_tau"])
 		P = "1"
+		
+		#if h > 1.:
+		#	continue
 		
 		ed_glob = glob.glob("../../ctint/data/ed_rhom_" + "*_Lx_" + str(int(L)) + "*V_" + format(h, '.6f') + "*GS*__gc")
 		if len(ed_glob) == 0:
@@ -282,7 +286,7 @@ for f in filelist:
 			
 			#min = 0; nmax = 2*int(plist[i]["discrete_tau"])
 			nmin = fit_x[fit_re.index(min(np.abs(fit_re)))]; nmax = f_max
-			#nmin = 500; nmax = 800
+			#nmin = 25; nmax = 50
 			#parameter, perr = fit_function( [1., 6., 1.2], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
 			parameter, perr = fit_function( [0.1, 0.1, 1.], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
 			#parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[0.1, 0.1, 1.])
@@ -290,15 +294,14 @@ for f in filelist:
 			px = np.linspace(x_tau[nmin], x_tau[nmax], 1000)
 			ax.plot(px, FitFunctionL(px, *parameter), 'k-', linewidth=3.0)
 			
-			print "V = " + str(h)
-			print "Nmin = ", fit_x[fit_re.index(min(np.abs(fit_re)))], " Nmax = ", f_max
-			print "Delta * sqrt(N) = ", fit_y[fit_re.index(min(np.abs(fit_re)))], " +- ", fit_e[fit_re.index(min(np.abs(fit_re)))]
-			print "Delta = ", fit_y[fit_re.index(min(np.abs(fit_re)))]/(2.*L*L)**0.5, " +- ", fit_e[fit_re.index(min(np.abs(fit_re)))]/(2.*L*L)**0.5
-			#print "Delta * sqrt(N) = ", parameter[2] * (2.*L*L)**0.5, " +- ", perr[2,2]**0.5*(2.*L*L)**0.5
-			#print "Delta = ", parameter[2], " +- ", perr[2,2]**0.5
-			print "Delta * sqrt(N) = ", parameter[2] * (2.*L*L)**0.5, " +- ", perr[2]*(2.*L*L)**0.5
-			print "Delta = ", parameter[2], " +- ", perr[2]
-			print "------"
+			#print "V = " + str(h)
+			#print "Nmin = ", fit_x[fit_re.index(min(np.abs(fit_re)))], " Nmax = ", f_max
+			#print "Delta * sqrt(N) = ", fit_y[fit_re.index(min(np.abs(fit_re)))], " +- ", fit_e[fit_re.index(min(np.abs(fit_re)))]
+			#print "Delta = ", fit_y[fit_re.index(min(np.abs(fit_re)))]/(2.*L*L)**0.5, " +- ", fit_e[fit_re.index(min(np.abs(fit_re)))]/(2.*L*L)**0.5
+			#print "Delta * sqrt(N) = ", parameter[2] * (2.*L*L)**0.5, " +- ", perr[2]*(2.*L*L)**0.5
+			#print "Delta = ", parameter[2], " +- ", perr[2]
+			#print "------"
+			print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t" + str(round(perr[2] * (2.*L*L)**0.5, 2)) + "\t\t\t0\t\t0"
 		
 		
 		'''
