@@ -36,6 +36,8 @@ mc::mc(const std::string& dir)
 	param.t = pars.value_or_default<double>("t", 1.0);
 	param.tprime = pars.value_or_default<double>("tprime", 0.0);
 	param.stag_mu = pars.value_or_default<double>("stag_mu", 0.0);
+	param.inv_symmetry = pars.value_or_default<double>("inv_symmetry", 1.0);
+	param.epsilon = 1E-6;
 	
 	param.n_updates_per_block = pars.value_or_default<double>("updates_per_block", 1);
 	param.static_measure_interval = pars.value_or_default<double>("static_measure_interval", 1);
@@ -58,18 +60,14 @@ mc::mc(const std::string& dir)
 	honeycomb hc(param.L, param.L);
 	lat.generate_graph(hc);
 	hc.generate_maps(lat);
-	
-	green_function::matrix_t K = green_function::matrix_t::Zero(lat.n_sites(), lat.n_sites());
-	for (auto& a : lat.bonds("nearest neighbors"))
-		K(a.first, a.second) = -param.t;
-	for (auto& a : lat.bonds("t3_bonds"))
-		K(a.first, a.second) = -param.tprime;
-	gf.set_K_matrix(K);
 
 	//Set up events
+	qmc.add_event(event_set_trial_wf{rng, param, lat, gf}, "trial_wf");
 	qmc.add_event(event_build{rng, param, lat, gf}, "initial build");
 	qmc.add_event(event_static_measurement{rng, measure, param, lat, gf}, "_static measure");
 	qmc.add_event(event_dynamic_measurement{rng, measure, param, lat, gf}, "dynamic measure");
+	
+	qmc.trigger_event("trial_wf");
 
 	#ifdef PROFILER
 		ProfilerStart("/net/home/lxtsfs1/tpc/hesselmann/code/profiler/gperftools.prof");

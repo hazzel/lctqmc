@@ -49,9 +49,9 @@ marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
 
 filelist = []
 
-#filelist.append(glob.glob("../job/*.out"))
+filelist.append(glob.glob("../job/*.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*04.out"))
-filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/lctqmc_L7_theta40/*.out"))
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/lctqmc_L7_theta40/*.out"))
 
 filelist[0].sort()
 
@@ -63,7 +63,7 @@ for f in filelist:
 	plist = ParseParameters(f)
 	elist = ParseEvalables(f)
 
-	obs = "M2"
+	obs = "kekule_K"
 	if obs == "M2":
 		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{cdw}(\tau) O_{cdw}^{\dag} \right \rangle$", fontsize=16)
@@ -75,13 +75,13 @@ for f in filelist:
 		ax.set_ylabel(r"$\left \langle O_{\epsilon_as}(\tau) O_{\epsilon_as}^{\dag} \right \rangle$", fontsize=16)
 	elif obs == "kekule_s":
 		ed_n = 4
-		ax.set_ylabel(r"$\left \langle O_{kek}(\tau) O_{kek_s}^{\dag} \right \rangle$", fontsize=16)
+		ax.set_ylabel(r"$\left \langle O_{kek_s}(\tau) O_{kek_s}^{\dag} \right \rangle$", fontsize=16)
 	elif obs == "kekule_as":
 		ed_n = 5
-		ax.set_ylabel(r"$\left \langle O_{kek}(\tau) O_{kek_as}^{\dag} \right \rangle$", fontsize=16)
-	elif obs == "kekule_alpha":
+		ax.set_ylabel(r"$\left \langle O_{kek_as}(\tau) O_{kek_as}^{\dag} \right \rangle$", fontsize=16)
+	elif obs == "kekule_K":
 		ed_n = 6
-		ax.set_ylabel(r"$\left \langle O_{kek}(\tau) O_{kek_as}^{\dag} \right \rangle$", fontsize=16)
+		ax.set_ylabel(r"$\left \langle O_{kek_K}(\tau) O_{kek_K}^{\dag} \right \rangle$", fontsize=16)
 	elif obs == "chern":
 		ed_n = 7
 		ax.set_ylabel(r"$\left \langle O_{chern}(\tau) O_{chern}^{\dag} \right \rangle$", fontsize=16)

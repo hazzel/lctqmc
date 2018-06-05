@@ -94,8 +94,8 @@ struct measure_M
 	
 	void perform()
 	{
-		//if (std::abs(gf.tau() - param.theta/2.+param.block_size/2) < 1E-6)
-		if (std::abs(gf.tau() - param.theta/2.+param.block_size/2) < param.measure_window/2.)
+		if (std::abs(gf.tau() - param.theta/2.+param.block_size/2) < 1E-6)
+		//if (std::abs(gf.tau() - param.theta/2.+param.block_size/2) < param.measure_window/2.)
 		{
 			unsigned k = gf.pert_order(), k_L = gf.pert_order(param.theta/2.), k_R = k - k_L;
 			measure.add("pert_order", k);

@@ -180,6 +180,49 @@ struct wick_kekule_as
 	}
 };
 
+// kekule(tau) = sum_{kekule} <c_i^dag(tau) c_j(tau) c_n^dag c_m>
+struct wick_kekule_K
+{
+	Random& rng;
+	parameters& param;
+	lattice& lat;
+
+	wick_kekule_K(Random& rng_, parameters& param_, lattice& lat_)
+		: rng(rng_), param(param_), lat(lat_)
+	{}
+	
+	double get_obs(const matrix_t& et_gf_0, const matrix_t& et_gf_t,
+		const matrix_t& td_gf)
+	{
+		const numeric_t *ca_et_gf_0 = et_gf_0.data(), *ca_et_gf_t = et_gf_t.data(), *ca_td_gf = td_gf.data();
+		numeric_t kek = 0.;
+		auto& K = lat.symmetry_point("K");
+		//std::array<const std::vector<std::pair<int, int>>*, 3> nn_bonds =
+		//	{&lat.bonds("nn_bond_1"), &lat.bonds("nn_bond_2"), &lat.bonds("nn_bond_3")};
+		std::array<const std::vector<std::pair<int, int>>*, 1> nn_bonds = {&lat.bonds("nn_bond_2")};
+		
+		const int N = nn_bonds.size(), M = nn_bonds[0]->size(), ns = lat.n_sites();
+		for (int i = 0; i < N; ++i)
+			for (int j = 0; j < M; ++j)
+			{
+				auto& a = (*nn_bonds[i])[j];
+				auto& r_a = lat.real_space_coord(a.second);
+				//for (int m = 0; m < N; ++m)
+				for (int n = 0; n < M; ++n)
+				{
+					auto& b = (*nn_bonds[i])[n];
+					auto& r_b = lat.real_space_coord(b.second);
+					
+					double phase = std::cos(K.dot(r_a - r_b));
+					
+					kek += phase * (ca_et_gf_t[a.first*ns + a.second] * ca_et_gf_0[b.second*ns + b.first]
+						+ lat.parity(a.first) * lat.parity(b.first) * ca_td_gf[b.first*ns + a.first] * ca_td_gf[b.second*ns + a.second]);
+				}
+			}
+		return std::real(kek) / std::pow(lat.n_sites(), 2.);
+	}
+};
+
 struct wick_gamma_mod
 {
 	Random& rng;

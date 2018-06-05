@@ -71,15 +71,17 @@ class green_function
 			: rng(rng_), param(param_), lat(lat_), norm_error_sum(0.), norm_error_cnt(0)
 		{}
 		
-		void set_K_matrix(const matrix_t& K_)
+		void set_K_matrix(const matrix_t& K)
 		{
-			K = K_;
 			Eigen::SelfAdjointEigenSolver<matrix_t> solver(K);
 			wK = solver.eigenvalues(); 
 			uK = solver.eigenvectors();
 			uKdag = solver.eigenvectors().adjoint();
-			
-			uKdagP = uKdag * solver.eigenvectors().leftCols(lat.n_sites()/2);
+		}
+		
+		void set_trial_wf(const matrix_t& P)
+		{
+			uKdagP = uKdag * P;
 			
 			//Eigen::JacobiSVD<matrix_t> svd(uKdagP, Eigen::ComputeThinU);
 			//uKdagP = svd.matrixU();
@@ -87,6 +89,53 @@ class green_function
 			qr_solver.compute(uKdagP);
 			matrix_t p_q = matrix_t::Identity(uKdagP.rows(), uKdagP.cols());
 			uKdagP = qr_solver.matrixQ() * p_q;
+		}
+		
+		void initialize(double tau, const std::vector<vertex>& vlist_)
+		{
+			storage.resize(param.theta / param.block_size + 1);
+			tpos = tau;
+			vlist = vlist_;
+			
+			int block = tpos / param.block_size;
+			storage[0] = uKdagP;
+			
+			for (int i=0; i < block; ++i)
+			{
+				matrix_t UR = storage[i];
+				prop_from_left(-1, (i+1)*param.block_size, i*param.block_size, UR);
+
+				//Eigen::JacobiSVD<matrix_t> svd(UR, Eigen::ComputeThinU); 
+				//storage[i+1] = svd.matrixU();
+
+				qr_solver.compute(UR);
+				matrix_t p_q = matrix_t::Identity(UR.rows(), UR.cols());
+				storage[i+1] = qr_solver.matrixQ() * p_q;
+			}
+
+			storage.back() = uKdagP.adjoint();
+			for (int i = storage.size()-2; i>block; --i)
+			{
+				matrix_t VL = storage[i+1];
+				prop_from_right(-1, (i+1)*param.block_size, i*param.block_size, VL);
+				
+				//Eigen::JacobiSVD<matrix_t> svd(VL, Eigen::ComputeThinV); 
+				//storage[i] = svd.matrixV().adjoint();
+
+				qr_solver.compute(VL.adjoint());
+				matrix_t p_q = matrix_t::Identity(VL.rows(), VL.cols());
+				storage[i] = p_q * qr_solver.matrixQ().adjoint();
+
+				//qr_solver.compute(VL);
+				//matrix_t r = qr_solver.matrixQR().template triangularView<Eigen::Upper>();
+				//storage[i] = r * qr_solver.colsPermutation().transpose();
+				//for (int i = 0; i < storage[i].rows(); ++i)
+				//	storage[i].row(i) = 1./qr_solver.matrixQR()(i, i) * storage[i].row(i);
+			}
+			
+
+			//g_tau = g_stable();
+			stabilize();
 		}
 		
 		unsigned int pert_order()
@@ -192,53 +241,6 @@ class green_function
 				A.noalias() -= 2.* uKdag.col(si) * (uK.row(si)* A) + 2.* uKdag.col(sj) * (uK.row(sj)* A); 
 			else if (side == "R")
 				A.noalias() -= 2.* (A*uKdag.col(si))* uK.row(si) + 2.* (A*uKdag.col(sj)) * uK.row(sj);
-		}
-
-		void initialize(double tau, const std::vector<vertex>& vlist_)
-		{
-			storage.resize(param.theta / param.block_size + 1);
-			tpos = tau;
-			vlist = vlist_;
-			
-			int block = tpos / param.block_size;
-			storage[0] = uKdagP;
-			
-			for (int i=0; i < block; ++i)
-			{
-				matrix_t UR = storage[i];
-				prop_from_left(-1, (i+1)*param.block_size, i*param.block_size, UR);
-
-				//Eigen::JacobiSVD<matrix_t> svd(UR, Eigen::ComputeThinU); 
-				//storage[i+1] = svd.matrixU();
-
-				qr_solver.compute(UR);
-				matrix_t p_q = matrix_t::Identity(UR.rows(), UR.cols());
-				storage[i+1] = qr_solver.matrixQ() * p_q;
-			}
-
-			storage.back() = uKdagP.adjoint();
-			for (int i = storage.size()-2; i>block; --i)
-			{
-				matrix_t VL = storage[i+1];
-				prop_from_right(-1, (i+1)*param.block_size, i*param.block_size, VL);
-				
-				//Eigen::JacobiSVD<matrix_t> svd(VL, Eigen::ComputeThinV); 
-				//storage[i] = svd.matrixV().adjoint();
-
-				qr_solver.compute(VL.adjoint());
-				matrix_t p_q = matrix_t::Identity(VL.rows(), VL.cols());
-				storage[i] = p_q * qr_solver.matrixQ().adjoint();
-
-				//qr_solver.compute(VL);
-				//matrix_t r = qr_solver.matrixQR().template triangularView<Eigen::Upper>();
-				//storage[i] = r * qr_solver.colsPermutation().transpose();
-				//for (int i = 0; i < storage[i].rows(); ++i)
-				//	storage[i].row(i) = 1./qr_solver.matrixQR()(i, i) * storage[i].row(i);
-			}
-			
-
-			//g_tau = g_stable();
-			stabilize();
 		}
 		
 		void rebuild()
@@ -748,7 +750,6 @@ class green_function
 		matrix_t W_tau;
 		matrix_t R_tau;
 		
-		matrix_t K;
 		vector_t wK;
 		matrix_t uK;
 		matrix_t uKdag;
