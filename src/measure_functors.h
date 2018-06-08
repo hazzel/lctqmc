@@ -89,7 +89,7 @@ struct measure_M
 		measure.add_observable("k_L k_R", param.n_prebin);
 		measure.add_observable("k_L", param.n_prebin);
 		measure.add_observable("k_R", param.n_prebin);
-		measure.add_vectorobservable("dyn_Hv_tau", param.theta / param.block_size, param.n_prebin);
+		//measure.add_vectorobservable("dyn_Hv_tau", param.theta / param.block_size, param.n_prebin);
 	}
 	
 	void perform()
@@ -103,8 +103,8 @@ struct measure_M
 			measure.add("k_L", k_L);
 			measure.add("k_R", k_R);
 			measure.add("avg_norm_error", gf.reset_norm_error());
-			std::vector<double> hv_tau = gf.measure_Hv_tau();
-			measure.add("dyn_Hv_tau", hv_tau);
+			//std::vector<double> hv_tau = gf.measure_Hv_tau();
+			//measure.add("dyn_Hv_tau", hv_tau);
 		}
 	}
 
@@ -112,6 +112,10 @@ struct measure_M
 	{
 		double eval_param[] = {param.V};
 		measure.add_evalable("fidelity susceptibility", "k_L k_R", "k_L", "k_R", eval_fid_suscept, eval_param);
+		if (contains("M2") && contains("M4"))
+			measure.add_evalable("B_cdw", "M2", "M4", eval_B_cdw);
+		if (contains("M2") && contains("S_cdw_q"))
+			measure.add_evalable("R_cdw", "M2", "S_cdw_q", eval_R_cdw);
 		
 		os << "PARAMETERS" << std::endl;
 		pars.get_all(os);
@@ -120,7 +124,6 @@ struct measure_M
 	
 	bool contains(const std::string& name)
 	{
-		//return std::find(config.param.static_obs.begin(), config.param.static_obs.end(), name) != config.param.static_obs.end();
-		return false;
+		return std::find(param.static_obs.begin(), param.static_obs.end(), name) != param.static_obs.end();
 	}
 };

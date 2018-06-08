@@ -1,17 +1,23 @@
-SWEEPS = 10000
-warmup = 2000
+SWEEPS = 1000000
+warmup = 10000
 prebin = 100
 
-L = 2
-theta = 20
-block_size = 0.2
-updates_per_block = 20
-static_measure_interval = 5
+L = 6
 
-dyn_tau_max = 6
-dyn_delta_tau = 0.2
+theta = 40
+block_size = 0.1
+updates_per_block = 1
+rebuild_interval = 10
+static_measure_interval = 10
+
+dyn_tau_max = 10
+dyn_delta_tau = 0.1
 
 static_obs = energy,epsilon,M2,S_cdw_q,kekule
 obs = M2,epsilon,kekule_s,kekule_as,kekule_K,gamma_mod,sp,tp
 
+inv_symmetry = 1
+{V = 1.}
+
+inv_symmetry = -1
 {V = 1.}

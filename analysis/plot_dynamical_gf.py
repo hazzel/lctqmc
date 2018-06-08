@@ -49,8 +49,8 @@ marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
 
 filelist = []
 
-filelist.append(glob.glob("../job/*.out"))
-#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*04.out"))
+#filelist.append(glob.glob("../job/*.out"))
+filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/lctqmc_L7_theta40/*.out"))
 
 filelist[0].sort()
@@ -63,7 +63,7 @@ for f in filelist:
 	plist = ParseParameters(f)
 	elist = ParseEvalables(f)
 
-	obs = "kekule_K"
+	obs = "sp"
 	if obs == "M2":
 		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{cdw}(\tau) O_{cdw}^{\dag} \right \rangle$", fontsize=16)
@@ -107,12 +107,12 @@ for f in filelist:
 		theta = float(plist[i]["theta"])
 		L = float(plist[i]["L"])
 		dtau = float(plist[i]["dyn_delta_tau"])
-		P = "1"
+		P = plist[i]["inv_symmetry"]
 		
 		#if h > 1.:
 		#	continue
 		
-		ed_glob = glob.glob("../../ctint/data/ed_rhom_" + "*_Lx_" + str(int(L)) + "*V_" + format(h, '.6f') + "*GS*__gc")
+		ed_glob = glob.glob("../../ctint/data/ed_rhom_" + "*_Lx_" + str(int(L)) + "*V_" + format(h, '.6f') + "*GS*__c")
 		if len(ed_glob) == 0:
 			ed_glob = glob.glob("../../ctint/data/ed*_rhom_" + "*_Lx_" + str(int(L)) + "*V_" + format(h, '.6f') + "*GS*__gc")
 		#ed_glob = glob.glob("../../ctint/data/ed*" + "L_" + str(int(L)) + "*V_" + format(h, '.6f') + "*T_" + format(0.01, '.6f') + "*")
@@ -120,7 +120,7 @@ for f in filelist:
 		if len(ed_glob) > 0:
 			ed_file = open(ed_glob[0])
 			ed_data = parse_ed_file(ed_file)
-			n_ed_tau = int(ed_data[0][9])
+			n_ed_tau = int(ed_data[0][9]) 
 			n_ed_mat = int(ed_data[0][10])
 			ed_tau = np.linspace(0., n_ed_tau * 0.2, n_ed_tau + 1)
 		
@@ -134,20 +134,16 @@ for f in filelist:
 		err_tau = np.array(ArrangePlot(elist[i], "dyn_"+obs+"_tau")[1])
 
 		if obs == "epsilon":
-			#y_tau = np.abs((y_tau[numpy.isfinite(y_tau)] - (ArrangePlot(elist[i], "epsilon")[0][0])**2.))
-			#err_tau = np.sqrt(err_tau[numpy.isfinite(err_tau)]**2. + (2.*ArrangePlot(elist[i], "epsilon")[0][0]*ArrangePlot(elist[i], "epsilon")[1][0]**2.)**2.)
+			y_tau = np.abs((y_tau[numpy.isfinite(y_tau)] - (ArrangePlot(elist[i], "epsilon")[0][0])**2.))
+			err_tau = np.sqrt(err_tau[numpy.isfinite(err_tau)]**2. + (2.*ArrangePlot(elist[i], "epsilon")[0][0]*ArrangePlot(elist[i], "epsilon")[1][0]**2.)**2.)
 			
-			#y_tau = np.abs((y_tau[numpy.isfinite(y_tau)] - 0.23882))
+			#y_tau = np.abs(y_tau[numpy.isfinite(y_tau)])
 			#err_tau = err_tau[numpy.isfinite(err_tau)]
-			
-			
-			y_tau = np.abs(y_tau[numpy.isfinite(y_tau)])
-			err_tau = err_tau[numpy.isfinite(err_tau)]
-			e = ArrangePlot(elist[i], "epsilon")[0][0]
-			s = ArrangePlot(elist[i], "epsilon")[1][0]
-			plt.axhline(e*e, color='r', linewidth=2.0, linestyle='--')
-			plt.axhline(e*e+2.*s*e, color='r', linewidth=1.0, linestyle='--')
-			plt.axhline(e*e-2.*s*e, color='r', linewidth=1.0, linestyle='--')
+			#e = ArrangePlot(elist[i], "epsilon")[0][0]
+			#s = ArrangePlot(elist[i], "epsilon")[1][0]
+			#plt.axhline(e*e, color='r', linewidth=2.0, linestyle='--')
+			#plt.axhline(e*e+2.*s*e, color='r', linewidth=1.0, linestyle='--')
+			#plt.axhline(e*e-2.*s*e, color='r', linewidth=1.0, linestyle='--')
 			
 			
 			#y_tau = np.abs(ArrangePlot(elist[i], "dyn_epjack_tau")[0])
@@ -217,10 +213,10 @@ for f in filelist:
 
 		
 		if len(ed_glob) > 0 and len(ed_data) > ed_n:
-			ax.plot(ed_tau, ed_data[ed_n], marker='o', color="r", markersize=10.0, linewidth=0.0, label=r'$L='+str(int(L))+'$')
-			#ax.plot(ed_tau, np.flipud(ed_data[ed_n]), marker='o', color="r", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+'$')
+			ax.plot(ed_tau, ed_data[ed_n], marker='o', color="b", markersize=10.0, linewidth=0.0, label=r'$L='+str(int(L))+'$')
+			#ax.plot(ed_tau, np.flipud(ed_data[ed_n]), marker='o', color="b", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+'$')
 		
-		
+		'''
 		j = 1
 		#f_min = 150; f_max = 300
 		f_min = 0
@@ -301,12 +297,14 @@ for f in filelist:
 			#print "Delta * sqrt(N) = ", parameter[2] * (2.*L*L)**0.5, " +- ", perr[2]*(2.*L*L)**0.5
 			#print "Delta = ", parameter[2], " +- ", perr[2]
 			#print "------"
-			print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t" + str(round(perr[2] * (2.*L*L)**0.5, 2)) + "\t\t\t0\t\t0"
-		
-		
+			
+			#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t" + str(round(perr[2] * (2.*L*L)**0.5, 2)) + "\t\t\t0\t\t0"
+			print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2], 5)) + "\t\t" + str(round(perr[2], 2)) + "\t\t\t0\t\t0"
 		'''
-		nmin = 100
-		nmax = 159
+		
+		
+		nmin = 4
+		nmax = 50
 		
 		try:
 			parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[1., 0.0004, 0.8], method='trf')
@@ -319,7 +317,7 @@ for f in filelist:
 			print parameter[2], " +- ", np.sqrt(perr[2,2])
 		except RuntimeError:
 			print "run time error during fit"
-		'''
+		
 		
 		if len(ed_glob) > 0 and len(ed_data) > ed_n:
 			nmin = len(ed_tau) / 2

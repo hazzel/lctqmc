@@ -260,7 +260,7 @@ class green_function
 			stabilize();
 			matrix_t g_stab;
 			calculate_gf(g_stab);
-			double err = (g_prev - g_stab).norm() / std::pow(lat.n_sites(), 2);
+			double err = ((g_prev - g_stab).cwiseAbs()).maxCoeff();
 			if (err > 1E-6)
 				std::cout << "Error (tau = " << tpos << "): " << err << std::endl;
 			norm_error_sum += err;
@@ -345,92 +345,47 @@ class green_function
 				matrix_t UR = storage[old_block];
 				prop_from_left(-1, new_block*param.block_size, old_block*param.block_size, UR);
 				
-				//Eigen::JacobiSVD<matrix_t> svd(UR, Eigen::ComputeThinU);
-				//storage[new_block] = svd.matrixU();
+				if (param.wrap_refresh_cnt >= param.wrap_refresh_interval)
+				{
+					//Eigen::JacobiSVD<matrix_t> svd(UR, Eigen::ComputeThinU);
+					//storage[new_block] = svd.matrixU();
 
-				qr_solver.compute(UR);
-				matrix_t p_q = matrix_t::Identity(UR.rows(), UR.cols());
-				storage[new_block] = qr_solver.matrixQ() * p_q;
+					qr_solver.compute(UR);
+					matrix_t p_q = matrix_t::Identity(UR.rows(), UR.cols());
+					UR = qr_solver.matrixQ() * p_q;
+					
+					param.wrap_refresh_cnt = 0;
+				}
+				
+				storage[new_block] = UR;
 			}
 			else if (new_block < old_block)
 			{// move to smaller block
 				matrix_t VL = storage[old_block+1];
 				prop_from_right(-1, (old_block+1)*param.block_size, old_block*param.block_size, VL);
 				
-				//Eigen::JacobiSVD<matrix_t> svd(VL, Eigen::ComputeThinV);
-				//storage[new_block+1] = svd.matrixV().adjoint();
+				if (param.wrap_refresh_cnt >= param.wrap_refresh_interval)
+				{
+					//Eigen::JacobiSVD<matrix_t> svd(VL, Eigen::ComputeThinV);
+					//storage[new_block+1] = svd.matrixV().adjoint();
 
-				qr_solver.compute(VL.adjoint());
-				matrix_t p_q = matrix_t::Identity(VL.rows(), VL.cols());
-				storage[new_block+1] = p_q * qr_solver.matrixQ().adjoint();
+					qr_solver.compute(VL.adjoint());
+					matrix_t p_q = matrix_t::Identity(VL.rows(), VL.cols());
+					VL = p_q * qr_solver.matrixQ().adjoint();
 
-				//qr_solver.compute(VL);
-				//matrix_t r = qr_solver.matrixQR().template triangularView<Eigen::Upper>();
-				//storage[new_block+1] = r * qr_solver.colsPermutation().transpose();
-				//for (int i = 0; i < storage[new_block+1].rows(); ++i)
-				//	storage[new_block+1].row(i) = 1./qr_solver.matrixQR()(i, i) * storage[new_block+1].row(i);
+					//qr_solver.compute(VL);
+					//matrix_t r = qr_solver.matrixQR().template triangularView<Eigen::Upper>();
+					//storage[new_block+1] = r * qr_solver.colsPermutation().transpose();
+					//for (int i = 0; i < storage[new_block+1].rows(); ++i)
+					//	storage[new_block+1].row(i) = 1./qr_solver.matrixQR()(i, i) * storage[new_block+1].row(i);
+					
+					param.wrap_refresh_cnt = 0;
+				}
+				
+				storage[new_block+1] = VL;
 			}
+			++param.wrap_refresh_cnt;
 		}
-
-		void wrap_and_stabilize(double tau)
-		{
-			int old_block = tpos / param.block_size;
-			int new_block = tau / param.block_size;
-
-			//wrap Green's function 
-			if (tau >= tpos)
-			{
-				// B G B^{-1}
-				//prop_from_left(-1, tau, tpos, g_tau);	// B(tau1) ... B(tau2) *U_
-				//prop_from_left(1, tau, tpos, g_tau);	// V_ * B^{-1}(tau2) ... B^{-1}(tau1)
-				
-				prop_from_left(-1, tau, tpos, R_tau);	// B(tau1) ... B(tau2) *U_
-				prop_from_left(1, tau, tpos, L_tau);	// V_ * B^{-1}(tau2) ... B^{-1}(tau1)
-			}
-			else
-			{
-				// B^{-1} G B 
-				//prop_from_right(1, tpos, tau, g_tau);	//  B^{-1}(tau2) ... B^{-1}(tau1) * U_
-				//prop_from_right(-1, tpos, tau, g_tau);	//  V_ * B(tau1) ... B(tau2)
-				
-				prop_from_right(1, tpos, tau, R_tau);	//  B^{-1}(tau2) ... B^{-1}(tau1) * U_
-				prop_from_right(-1, tpos, tau, L_tau);	//  V_ * B(tau1) ... B(tau2)
-			}
-			tpos = tau;
-
-			//when we wrap to a new block we need to update storage 
-			if (new_block > old_block)
-			{// move to a larger block on the left
-				matrix_t UR = storage[old_block];
-				prop_from_left(-1, new_block*param.block_size, old_block*param.block_size, UR);
-				
-				//Eigen::JacobiSVD<matrix_t> svd(UR, Eigen::ComputeThinU);
-				//storage[new_block] = svd.matrixU();
-
-				qr_solver.compute(UR);
-				matrix_t p_q = matrix_t::Identity(UR.rows(), UR.cols());
-				storage[new_block] = qr_solver.matrixQ() * p_q;
-			}
-			else if (new_block < old_block)
-			{// move to smaller block
-				matrix_t VL = storage[old_block+1];
-				prop_from_right(-1, (old_block+1)*param.block_size, old_block*param.block_size, VL);
-				
-				//Eigen::JacobiSVD<matrix_t> svd(VL, Eigen::ComputeThinV);
-				//storage[new_block+1] = svd.matrixV().adjoint();
-
-				qr_solver.compute(VL.adjoint());
-				matrix_t p_q = matrix_t::Identity(VL.rows(), VL.cols());
-				storage[new_block+1] = p_q * qr_solver.matrixQ().adjoint();
-
-				//qr_solver.compute(VL);
-				//matrix_t r = qr_solver.matrixQR().template triangularView<Eigen::Upper>();
-				//storage[new_block+1] = r * qr_solver.colsPermutation().transpose();
-				//for (int i = 0; i < storage[new_block+1].rows(); ++i)
-				//	storage[new_block+1].row(i) = 1./qr_solver.matrixQR()(i, i) * storage[new_block+1].row(i);
-			}
-			stabilize();
-		}	
 		
 		double gij(const int si, const int sj) const
 		{	// current g in the site basis 
@@ -588,9 +543,9 @@ class green_function
 			
 			for (int n = 1; n <= param.dyn_tau_steps/2; ++n)
 			{
-				//wrap(tpos + param.direction * param.dyn_delta_tau);
-				//rebuild();
-				wrap_and_stabilize(tpos + param.direction * param.dyn_delta_tau);
+				wrap(tpos + param.direction * param.dyn_delta_tau);
+				stabilize();
+				//wrap_and_stabilize(tpos + param.direction * param.dyn_delta_tau);
 				//et_gf_L[n] = g_tau;
 				calculate_gf(et_gf_L[n]);
 			}
@@ -599,9 +554,9 @@ class green_function
 			et_gf_R[0] = et_gf_0;
 			for (int n = 1; n <= param.dyn_tau_steps/2; ++n)
 			{
-				//wrap(tpos + param.direction * param.dyn_delta_tau);
-				//rebuild();
-				wrap_and_stabilize(tpos + param.direction * param.dyn_delta_tau);
+				wrap(tpos + param.direction * param.dyn_delta_tau);
+				stabilize();
+				//wrap_and_stabilize(tpos + param.direction * param.dyn_delta_tau);
 				//et_gf_R[n] = g_tau;
 				calculate_gf(et_gf_R[n]);
 			}

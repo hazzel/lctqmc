@@ -84,6 +84,61 @@ struct wick_epsilon
 	}
 };
 
+struct wick_epsilon_as
+{
+	Random& rng;
+	parameters& param;
+	lattice& lat;
+
+	wick_epsilon_as(Random& rng_, parameters& param_, lattice& lat_)
+		: rng(rng_), param(param_), lat(lat_)
+	{}
+	
+	double get_obs(const matrix_t& et_gf_0, const matrix_t& et_gf_t,
+		const matrix_t& td_gf)
+	{
+		const numeric_t *ca_et_gf_0 = et_gf_0.data(), *ca_et_gf_t = et_gf_t.data(), *ca_td_gf = td_gf.data();
+		numeric_t ep = 0.;
+		std::vector<const std::vector<std::pair<int, int>>*> bonds =
+			{&lat.bonds("nn_bond_1"), &lat.bonds("nn_bond_2"),
+			&lat.bonds("nn_bond_3")};
+		
+		const int N = bonds.size(), M = bonds[0]->size(), ns = lat.n_sites();
+		for (int i = 0; i < N; ++i)
+			for (int j = 0; j < M; ++j)
+			{
+				auto& a = (*bonds[i])[j];
+				for (int m = 0; m < N; ++m)
+					for (int n = 0; n < M; ++n)
+					{
+						auto& b = (*bonds[m])[n];
+						
+						/*
+						ep += 2.*(et_gf_t(a.second, a.first) * et_gf_0(b.first, b.second)
+							+ lat.parity(a.first) * lat.parity(b.first) * td_gf(a.first, b.first) * td_gf(a.second, b.second));
+							
+						ep -= 2.*(et_gf_t(a.first, a.second) * et_gf_0(b.first, b.second)
+							+ lat.parity(a.second) * lat.parity(b.first) * td_gf(a.second, b.first) * td_gf(a.first, b.second));
+						*/
+						ep += 2.*(ca_et_gf_t[a.first*ns+a.second] * ca_et_gf_0[b.second*ns+b.first]
+							+ lat.parity(a.first) * lat.parity(b.first) * ca_td_gf[b.first*ns+a.first] * ca_td_gf[b.second*ns+a.second]);
+							
+						ep -= 2.*(ca_et_gf_t[a.second*ns+a.first] * ca_et_gf_0[b.second*ns+b.first]
+							+ lat.parity(a.second) * lat.parity(b.first) * ca_td_gf[b.first*ns+a.second] * ca_td_gf[b.second*ns+a.first]);
+						
+						/*
+						ep -= et_gf_t(a.second, a.first) * et_gf_0(b.second, b.first)
+							+ lat.parity(a.first) * lat.parity(b.second) * td_gf(a.first, b.second) * td_gf(a.second, b.first);
+							
+						ep += et_gf_t(a.first, a.second) * et_gf_0(b.second, b.first)
+							+ lat.parity(a.second) * lat.parity(b.second) * td_gf(a.second, b.second) * td_gf(a.first, b.first);
+						*/
+					}
+			}
+		return std::real(ep) / std::pow(N, 2.);
+	}
+};
+
 // kekule(tau) = sum_{kekule} <c_i^dag(tau) c_j(tau) c_n^dag c_m>
 struct wick_kekule_s
 {
@@ -359,6 +414,6 @@ struct wick_tp
 				tp += std::real(std::cos(kdot) * (ca_td_gf[i*N+m] * ca_td_gf[(j+1)*N+(n+1)] - ca_td_gf[i*N+(n+1)] * ca_td_gf[(j+1)*N+m]));
 			}
 		}
-		return tp;
+		return tp / static_cast<double>(N*N/4);
 	}
 };

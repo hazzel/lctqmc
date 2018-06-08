@@ -40,6 +40,10 @@ mc::mc(const std::string& dir)
 	param.epsilon = 1E-6;
 	
 	param.n_updates_per_block = pars.value_or_default<double>("updates_per_block", 1);
+	param.rebuild_interval = pars.value_or_default<double>("rebuild_interval", 10);
+	param.rebuild_cnt = 0;
+	param.wrap_refresh_interval = pars.value_or_default<double>("wrap_refresh_interval", 10);
+	param.wrap_refresh_cnt = 0;
 	param.static_measure_interval = pars.value_or_default<double>("static_measure_interval", 1);
 	param.static_measure_cnt = 0;
 
@@ -191,7 +195,10 @@ void mc::do_update()
 		}
 		t0 = std::chrono::steady_clock::now();
 		for (int n = 0; n < param.n_updates_per_block; ++n)
+		{
 			qmc.do_update();
+			rebuild();
+		}
 		t1 = std::chrono::steady_clock::now();
 		//std::cout << "Time of updates: " << std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count() << std::endl;
 		//std::cout << std::endl << "---" << std::endl;
@@ -200,7 +207,7 @@ void mc::do_update()
 	{
 		t0 = std::chrono::steady_clock::now();
 		gf.wrap((i + 0.5) * param.block_size);
-		gf.rebuild();
+		//gf.rebuild();
 		//gf.wrap_and_stabilize((i + 0.5) * param.block_size);
 		t1 = std::chrono::steady_clock::now();
 		//std::cout << "Time of wrap: " << std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count() << std::endl;
@@ -213,7 +220,10 @@ void mc::do_update()
 		}
 		t0 = std::chrono::steady_clock::now();
 		for (int n = 0; n < param.n_updates_per_block; ++n)
+		{
 			qmc.do_update();
+			rebuild();
+		}
 		t1 = std::chrono::steady_clock::now();
 		//std::cout << "Time of updates: " << std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count() << std::endl;
 		//std::cout << std::endl << "---" << std::endl;
@@ -231,4 +241,14 @@ void mc::status()
 	//	std::cout << "Thermalization done." << std::endl;
 	//if (is_thermalized() && sweep % (1000) == 0)
 	//	std::cout << "sweep: " << sweep << std::endl;
+}
+
+void mc::rebuild()
+{
+	++param.rebuild_cnt;
+	if (param.rebuild_cnt >= param.rebuild_interval)
+	{
+		gf.rebuild();
+		param.rebuild_cnt = 0;
+	}
 }
