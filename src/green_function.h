@@ -338,6 +338,7 @@ class green_function
 				prop_from_right(-1, tpos, tau, L_tau);	//  V_ * B(tau1) ... B(tau2)
 			}
 			tpos = tau;
+			++param.wrap_refresh_cnt;
 			
 			//when we wrap to a new block we need to update storage 
 			if (new_block > old_block)
@@ -384,7 +385,6 @@ class green_function
 				
 				storage[new_block+1] = VL;
 			}
-			++param.wrap_refresh_cnt;
 		}
 		
 		double gij(const int si, const int sj) const
@@ -406,7 +406,7 @@ class green_function
 			g_tau.noalias() -= (g_tau*uKdag.col(sj)) * ri/gij + (g_tau*uKdag.col(si)) * rj/gji; 
 			*/
 			
-			W_tau += ((W_tau * (L_tau* uKdag.col(sj))) * ((uK.row(si)*R_tau)*W_tau)) / gij + ((W_tau* (L_tau* uKdag.col(si))) * ((uK.row(sj)*R_tau)*W_tau)) / gji;
+			W_tau += ((W_tau * (L_tau*uKdag.col(sj))) * ((uK.row(si)*R_tau)*W_tau)) / gij + ((W_tau* (L_tau* uKdag.col(si))) * ((uK.row(sj)*R_tau)*W_tau)) / gji;
 			V_prop(si, sj, "L",  R_tau);
 		}
 		

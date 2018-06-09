@@ -6,7 +6,7 @@ sys.path.append('/home/stephan/mc/ctqmc')
 sys.path.append("/net/home/lxtsfs1/tpc/hesselmann/mc/ctqmc")
 import numpy as np
 import matplotlib
-matplotlib.use('TkAgg')
+#matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import pylab
 from ParseDataOutput import *
@@ -49,8 +49,8 @@ marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
 
 filelist = []
 
-#filelist.append(glob.glob("../job/*.out"))
-filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*.out"))
+filelist.append(glob.glob("../job/*.out"))
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/lctqmc_L7_theta40/*.out"))
 
 filelist[0].sort()
@@ -63,7 +63,7 @@ for f in filelist:
 	plist = ParseParameters(f)
 	elist = ParseEvalables(f)
 
-	obs = "sp"
+	obs = "epsilon_as"
 	if obs == "M2":
 		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{cdw}(\tau) O_{cdw}^{\dag} \right \rangle$", fontsize=16)
@@ -216,7 +216,7 @@ for f in filelist:
 			ax.plot(ed_tau, ed_data[ed_n], marker='o', color="b", markersize=10.0, linewidth=0.0, label=r'$L='+str(int(L))+'$')
 			#ax.plot(ed_tau, np.flipud(ed_data[ed_n]), marker='o', color="b", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+'$')
 		
-		'''
+		
 		j = 1
 		#f_min = 150; f_max = 300
 		f_min = 0
@@ -300,9 +300,9 @@ for f in filelist:
 			
 			#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t" + str(round(perr[2] * (2.*L*L)**0.5, 2)) + "\t\t\t0\t\t0"
 			print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2], 5)) + "\t\t" + str(round(perr[2], 2)) + "\t\t\t0\t\t0"
+		
+		
 		'''
-		
-		
 		nmin = 4
 		nmax = 50
 		
@@ -317,7 +317,7 @@ for f in filelist:
 			print parameter[2], " +- ", np.sqrt(perr[2,2])
 		except RuntimeError:
 			print "run time error during fit"
-		
+		'''
 		
 		if len(ed_glob) > 0 and len(ed_data) > ed_n:
 			nmin = len(ed_tau) / 2
