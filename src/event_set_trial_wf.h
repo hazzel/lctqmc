@@ -457,6 +457,8 @@ struct event_set_trial_wf
 		matrix_t tw = matrix_t::Zero(lat.n_sites(), lat.n_sites());
 		for (auto& a : lat.bonds("nearest neighbors"))
 			tw(a.first, a.second) = -param.t;
+		//for (auto& a : lat.bonds("t3_bonds"))
+		//	tw(a.first, a.second) = -param.tprime;
 		return tw;
 	}
 
@@ -483,6 +485,8 @@ struct event_set_trial_wf
 			ph_pm(i, i) = lat.parity(i);
 		}
 		
+		//std::cout << solver.eigenvalues() << std::endl;
+		
 		std::vector<numeric_t> total_quantum_numbers = {{1., 1., 1., 1., 1.}};
 		std::vector<numeric_t> ph_2p_parity(4);
 		std::vector<std::vector<int>> energy_levels = get_energy_levels(solver.eigenvalues());
@@ -491,6 +495,7 @@ struct event_set_trial_wf
 		
 		if (lat.n_sites() % 3 != 0)
 			P = S_f.leftCols(lat.n_sites()/2);
+			//P = solver.eigenvectors().leftCols(lat.n_sites()/2);
 		else
 		{
 			for (int i = 0; i < lat.n_sites()/2-2; ++i)

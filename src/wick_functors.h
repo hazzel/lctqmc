@@ -409,8 +409,8 @@ struct wick_tp
 			for (int n = 0; n < N; n+=2)
 			{
 				auto& r_n = lat.real_space_coord(n);
-				//double kdot = K.dot(r_i - r_j - r_m + r_n);
-				double kdot = K.dot(r_i - r_m) + Kp.dot(r_j - r_n);
+				double kdot = K.dot(r_i - r_j - r_m + r_n);
+				//double kdot = K.dot(r_i - r_m) + Kp.dot(r_j - r_n);
 				tp += std::real(std::cos(kdot) * (ca_td_gf[i*N+m] * ca_td_gf[(j+1)*N+(n+1)] - ca_td_gf[i*N+(n+1)] * ca_td_gf[(j+1)*N+m]));
 			}
 		}
