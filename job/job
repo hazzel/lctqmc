@@ -1,5 +1,5 @@
-SWEEPS = 10000000
-warmup = 5000
+SWEEPS = 0
+warmup = 0
 prebin = 1000
 
 L = 6
@@ -9,7 +9,7 @@ block_size = 0.1
 
 updates_per_block = 5
 rebuild_interval = 10
-wrap_refresh_interval = 10
+wrap_refresh_interval = 5
 
 static_measure_interval = 1
 

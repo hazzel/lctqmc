@@ -443,7 +443,7 @@ struct event_set_trial_wf
 	
 	matrix_t set_K_matrix()
 	{
-		green_function::matrix_t K = green_function::matrix_t::Zero(lat.n_sites(), lat.n_sites());
+		matrix_t K = matrix_t::Zero(lat.n_sites(), lat.n_sites());
 		for (auto& a : lat.bonds("nearest neighbors"))
 			K(a.first, a.second) = -param.t;
 		for (auto& a : lat.bonds("t3_bonds"))
@@ -451,13 +451,22 @@ struct event_set_trial_wf
 		gf.set_K_matrix(K);
 		return K;
 	}
+	
+	matrix_t set_twf_matrix()
+	{
+		matrix_t tw = matrix_t::Zero(lat.n_sites(), lat.n_sites());
+		for (auto& a : lat.bonds("nearest neighbors"))
+			tw(a.first, a.second) = -param.t;
+		return tw;
+	}
 
 	void trigger()
 	{
 		matrix_t K = set_K_matrix();
+		matrix_t tw = set_twf_matrix();
 		
 		matrix_t P;
-		Eigen::SelfAdjointEigenSolver<matrix_t> solver(K);
+		Eigen::SelfAdjointEigenSolver<matrix_t> solver(tw);
 		matrix_t inv_pm = matrix_t::Zero(lat.n_sites(), lat.n_sites()),
 			ph_pm = matrix_t::Zero(lat.n_sites(), lat.n_sites()),
 			rot60_pm = matrix_t::Zero(lat.n_sites(), lat.n_sites()),
