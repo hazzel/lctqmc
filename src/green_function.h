@@ -134,8 +134,8 @@ class green_function
 			}
 			
 
-			//g_tau = g_stable();
-			stabilize();
+			g_tau = g_stable();
+			//stabilize();
 		}
 		
 		unsigned int pert_order()
@@ -245,20 +245,20 @@ class green_function
 		
 		void rebuild()
 		{
-			/*
+			
 			matrix_t g_stab = g_stable();
-			double err = (g_tau - g_stab).norm();
+			double err = ((g_prev - g_stab).cwiseAbs()).maxCoeff();
 			g_tau = g_stab;
-			*/
 			
 			
+			/*
 			matrix_t g_prev;
 			calculate_gf(g_prev);
 			stabilize();
 			matrix_t g_stab;
 			calculate_gf(g_stab);
 			double err = ((g_prev - g_stab).cwiseAbs()).maxCoeff();
-			
+			*/
 			
 			if (err > 1E-6)
 				std::cout << "Error (tau = " << tpos << "): " << err << std::endl;
@@ -321,20 +321,20 @@ class green_function
 			if (tau >= tpos)
 			{
 				// B G B^{-1}
-				//prop_from_left(-1, tau, tpos, g_tau);	// B(tau1) ... B(tau2) *U_
-				//prop_from_left(1, tau, tpos, g_tau);	// V_ * B^{-1}(tau2) ... B^{-1}(tau1)
+				prop_from_left(-1, tau, tpos, g_tau);	// B(tau1) ... B(tau2) *U_
+				prop_from_left(1, tau, tpos, g_tau);	// V_ * B^{-1}(tau2) ... B^{-1}(tau1)
 				
-				prop_from_left(-1, tau, tpos, R_tau);	// B(tau1) ... B(tau2) *U_
-				prop_from_left(1, tau, tpos, L_tau);	// V_ * B^{-1}(tau2) ... B^{-1}(tau1)
+				//prop_from_left(-1, tau, tpos, R_tau);	// B(tau1) ... B(tau2) *U_
+				//prop_from_left(1, tau, tpos, L_tau);	// V_ * B^{-1}(tau2) ... B^{-1}(tau1)
 			}
 			else
 			{
 				// B^{-1} G B 
-				//prop_from_right(1, tpos, tau, g_tau);	//  B^{-1}(tau2) ... B^{-1}(tau1) * U_
-				//prop_from_right(-1, tpos, tau, g_tau);	//  V_ * B(tau1) ... B(tau2)
+				prop_from_right(1, tpos, tau, g_tau);	//  B^{-1}(tau2) ... B^{-1}(tau1) * U_
+				prop_from_right(-1, tpos, tau, g_tau);	//  V_ * B(tau1) ... B(tau2)
 				
-				prop_from_right(1, tpos, tau, R_tau);	//  B^{-1}(tau2) ... B^{-1}(tau1) * U_
-				prop_from_right(-1, tpos, tau, L_tau);	//  V_ * B(tau1) ... B(tau2)
+				//prop_from_right(1, tpos, tau, R_tau);	//  B^{-1}(tau2) ... B^{-1}(tau1) * U_
+				//prop_from_right(-1, tpos, tau, L_tau);	//  V_ * B(tau1) ... B(tau2)
 			}
 			tpos = tau;
 			++param.wrap_refresh_cnt;
@@ -389,24 +389,24 @@ class green_function
 		double gij(const int si, const int sj) const
 		{	// current g in the site basis 
 			// (U gtau U^{dagger} )_ij 
-			//return  (uK.row(si) * g_tau) * uKdag.col(sj);
+			return  (uK.row(si) * g_tau) * uKdag.col(sj);
 			
-			return (si==sj) ? 1.0 : 0.0 - (uK.row(si) * R_tau) *  W_tau * (L_tau*uKdag.col(sj));  
+			//return (si==sj) ? 1.0 : 0.0 - (uK.row(si) * R_tau) *  W_tau * (L_tau*uKdag.col(sj));  
 		}
 		
 		//update changes g_tau 
 		void update(const int si, const int sj, const double gij, const double gji)
 		{
-			/*
+			
 			//update g_tau
 			Eigen::RowVectorXd ri = uK.row(si) * g_tau - uK.row(si); 
 			Eigen::RowVectorXd rj = uK.row(sj) * g_tau - uK.row(sj); 
 
 			g_tau.noalias() -= (g_tau*uKdag.col(sj)) * ri/gij + (g_tau*uKdag.col(si)) * rj/gji; 
-			*/
 			
-			W_tau += ((W_tau * (L_tau*uKdag.col(sj))) * ((uK.row(si)*R_tau)*W_tau)) / gij + ((W_tau* (L_tau* uKdag.col(si))) * ((uK.row(sj)*R_tau)*W_tau)) / gji;
-			V_prop(si, sj, "L",  R_tau);
+			
+			//W_tau += ((W_tau * (L_tau*uKdag.col(sj))) * ((uK.row(si)*R_tau)*W_tau)) / gij + ((W_tau* (L_tau* uKdag.col(si))) * ((uK.row(sj)*R_tau)*W_tau)) / gji;
+			//V_prop(si, sj, "L",  R_tau);
 		}
 		
 		vertex generate_random_vertex()
@@ -502,11 +502,13 @@ class green_function
 			const std::vector<std::string>& vec_names,
 			const std::vector<vector_wick_static_base<matrix_t>>& vec_obs)
 		{
-			//matrix_t g_site = uK * g_tau * uKdag;
+			matrix_t g_site = uK * g_tau * uKdag;
 			
+			/*
 			matrix_t g_site;
 			calculate_gf(g_site);
 			g_site = uK * g_site * uKdag;
+			*/
 			
 			for (int i = 0; i < names.size(); ++i)
 				measure.add(names[i], obs[i].get_obs(g_site));
@@ -520,10 +522,10 @@ class green_function
 			const std::vector<vector_wick_base<matrix_t>>& vec_obs)
 		{
 			double tpos_buffer = tpos;
-			//matrix_t g_tau_buffer = g_tau;
-			matrix_t R_tau_buffer = R_tau;
-			matrix_t L_tau_buffer = L_tau;
-			matrix_t W_tau_buffer = W_tau;
+			matrix_t g_tau_buffer = g_tau;
+			//matrix_t R_tau_buffer = R_tau;
+			//matrix_t L_tau_buffer = L_tau;
+			//matrix_t W_tau_buffer = W_tau;
 			std::vector<matrix_t> storage_buffer = storage;
 			
 			std::vector<matrix_t> et_gf_L(param.dyn_tau_steps/2+1);
@@ -537,16 +539,16 @@ class green_function
 			else
 				param.direction = 1;
 
-			//et_gf_L[0] = g_tau;
-			calculate_gf(et_gf_L[0]);
+			et_gf_L[0] = g_tau;
+			//calculate_gf(et_gf_L[0]);
 			
 			for (int n = 1; n <= param.dyn_tau_steps/2; ++n)
 			{
 				wrap(tpos + param.direction * param.dyn_delta_tau);
 				stabilize();
-				//wrap_and_stabilize(tpos + param.direction * param.dyn_delta_tau);
-				//et_gf_L[n] = g_tau;
-				calculate_gf(et_gf_L[n]);
+				//rebuild();
+				et_gf_L[n] = g_tau;
+				//calculate_gf(et_gf_L[n]);
 			}
 
 			matrix_t& et_gf_0 = et_gf_L[param.dyn_tau_steps/2];
@@ -555,9 +557,9 @@ class green_function
 			{
 				wrap(tpos + param.direction * param.dyn_delta_tau);
 				stabilize();
-				//wrap_and_stabilize(tpos + param.direction * param.dyn_delta_tau);
-				//et_gf_R[n] = g_tau;
-				calculate_gf(et_gf_R[n]);
+				//rebuild();
+				et_gf_R[n] = g_tau;
+				//calculate_gf(et_gf_R[n]);
 			}
 			
 			get_obs_values(dyn_tau, 0, et_gf_0, et_gf_0, et_gf_0, obs, vec_obs);
@@ -592,10 +594,10 @@ class green_function
 			}
 			
 			tpos = tpos_buffer;
-			//g_tau = g_tau_buffer;
-			R_tau = R_tau_buffer;
-			L_tau = L_tau_buffer;
-			W_tau = W_tau_buffer;
+			g_tau = g_tau_buffer;
+			//R_tau = R_tau_buffer;
+			//L_tau = L_tau_buffer;
+			//W_tau = W_tau_buffer;
 			storage = storage_buffer;
 		}
 

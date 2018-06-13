@@ -69,7 +69,7 @@ for f in filelist:
 	plist = ParseParameters(f)
 	elist = ParseEvalables(f)
 
-	obs = "tp"
+	obs = "sp"
 	if obs == "M2":
 		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{cdw}(\tau) O_{cdw}^{\dag} \right \rangle$", fontsize=16)
