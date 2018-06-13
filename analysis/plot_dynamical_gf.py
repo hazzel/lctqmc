@@ -53,8 +53,9 @@ marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
 
 filelist = []
 
-#filelist.append(glob.glob("../job/*.out"))
-filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*.out"))
+filelist.append(glob.glob("../job/*1.out"))
+filelist.append(glob.glob("../job/*4.out"))
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/lctqmc_L7_theta40/*.out"))
 #filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/cluster_work/code/lctqmc/jobs/K_point/lctqmc_L6_theta40/*08.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/tprime=0.5/lctqmc_L6_tprime0.5_theta40/*.out"))

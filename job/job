@@ -1,8 +1,11 @@
-SWEEPS = 1000000
+SWEEPS = 100000
+warmup = 1000
 prebin = 256
 
-L = 6
+L = 9
 tprime = 0.5
+
+inv_symmetry = 1
 
 block_size = 0.1
 
@@ -10,26 +13,32 @@ updates_per_block = 2
 rebuild_interval = 10
 wrap_refresh_interval = 10
 
-static_measure_interval = 1
+static_measure_interval = 2
 
 dyn_tau_max = 5
 dyn_delta_tau = 0.1
 
 static_obs = energy,epsilon,M2,S_cdw_q,kekule
-obs = M2,epsilon,epsilon_as,kekule_s,kekule_as,kekule_K,gamma_mod,sp,tp,tp_mat
+obs = 
 
-inv_symmetry = 1
+trial_wave_function = t_only
 
 theta = 40
-
-warmup = 10
 {V = 0.2}
 
-warmup = 100
+theta = 80
 {V = 0.2}
 
-warmup = 1000
+theta = 160
 {V = 0.2}
 
-warmup = 10000
+trial_wave_function = t_and_tp
+
+theta = 40
+{V = 0.2}
+
+theta = 80
+{V = 0.2}
+
+theta = 160
 {V = 0.2}

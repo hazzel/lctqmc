@@ -64,6 +64,7 @@ class green_function
 	public:
 		using numeric_t = double;
 		using vector_t = Eigen::VectorXd;
+		using row_vector_t = Eigen::Matrix<numeric_t, 1, Eigen::Dynamic>;
 		using matrix_t = Eigen::Matrix<numeric_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>;
 		using vlist_t = std::vector<vertex>;
 
@@ -247,7 +248,7 @@ class green_function
 		{
 			
 			matrix_t g_stab = g_stable();
-			double err = ((g_prev - g_stab).cwiseAbs()).maxCoeff();
+			double err = ((g_tau - g_stab).cwiseAbs()).maxCoeff();
 			g_tau = g_stab;
 			
 			
@@ -269,7 +270,7 @@ class green_function
 		void calculate_gf(matrix_t& m)
 		{
 			m = matrix_t::Identity(lat.n_sites(), lat.n_sites());
-			m.noalias() -= R_tau * (W_tau * L_tau);
+			m.noalias() -= (R_tau * W_tau) * L_tau;
 		}
 		
 		matrix_t g_stable()
@@ -386,12 +387,22 @@ class green_function
 			}
 		}
 		
-		double gij(const int si, const int sj) const
+		double gij(const int si, const int sj)
 		{	// current g in the site basis 
 			// (U gtau U^{dagger} )_ij 
-			return  (uK.row(si) * g_tau) * uKdag.col(sj);
 			
-			//return (si==sj) ? 1.0 : 0.0 - (uK.row(si) * R_tau) *  W_tau * (L_tau*uKdag.col(sj));  
+			uK_si_gtau = uK.row(si) * g_tau;
+			return  uK_si_gtau * uKdag.col(sj);
+			
+			//return  (uK.row(si) * g_tau) * uKdag.col(sj);
+			
+			/*
+			uK_si_R_W = (uK.row(si) * R_tau) * W_tau;
+			L_uKdag_sj = L_tau * uKdag.col(sj);
+			return (si==sj) ? 1.0 : 0.0 - (uK_si_R_W * L_uKdag_sj);
+			
+			//return (si==sj) ? 1.0 : 0.0 - (uK.row(si)*R_tau) *  W_tau * (L_tau*uKdag.col(sj));  
+			*/
 		}
 		
 		//update changes g_tau 
@@ -399,14 +410,25 @@ class green_function
 		{
 			
 			//update g_tau
-			Eigen::RowVectorXd ri = uK.row(si) * g_tau - uK.row(si); 
-			Eigen::RowVectorXd rj = uK.row(sj) * g_tau - uK.row(sj); 
-
-			g_tau.noalias() -= (g_tau*uKdag.col(sj)) * ri/gij + (g_tau*uKdag.col(si)) * rj/gji; 
+			Eigen::RowVectorXd ri = uK_si_gtau - uK.row(si);
+			Eigen::RowVectorXd rj = uK.row(sj) * g_tau - uK.row(sj);
+			g_tau.noalias() -= (g_tau*uKdag.col(sj)) * ri / gij + (g_tau*uKdag.col(si)) * rj / gji;
 			
 			
-			//W_tau += ((W_tau * (L_tau*uKdag.col(sj))) * ((uK.row(si)*R_tau)*W_tau)) / gij + ((W_tau* (L_tau* uKdag.col(si))) * ((uK.row(sj)*R_tau)*W_tau)) / gji;
-			//V_prop(si, sj, "L",  R_tau);
+			/*
+			vector_t W_L_uKdag_sj = W_tau * L_uKdag_sj;
+			vector_t L_uKdag_si = L_tau * uKdag.col(si);
+			vector_t W_L_uKdag_si = W_tau * L_uKdag_si;
+			row_vector_t uK_sj_R_W = (uK.row(sj) * R_tau) * W_tau;
+			W_tau.noalias() += 1./gij * (W_L_uKdag_sj * uK_si_R_W);
+			W_tau.noalias() += 1./gji * (W_L_uKdag_si * uK_sj_R_W);
+			
+			//W_tau.noalias() += ((W_tau * L_uKdag_sj) * uK_si_R_W) / gij + ((W_tau * (L_tau*uKdag.col(si))) * ((uK.row(sj)*R_tau)*W_tau)) / gji;
+			
+			//W_tau.noalias() += ((W_tau * (L_tau*uKdag.col(sj))) * ((uK.row(si)*R_tau)*W_tau)) / gij + ((W_tau * (L_tau*uKdag.col(si))) * ((uK.row(sj)*R_tau)*W_tau)) / gji;
+			V_prop(si, sj, "L",  R_tau);
+			*/
+			
 		}
 		
 		vertex generate_random_vertex()
@@ -523,9 +545,9 @@ class green_function
 		{
 			double tpos_buffer = tpos;
 			matrix_t g_tau_buffer = g_tau;
-			//matrix_t R_tau_buffer = R_tau;
-			//matrix_t L_tau_buffer = L_tau;
-			//matrix_t W_tau_buffer = W_tau;
+			matrix_t R_tau_buffer = R_tau;
+			matrix_t L_tau_buffer = L_tau;
+			matrix_t W_tau_buffer = W_tau;
 			std::vector<matrix_t> storage_buffer = storage;
 			
 			std::vector<matrix_t> et_gf_L(param.dyn_tau_steps/2+1);
@@ -545,8 +567,9 @@ class green_function
 			for (int n = 1; n <= param.dyn_tau_steps/2; ++n)
 			{
 				wrap(tpos + param.direction * param.dyn_delta_tau);
-				stabilize();
-				//rebuild();
+				//stabilize();
+				if (n % param.wrap_refresh_interval == 0)
+					rebuild();
 				et_gf_L[n] = g_tau;
 				//calculate_gf(et_gf_L[n]);
 			}
@@ -556,8 +579,9 @@ class green_function
 			for (int n = 1; n <= param.dyn_tau_steps/2; ++n)
 			{
 				wrap(tpos + param.direction * param.dyn_delta_tau);
-				stabilize();
-				//rebuild();
+				//stabilize();
+				if (n % param.wrap_refresh_interval == 0)
+					rebuild();
 				et_gf_R[n] = g_tau;
 				//calculate_gf(et_gf_R[n]);
 			}
@@ -595,9 +619,9 @@ class green_function
 			
 			tpos = tpos_buffer;
 			g_tau = g_tau_buffer;
-			//R_tau = R_tau_buffer;
-			//L_tau = L_tau_buffer;
-			//W_tau = W_tau_buffer;
+			R_tau = R_tau_buffer;
+			L_tau = L_tau_buffer;
+			W_tau = W_tau_buffer;
 			storage = storage_buffer;
 		}
 
@@ -705,6 +729,10 @@ class green_function
 		matrix_t L_tau;
 		matrix_t W_tau;
 		matrix_t R_tau;
+		
+		row_vector_t uK_si_gtau;
+		row_vector_t uK_si_R_W;
+		vector_t L_uKdag_sj;
 		
 		vector_t wK;
 		matrix_t uK;
