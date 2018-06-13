@@ -1,15 +1,14 @@
-SWEEPS = 10000000
-warmup = 5000
-prebin = 1000
+SWEEPS = 1000000
+prebin = 256
 
 L = 6
 tprime = 0.5
 
 block_size = 0.1
 
-updates_per_block = 5
-rebuild_interval = 5
-wrap_refresh_interval = 5
+updates_per_block = 2
+rebuild_interval = 10
+wrap_refresh_interval = 10
 
 static_measure_interval = 1
 
@@ -21,17 +20,16 @@ obs = M2,epsilon,epsilon_as,kekule_s,kekule_as,kekule_K,gamma_mod,sp,tp,tp_mat
 
 inv_symmetry = 1
 
-theta = 10
-{V = 0.2}
-
-theta = 20
-{V = 0.2}
-
 theta = 40
+
+warmup = 10
 {V = 0.2}
 
-theta = 80
+warmup = 100
 {V = 0.2}
 
-theta = 160
+warmup = 1000
+{V = 0.2}
+
+warmup = 10000
 {V = 0.2}

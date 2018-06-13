@@ -445,9 +445,9 @@ struct event_set_trial_wf
 	{
 		matrix_t K = matrix_t::Zero(lat.n_sites(), lat.n_sites());
 		for (auto& a : lat.bonds("nearest neighbors"))
-			K(a.first, a.second) = -param.t;
+			K(a.first, a.second) += -param.t;
 		for (auto& a : lat.bonds("t3_bonds"))
-			K(a.first, a.second) = -param.tprime;
+			K(a.first, a.second) += -param.tprime;
 		gf.set_K_matrix(K);
 		return K;
 	}
@@ -455,10 +455,18 @@ struct event_set_trial_wf
 	matrix_t set_twf_matrix()
 	{
 		matrix_t tw = matrix_t::Zero(lat.n_sites(), lat.n_sites());
-		for (auto& a : lat.bonds("nearest neighbors"))
-			tw(a.first, a.second) = -param.t;
-		//for (auto& a : lat.bonds("t3_bonds"))
-		//	tw(a.first, a.second) = -param.tprime;
+		if (param.trial_wave_function == "t_only")
+		{
+			for (auto& a : lat.bonds("nearest neighbors"))
+				tw(a.first, a.second) += -param.t;
+		}
+		else
+		{
+			for (auto& a : lat.bonds("nearest neighbors"))
+				tw(a.first, a.second) += -param.t;
+			for (auto& a : lat.bonds("t3_bonds"))
+				tw(a.first, a.second) += -param.tprime;
+		}
 		return tw;
 	}
 

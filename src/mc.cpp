@@ -24,6 +24,7 @@ mc::mc(const std::string& dir)
 	n_warmup = pars.value_or_default<int>("warmup", 100000);
 	param.n_prebin = pars.value_or_default<int>("prebin", 500);
 	
+	param.trial_wave_function = pars.value_or_default<std::string>("trial_wave_function", "t_only");
 	param.theta = pars.value_or_default<double>("theta", 40);
 	param.block_size = pars.value_or_default<double>("block_size", 0.25);
 	param.measure_window = pars.value_or_default<double>("measure_window", param.theta/4.);
@@ -182,8 +183,7 @@ void mc::do_update()
 	{
 		t0 = std::chrono::steady_clock::now();
 		gf.wrap((i + 0.5) * param.block_size);
-		gf.rebuild();
-		//gf.wrap_and_stabilize((i + 0.5) * param.block_size);
+		//gf.rebuild();
 		t1 = std::chrono::steady_clock::now();
 		//std::cout << "Time of wrap: " << std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count() << std::endl;
 		
@@ -208,7 +208,6 @@ void mc::do_update()
 		t0 = std::chrono::steady_clock::now();
 		gf.wrap((i + 0.5) * param.block_size);
 		//gf.rebuild();
-		//gf.wrap_and_stabilize((i + 0.5) * param.block_size);
 		t1 = std::chrono::steady_clock::now();
 		//std::cout << "Time of wrap: " << std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count() << std::endl;
 

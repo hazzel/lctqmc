@@ -29,7 +29,7 @@ color_cycle = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'orange', 'darkgreen']
 marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
 
 list_of_files = []
-list_of_files += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/benchmark/L6-s-tprime=0.5-theta.txt")
+list_of_files += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/benchmark/L3-s-tprime=0.5-theta.txt")
 list_of_files.sort()
 cnt = 0
 

@@ -247,13 +247,10 @@ class green_function
 		{
 			/*
 			matrix_t g_stab = g_stable();
-
 			double err = (g_tau - g_stab).norm();
-			if (err > 1E-6)
-				std::cout << "Error (tau = " << tpos << "): " << err << std::endl;
-
 			g_tau = g_stab;
 			*/
+			
 			
 			matrix_t g_prev;
 			calculate_gf(g_prev);
@@ -261,6 +258,8 @@ class green_function
 			matrix_t g_stab;
 			calculate_gf(g_stab);
 			double err = ((g_prev - g_stab).cwiseAbs()).maxCoeff();
+			
+			
 			if (err > 1E-6)
 				std::cout << "Error (tau = " << tpos << "): " << err << std::endl;
 			norm_error_sum += err;
@@ -287,7 +286,7 @@ class green_function
 			for (int l = 0; l < lat.n_sites(); ++l)
 				res(l, l) += 1.0;
 
-			return res; 
+			return res;
 		}
 		
 		void stabilize()
