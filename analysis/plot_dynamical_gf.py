@@ -53,9 +53,8 @@ marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
 
 filelist = []
 
-filelist.append(glob.glob("../job/*1.out"))
-filelist.append(glob.glob("../job/*4.out"))
-#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*.out"))
+#filelist.append(glob.glob("../job/*1.out"))
+filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/lctqmc_L7_theta40/*.out"))
 #filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/cluster_work/code/lctqmc/jobs/K_point/lctqmc_L6_theta40/*08.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/tprime=0.5/lctqmc_L6_tprime0.5_theta40/*.out"))
@@ -70,7 +69,7 @@ for f in filelist:
 	plist = ParseParameters(f)
 	elist = ParseEvalables(f)
 
-	obs = "sp"
+	obs = "chern"
 	if obs == "M2":
 		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{cdw}(\tau) O_{cdw}^{\dag} \right \rangle$", fontsize=16)
@@ -120,6 +119,7 @@ for f in filelist:
 		#	continue
 		
 		ed_glob = glob.glob("../../ctint/data/ed_rhom_" + "*_Lx_" + str(int(L)) + "*V_" + format(h, '.6f') + "*GS*__c")
+		ed_glob = []
 		if len(ed_glob) == 0:
 			ed_glob = glob.glob("../../ctint/data/ed*_rhom_" + "*_Lx_" + str(int(L)) + "*V_" + format(h, '.6f') + "*GS*__gc")
 		#ed_glob = glob.glob("../../ctint/data/ed*" + "L_" + str(int(L)) + "*V_" + format(h, '.6f') + "*T_" + format(0.01, '.6f') + "*")
@@ -141,16 +141,16 @@ for f in filelist:
 		err_tau = np.array(ArrangePlot(elist[i], "dyn_"+obs+"_tau")[1])
 
 		if obs == "epsilon":
-			y_tau = np.abs((y_tau[numpy.isfinite(y_tau)] - (ArrangePlot(elist[i], "epsilon")[0][0])**2.))
-			err_tau = np.sqrt(err_tau[numpy.isfinite(err_tau)]**2. + (2.*ArrangePlot(elist[i], "epsilon")[0][0]*ArrangePlot(elist[i], "epsilon")[1][0]**2.)**2.)
+			#y_tau = np.abs((y_tau[numpy.isfinite(y_tau)] - (ArrangePlot(elist[i], "epsilon")[0][0])**2.))
+			#err_tau = np.sqrt(err_tau[numpy.isfinite(err_tau)]**2. + (2.*ArrangePlot(elist[i], "epsilon")[0][0]*ArrangePlot(elist[i], "epsilon")[1][0]**2.)**2.)
 			
-			#y_tau = np.abs(y_tau[numpy.isfinite(y_tau)])
-			#err_tau = err_tau[numpy.isfinite(err_tau)]
-			#e = ArrangePlot(elist[i], "epsilon")[0][0]
-			#s = ArrangePlot(elist[i], "epsilon")[1][0]
-			#plt.axhline(e*e, color='r', linewidth=2.0, linestyle='--')
-			#plt.axhline(e*e+2.*s*e, color='r', linewidth=1.0, linestyle='--')
-			#plt.axhline(e*e-2.*s*e, color='r', linewidth=1.0, linestyle='--')
+			y_tau = np.abs(y_tau[numpy.isfinite(y_tau)])
+			err_tau = err_tau[numpy.isfinite(err_tau)]
+			e = ArrangePlot(elist[i], "epsilon")[0][0]
+			s = ArrangePlot(elist[i], "epsilon")[1][0]
+			plt.axhline(e*e, color='r', linewidth=2.0, linestyle='--')
+			plt.axhline(e*e+2.*s*e, color='r', linewidth=1.0, linestyle='--')
+			plt.axhline(e*e-2.*s*e, color='r', linewidth=1.0, linestyle='--')
 			
 			
 			#y_tau = np.abs(ArrangePlot(elist[i], "dyn_epjack_tau")[0])

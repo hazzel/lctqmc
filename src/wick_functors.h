@@ -347,6 +347,45 @@ struct wick_gamma_mod
 	}
 };
 
+// chern(tau) = sum_{chern} <c_i^dag(tau) c_j(tau) c_n^dag c_m>
+struct wick_chern
+{
+	Random& rng;
+	parameters& param;
+	lattice& lat;
+
+	wick_chern(Random& rng_, parameters& param_, lattice& lat_)
+		: rng(rng_), param(param_), lat(lat_)
+	{}
+	
+	double get_obs(const matrix_t& et_gf_0, const matrix_t& et_gf_t,
+		const matrix_t& td_gf)
+	{
+		const numeric_t *ca_et_gf_0 = et_gf_0.data(), *ca_et_gf_t = et_gf_t.data(), *ca_td_gf = td_gf.data();
+		numeric_t ch = 0.;
+		auto& bonds_c1 = lat.bonds("chern");
+		auto& bonds_c2 = lat.bonds("chern");
+		const int N = bonds_c1.size(), ns = lat.n_sites();
+		for (int i = 0; i < N; ++i)
+			for (int j = 0; j < N; ++j)
+			{
+				auto& a = bonds_c1[i];
+				auto& b = bonds_c2[j];
+				
+				ch += ca_et_gf_t[a.first*ns+a.second] * ca_et_gf_0[b.second*ns+b.first]
+					+ lat.parity(a.first) * lat.parity(b.first) * ca_td_gf[b.first*ns+a.first] * ca_td_gf[b.second*ns+a.second];
+				ch -= ca_et_gf_t[a.second*ns+a.first] * ca_et_gf_0[b.second*ns+b.first]
+					+ lat.parity(a.second) * lat.parity(b.first) * ca_td_gf[b.first*ns+a.second] * ca_td_gf[b.second*ns+a.first];
+				ch -= ca_et_gf_t[a.first*ns+a.second] * ca_et_gf_0[b.first*ns+b.second]
+					+ lat.parity(a.first) * lat.parity(b.second) * ca_td_gf[b.second*ns+a.first] * ca_td_gf[b.first*ns+a.second];
+				ch += ca_et_gf_t[a.second*ns+a.first] * ca_et_gf_0[b.first*ns+b.second]
+					+ lat.parity(a.second) * lat.parity(b.second) * ca_td_gf[b.second*ns+a.second] * ca_td_gf[b.first*ns+a.first];
+			}
+		return std::real(ch) / std::pow(lat.n_bonds(), 2.);
+	}
+};
+
+
 // sp(tau) = sum_ij e^{-i K (r_i - r_j)} <c_i(tau) c_j^dag>
 struct wick_sp
 {

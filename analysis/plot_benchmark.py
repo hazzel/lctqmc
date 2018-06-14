@@ -42,13 +42,15 @@ for filename in list_of_files:
 		data = np.loadtxt(new_del, delimiter=',', skiprows=0)
 
 	fig, ax1 = plt.subplots()
+	print filename.split("/")[-1].replace("_", "-")
+	plt.title(r"$\text{" + filename.split("/")[-1].replace("_", "-") + "}$")
 
 	ax1.plot( data[:,0], data[:,1], marker="o", color="b", markersize=10.0, linewidth=2.0, label=r"E")
 	(_, caps, _) = ax1.errorbar(data[:,0], data[:,1], yerr=data[:,2], marker='None', capsize=8, color="b", linewidth=0.0, )
 	for cap in caps:
 		cap.set_markeredgewidth(1.6)
 		
-	parameter, perr = scipy.optimize.curve_fit( FitFunction, data[:,0], data[:,1], p0=[0.1, 0.1, 1.], method='trf')
+	#parameter, perr = scipy.optimize.curve_fit( FitFunction, data[:,0], data[:,1], p0=[0.1, 0.1, 1.], method='trf')
 	
 	ax2 = ax1.twinx()
 	ax2.plot( data[:,0], data[:,3], marker="o", color="g", markersize=10.0, linewidth=2.0, label=r"$R_{\text{cdw}}$")

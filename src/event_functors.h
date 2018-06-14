@@ -108,7 +108,7 @@ struct event_static_measurement
 	void init()
 	{
 		for (int i = 0; i < obs.size(); ++i)
-			measure.add_observable(names[i], param.n_prebin / param.static_measure_interval * param.measure_window / param.block_size);
+			measure.add_observable(names[i], param.n_prebin * (param.measure_window / param.block_size) / param.static_measure_interval);
 	}
 };
 
@@ -149,6 +149,8 @@ struct event_dynamic_measurement
 				add_wick(wick_kekule_K{rng, param, lat}, param.dyn_obs[i]);
 			if (param.dyn_obs[i] == "gamma_mod")
 				add_wick(wick_gamma_mod{rng, param, lat}, param.dyn_obs[i]);
+			if (param.dyn_obs[i] == "chern")
+				add_wick(wick_chern{rng, param, lat}, param.dyn_obs[i]);
 			if (param.dyn_obs[i] == "sp")
 				add_wick(wick_sp{rng, param, lat}, param.dyn_obs[i]);
 			if (param.dyn_obs[i] == "tp")
