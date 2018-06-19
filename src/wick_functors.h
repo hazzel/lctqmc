@@ -453,6 +453,6 @@ struct wick_tp
 				tp += std::real(std::cos(kdot) * (ca_td_gf[i*N+m] * ca_td_gf[(j+1)*N+(n+1)] - ca_td_gf[i*N+(n+1)] * ca_td_gf[(j+1)*N+m]));
 			}
 		}
-		return tp / static_cast<double>(N*N/4);
+		return tp / static_cast<double>(N/2);
 	}
 };

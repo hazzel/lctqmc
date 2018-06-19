@@ -53,9 +53,9 @@ marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
 
 filelist = []
 
-#filelist.append(glob.glob("../job/*1.out"))
-filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*.out"))
-#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/lctqmc_L7_theta40/*.out"))
+filelist.append(glob.glob("../job/*.out"))
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*.out"))
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/lctqmc_L14_theta40/*0010.out"))
 #filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/cluster_work/code/lctqmc/jobs/K_point/lctqmc_L6_theta40/*08.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/tprime=0.5/lctqmc_L6_tprime0.5_theta40/*.out"))
 
@@ -69,7 +69,7 @@ for f in filelist:
 	plist = ParseParameters(f)
 	elist = ParseEvalables(f)
 
-	obs = "chern"
+	obs = "tp"
 	if obs == "M2":
 		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{cdw}(\tau) O_{cdw}^{\dag} \right \rangle$", fontsize=16)
@@ -113,7 +113,7 @@ for f in filelist:
 		theta = float(plist[i]["theta"])
 		L = float(plist[i]["L"])
 		dtau = float(plist[i]["dyn_delta_tau"])
-		P = plist[i]["inv_symmetry"]
+		P = "1" #plist[i]["inv_symmetry"]
 		
 		#if h > 1.:
 		#	continue
@@ -227,7 +227,7 @@ for f in filelist:
 		j = 1
 		#f_min = 150; f_max = 300
 		f_min = 0
-		#f_max = 15
+		#f_max = 25
 		f_max = len(x_tau)-1
 		step = 1
 		fit_x = []
@@ -289,7 +289,7 @@ for f in filelist:
 			
 			#min = 0; nmax = 2*int(plist[i]["discrete_tau"])
 			nmin = fit_x[fit_re.index(min(np.abs(fit_re)))]; nmax = f_max
-			#nmin = 25; nmax = 50
+			#nmin = 5; nmax = 25
 			#parameter, perr = fit_function( [1., 6., 1.2], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
 			parameter, perr = fit_function( [0.1, 0.1, 1.], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
 			#parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[0.1, 0.1, 1.])
@@ -305,12 +305,12 @@ for f in filelist:
 			#print "Delta = ", parameter[2], " +- ", perr[2]
 			#print "------"
 			
-			#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t" + str(round(perr[2] * (2.*L*L)**0.5, 2)) + "\t\t\t0\t\t0"
-			print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2], 5)) + "\t\t" + str(round(perr[2], 2)) + "\t\t\t0\t\t0"
+			print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2] * (2.*L*L)**0.5, 2))
+			#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2], 5)) + "\t\t" + str(round(perr[2], 2))
 		
 		
 		'''
-		nmin = 4
+		nmin = 35
 		nmax = 50
 		
 		try:
@@ -318,10 +318,11 @@ for f in filelist:
 			px = np.linspace(x_tau[nmin], x_tau[nmax], 1000)
 			ax.plot(px, FitFunctionL(px, *parameter), 'k-', linewidth=3.0)
 			
-			print "V = " + str(h)
-			print parameter
-			print parameter[2] * (2.*L*L)**0.5, " +- ", np.sqrt(perr[2,2]) * (2.*L*L)**0.5
-			print parameter[2], " +- ", np.sqrt(perr[2,2])
+			#print "V = " + str(h)
+			#print parameter
+			#print parameter[2] * (2.*L*L)**0.5, " +- ", np.sqrt(perr[2,2]) * (2.*L*L)**0.5
+			#print parameter[2], " +- ", np.sqrt(perr[2,2])
+			print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2,2]**0.5 * (2.*L*L)**0.5, 2))
 		except RuntimeError:
 			print "run time error during fit"
 		'''
