@@ -47,10 +47,12 @@ struct wick_tp_matrix
 					for (int v = 0; v < 2; ++v)
 					{
 						auto& r_n = lat.real_space_coord(n);
-						//double kdot = K.dot(r_i - r_j - r_m + r_n);
-						double kdot = K.dot(r_i - r_m) + Kp.dot(r_j - r_n);
-						values[u*2+v] += std::real(std::cos(kdot) * (ca_td_gf[(i+u)*N+(m+u)] * ca_td_gf[(j+v)*N+(n+v)] - ca_td_gf[(i+u)*N+(n+v)] * ca_td_gf[(j+v)*N+(m+u)])
-							/ static_cast<double>(N*N/4));
+						double kdot;
+						if (param.L % 3 == 0)
+							kdot = K.dot(r_i - r_j - r_m + r_n);
+						else
+							kdot = K.dot(r_i - r_m) + Kp.dot(r_j - r_n);
+						values[u*2+v] += std::real(std::cos(kdot) * (ca_td_gf[(i+u)*N+(m+u)] * ca_td_gf[(j+v)*N+(n+v)] - ca_td_gf[(i+u)*N+(n+v)] * ca_td_gf[(j+v)*N+(m+u)]));
 					}
 			}
 		return values;

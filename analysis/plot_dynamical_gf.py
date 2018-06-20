@@ -53,7 +53,7 @@ marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
 
 filelist = []
 
-filelist.append(glob.glob("../job/*.out"))
+filelist.append(glob.glob("../job/*1.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/lctqmc_L14_theta40/*0010.out"))
 #filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/cluster_work/code/lctqmc/jobs/K_point/lctqmc_L6_theta40/*08.out"))
@@ -69,7 +69,7 @@ for f in filelist:
 	plist = ParseParameters(f)
 	elist = ParseEvalables(f)
 
-	obs = "tp"
+	obs = "chern"
 	if obs == "M2":
 		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{cdw}(\tau) O_{cdw}^{\dag} \right \rangle$", fontsize=16)
@@ -305,8 +305,8 @@ for f in filelist:
 			#print "Delta = ", parameter[2], " +- ", perr[2]
 			#print "------"
 			
-			print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2] * (2.*L*L)**0.5, 2))
-			#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2], 5)) + "\t\t" + str(round(perr[2], 2))
+			#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2] * (2.*L*L)**0.5, 2))
+			print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2], 5)) + "\t\t" + str(round(perr[2], 2))
 		
 		
 		'''

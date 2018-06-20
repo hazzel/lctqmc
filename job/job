@@ -1,8 +1,7 @@
-SWEEPS = 10000
+SWEEPS = 100000000
 warmup = 1000
-prebin = 100
+prebin = 10000
 
-L = 2
 tprime = 0.
 
 trial_wave_function = t_only
@@ -20,7 +19,12 @@ dyn_delta_tau = 0.1
 static_obs = energy,epsilon,M2,S_cdw_q,kekule
 obs = M2,epsilon,epsilon_as,kekule_s,kekule_as,kekule_K,gamma_mod,chern,sp,tp,tp_mat
 
-inv_symmetry = 1
-
 theta = 40
+
+L = 3
+inv_symmetry = -1
+{V = 0.5}
+
+L = 3
+inv_symmetry = 1
 {V = 0.5}

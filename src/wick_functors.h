@@ -363,15 +363,16 @@ struct wick_chern
 	{
 		const numeric_t *ca_et_gf_0 = et_gf_0.data(), *ca_et_gf_t = et_gf_t.data(), *ca_td_gf = td_gf.data();
 		numeric_t ch = 0.;
-		auto& bonds_c1 = lat.bonds("chern");
-		auto& bonds_c2 = lat.bonds("chern");
-		const int N = bonds_c1.size(), ns = lat.n_sites();
+		{
+		auto& bonds_c1 = lat.bonds("chern_x");
+		auto& bonds_c2 = lat.bonds("chern_x");
+		const int N = 1, ns = lat.n_sites();
 		for (int i = 0; i < N; ++i)
 			for (int j = 0; j < N; ++j)
 			{
 				auto& a = bonds_c1[i];
 				auto& b = bonds_c2[j];
-				
+
 				ch += ca_et_gf_t[a.first*ns+a.second] * ca_et_gf_0[b.second*ns+b.first]
 					+ lat.parity(a.first) * lat.parity(b.first) * ca_td_gf[b.first*ns+a.first] * ca_td_gf[b.second*ns+a.second];
 				ch -= ca_et_gf_t[a.second*ns+a.first] * ca_et_gf_0[b.second*ns+b.first]
@@ -381,6 +382,90 @@ struct wick_chern
 				ch += ca_et_gf_t[a.second*ns+a.first] * ca_et_gf_0[b.first*ns+b.second]
 					+ lat.parity(a.second) * lat.parity(b.second) * ca_td_gf[b.second*ns+a.second] * ca_td_gf[b.first*ns+a.first];
 			}
+		}
+		{
+		auto& bonds_c1 = lat.bonds("chern_x");
+		auto& bonds_c2 = lat.bonds("chern_x_2");
+		const int N = 1, ns = lat.n_sites();
+		for (int i = 0; i < N; ++i)
+			for (int j = 0; j < N; ++j)
+			{
+				auto& a = bonds_c1[i];
+				auto& b = bonds_c2[j];
+
+				ch += ca_et_gf_t[a.first*ns+a.second] * ca_et_gf_0[b.second*ns+b.first]
+					+ lat.parity(a.first) * lat.parity(b.first) * ca_td_gf[b.first*ns+a.first] * ca_td_gf[b.second*ns+a.second];
+				ch -= ca_et_gf_t[a.second*ns+a.first] * ca_et_gf_0[b.second*ns+b.first]
+					+ lat.parity(a.second) * lat.parity(b.first) * ca_td_gf[b.first*ns+a.second] * ca_td_gf[b.second*ns+a.first];
+				ch -= ca_et_gf_t[a.first*ns+a.second] * ca_et_gf_0[b.first*ns+b.second]
+					+ lat.parity(a.first) * lat.parity(b.second) * ca_td_gf[b.second*ns+a.first] * ca_td_gf[b.first*ns+a.second];
+				ch += ca_et_gf_t[a.second*ns+a.first] * ca_et_gf_0[b.first*ns+b.second]
+					+ lat.parity(a.second) * lat.parity(b.second) * ca_td_gf[b.second*ns+a.second] * ca_td_gf[b.first*ns+a.first];
+			}
+		}
+		{
+		auto& bonds_c1 = lat.bonds("chern_x_2");
+		auto& bonds_c2 = lat.bonds("chern_x");
+		const int N = 1, ns = lat.n_sites();
+		for (int i = 0; i < N; ++i)
+			for (int j = 0; j < N; ++j)
+			{
+				auto& a = bonds_c1[i];
+				auto& b = bonds_c2[j];
+
+				ch += ca_et_gf_t[a.first*ns+a.second] * ca_et_gf_0[b.second*ns+b.first]
+					+ lat.parity(a.first) * lat.parity(b.first) * ca_td_gf[b.first*ns+a.first] * ca_td_gf[b.second*ns+a.second];
+				ch -= ca_et_gf_t[a.second*ns+a.first] * ca_et_gf_0[b.second*ns+b.first]
+					+ lat.parity(a.second) * lat.parity(b.first) * ca_td_gf[b.first*ns+a.second] * ca_td_gf[b.second*ns+a.first];
+				ch -= ca_et_gf_t[a.first*ns+a.second] * ca_et_gf_0[b.first*ns+b.second]
+					+ lat.parity(a.first) * lat.parity(b.second) * ca_td_gf[b.second*ns+a.first] * ca_td_gf[b.first*ns+a.second];
+				ch += ca_et_gf_t[a.second*ns+a.first] * ca_et_gf_0[b.first*ns+b.second]
+					+ lat.parity(a.second) * lat.parity(b.second) * ca_td_gf[b.second*ns+a.second] * ca_td_gf[b.first*ns+a.first];
+			}
+		}
+		{
+		auto& bonds_c1 = lat.bonds("chern_x_2");
+		auto& bonds_c2 = lat.bonds("chern_x_2");
+		const int N = 1, ns = lat.n_sites();
+		for (int i = 0; i < N; ++i)
+			for (int j = 0; j < N; ++j)
+			{
+				auto& a = bonds_c1[i];
+				auto& b = bonds_c2[j];
+
+				ch += ca_et_gf_t[a.first*ns+a.second] * ca_et_gf_0[b.second*ns+b.first]
+					+ lat.parity(a.first) * lat.parity(b.first) * ca_td_gf[b.first*ns+a.first] * ca_td_gf[b.second*ns+a.second];
+				ch -= ca_et_gf_t[a.second*ns+a.first] * ca_et_gf_0[b.second*ns+b.first]
+					+ lat.parity(a.second) * lat.parity(b.first) * ca_td_gf[b.first*ns+a.second] * ca_td_gf[b.second*ns+a.first];
+				ch -= ca_et_gf_t[a.first*ns+a.second] * ca_et_gf_0[b.first*ns+b.second]
+					+ lat.parity(a.first) * lat.parity(b.second) * ca_td_gf[b.second*ns+a.first] * ca_td_gf[b.first*ns+a.second];
+				ch += ca_et_gf_t[a.second*ns+a.first] * ca_et_gf_0[b.first*ns+b.second]
+					+ lat.parity(a.second) * lat.parity(b.second) * ca_td_gf[b.second*ns+a.second] * ca_td_gf[b.first*ns+a.first];
+			}
+		}
+		
+		/*
+		{
+		auto& bonds_c1 = lat.bonds("chern_2");
+		auto& bonds_c2 = lat.bonds("chern_2");
+		const int N = 1, ns = lat.n_sites();
+		for (int i = 0; i < N; ++i)
+			for (int j = 0; j < N; ++j)
+			{
+				auto& a = bonds_c1[i];
+				auto& b = bonds_c2[j];
+
+				ch -= ca_et_gf_t[a.first*ns+a.second] * ca_et_gf_0[b.second*ns+b.first]
+					+ lat.parity(a.first) * lat.parity(b.first) * ca_td_gf[b.first*ns+a.first] * ca_td_gf[b.second*ns+a.second];
+				ch += ca_et_gf_t[a.second*ns+a.first] * ca_et_gf_0[b.second*ns+b.first]
+					+ lat.parity(a.second) * lat.parity(b.first) * ca_td_gf[b.first*ns+a.second] * ca_td_gf[b.second*ns+a.first];
+				ch += ca_et_gf_t[a.first*ns+a.second] * ca_et_gf_0[b.first*ns+b.second]
+					+ lat.parity(a.first) * lat.parity(b.second) * ca_td_gf[b.second*ns+a.first] * ca_td_gf[b.first*ns+a.second];
+				ch -= ca_et_gf_t[a.second*ns+a.first] * ca_et_gf_0[b.first*ns+b.second]
+					+ lat.parity(a.second) * lat.parity(b.second) * ca_td_gf[b.second*ns+a.second] * ca_td_gf[b.first*ns+a.first];
+			}
+		}
+		*/
 		return std::real(ch) / std::pow(lat.n_bonds(), 2.);
 	}
 };
@@ -448,11 +533,16 @@ struct wick_tp
 			for (int n = 0; n < N; n+=2)
 			{
 				auto& r_n = lat.real_space_coord(n);
-				//double kdot = K.dot(r_i - r_j - r_m + r_n);
-				double kdot = K.dot(r_i - r_m) + Kp.dot(r_j - r_n);
-				tp += std::real(std::cos(kdot) * (ca_td_gf[i*N+m] * ca_td_gf[(j+1)*N+(n+1)] - ca_td_gf[i*N+(n+1)] * ca_td_gf[(j+1)*N+m]));
+				double kdot;
+				if (param.L % 3 == 0)
+					kdot = K.dot(r_i - r_j - r_m + r_n);
+				else
+					kdot = K.dot(r_i - r_m) + Kp.dot(r_j - r_n);
+				//tp += std::real(std::cos(kdot) * (ca_td_gf[i*N+m] * ca_td_gf[(j+1)*N+(n+1)] - ca_td_gf[i*N+(n+1)] * ca_td_gf[(j+1)*N+m]));
+				tp += std::cos(kdot) * (ca_td_gf[i*N+m] * ca_td_gf[(j)*N+(n)] - ca_td_gf[i*N+(n)] * ca_td_gf[(j)*N+m]);
+				tp += std::cos(kdot) * (ca_td_gf[(i+1)*N+(m+1)] * ca_td_gf[(j+1)*N+(n+1)] - ca_td_gf[(i+1)*N+(n+1)] * ca_td_gf[(j+1)*N+(m+1)]);
 			}
 		}
-		return tp / static_cast<double>(N/2);
+		return std::real(tp)/2.;
 	}
 };
