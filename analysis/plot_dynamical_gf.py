@@ -53,7 +53,7 @@ marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
 
 filelist = []
 
-filelist.append(glob.glob("../job/*1.out"))
+filelist.append(glob.glob("../job/*.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/lctqmc_L14_theta40/*0010.out"))
 #filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/cluster_work/code/lctqmc/jobs/K_point/lctqmc_L6_theta40/*08.out"))
@@ -69,7 +69,7 @@ for f in filelist:
 	plist = ParseParameters(f)
 	elist = ParseEvalables(f)
 
-	obs = "chern"
+	obs = "epsilon_as"
 	if obs == "M2":
 		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{cdw}(\tau) O_{cdw}^{\dag} \right \rangle$", fontsize=16)
@@ -119,7 +119,7 @@ for f in filelist:
 		#	continue
 		
 		ed_glob = glob.glob("../../ctint/data/ed_rhom_" + "*_Lx_" + str(int(L)) + "*V_" + format(h, '.6f') + "*GS*__c")
-		ed_glob = []
+		#ed_glob = []
 		if len(ed_glob) == 0:
 			ed_glob = glob.glob("../../ctint/data/ed*_rhom_" + "*_Lx_" + str(int(L)) + "*V_" + format(h, '.6f') + "*GS*__gc")
 		#ed_glob = glob.glob("../../ctint/data/ed*" + "L_" + str(int(L)) + "*V_" + format(h, '.6f') + "*T_" + format(0.01, '.6f') + "*")

@@ -1,4 +1,4 @@
-SWEEPS = 100000000
+SWEEPS = 100
 warmup = 1000
 prebin = 10000
 

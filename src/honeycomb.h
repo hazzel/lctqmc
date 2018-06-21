@@ -370,10 +370,10 @@ struct honeycomb
 				list.push_back({i, l.site_at_position(r_i - l.a1)});
 				
 				list.push_back({l.site_at_position(r_i - l.a2), i});
-				list.push_back({i, l.site_at_position(r_i - l.a2)});
+				list.push_back({i, l.site_at_position(r_i + l.a2)});
 				
 				list.push_back({l.site_at_position(r_i - l.a1 + l.a2), i});
-				list.push_back({i, l.site_at_position(r_i - l.a1 + l.a2)});
+				list.push_back({i, l.site_at_position(r_i + l.a1 - l.a2)});
 			}
 		});
 		
@@ -390,10 +390,10 @@ struct honeycomb
 				list.push_back({i, l.site_at_position(r_i - l.a1)});
 				
 				list.push_back({l.site_at_position(r_i - l.a2), i});
-				list.push_back({i, l.site_at_position(r_i - l.a2)});
+				list.push_back({i, l.site_at_position(r_i + l.a2)});
 				
 				list.push_back({l.site_at_position(r_i - l.a1 + l.a2), i});
-				list.push_back({i, l.site_at_position(r_i - l.a1 + l.a2)});
+				list.push_back({i, l.site_at_position(r_i + l.a1 - l.a2)});
 			}
 		});
 		
