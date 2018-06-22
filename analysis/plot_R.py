@@ -23,16 +23,18 @@ plt.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
 plt.rcParams.update({'font.size': 20})
 plt.rc('legend',fontsize=12)
 
-color_cycle = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'orange', 'darkgreen']
+color_cycle = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'orange', 'darkgreen', 'cyan', 'magenta']
 marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
 cnt = 0
 
 list_of_files_R = []
 
-list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L6-s-*tprime*-theta*.txt")
-list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L9-s-*tprime*-theta*.txt")
-list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L12-s-*tprime*-theta*.txt")
-list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L15-s-*tprime*-theta*.txt")
+list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L6-s-*tprime*-theta8*.txt")
+list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L9-s-*tprime*-theta8*.txt")
+list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L12-s-*tprime*-theta8*.txt")
+list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L15-s-*tprime*-theta8*.txt")
+list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L18-s-*tprime*-theta8*.txt")
+list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L21-s-*tprime*-theta8*.txt")
 
 data_list_R = [ ( pylab.loadtxt(filename), label ) for label, filename in enumerate(list_of_files_R) ]
 

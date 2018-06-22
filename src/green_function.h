@@ -638,14 +638,30 @@ class green_function
 				}
 			*/
 
+			
 			std::vector<double> hv_tau(param.theta / param.block_size, 0.);
-		    for (int i=0; i < param.theta / param.block_size; ++i)
-		    {
+			for (int i=0; i < param.theta / param.block_size; ++i)
+			{
         		auto lower = std::lower_bound(vlist.begin(), vlist.end(), i*param.block_size, vertex::less()); 
         		auto upper = std::upper_bound(vlist.begin(), vlist.end(), (i+1)*param.block_size, vertex::less_equal());  //equal is exclude
  
         		hv_tau[i] = 1.*std::distance(lower, upper) / param.V / param.V; //number of vertices in this block
     		}
+    		
+			/*
+			std::vector<double> hv_tau(param.theta / param.block_size, 0.);
+			vlist_t vertices = vlist;
+			while (vertices.size() >= 2)
+			{
+				int v1 = rng() * vertices.size(), v2 = rng() * vertices.size();
+				while (v1 == v2)
+					v2 = rng() * vertices.size();
+				int tau_block = std::abs(vertices[v1].tau - vertices[v2].tau) / param.dyn_delta_tau;
+				hv_tau[tau_block] += 1. / vlist.size();
+				vertices.erase(vertices.begin() + std::max(v1, v2));
+				vertices.erase(vertices.begin() + std::min(v1, v2));
+			}
+			*/
 
 			return hv_tau;
 		}

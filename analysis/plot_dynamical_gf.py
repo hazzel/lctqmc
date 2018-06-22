@@ -69,7 +69,7 @@ for f in filelist:
 	plist = ParseParameters(f)
 	elist = ParseEvalables(f)
 
-	obs = "chern"
+	obs = "Hv"
 	if obs == "M2":
 		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{cdw}(\tau) O_{cdw}^{\dag} \right \rangle$", fontsize=16)
@@ -119,11 +119,11 @@ for f in filelist:
 		#	continue
 		
 		ed_glob = glob.glob("../../ctint/data/ed_rhom_" + "*_Lx_" + str(int(L)) + "*V_" + format(h, '.6f') + "*GS*__c")
-		#ed_glob = []
 		if len(ed_glob) == 0:
 			ed_glob = glob.glob("../../ctint/data/ed*_rhom_" + "*_Lx_" + str(int(L)) + "*V_" + format(h, '.6f') + "*GS*__gc")
 		#ed_glob = glob.glob("../../ctint/data/ed*" + "L_" + str(int(L)) + "*V_" + format(h, '.6f') + "*T_" + format(0.01, '.6f') + "*")
 		
+		ed_glob = []
 		if len(ed_glob) > 0:
 			ed_file = open(ed_glob[0])
 			ed_data = parse_ed_file(ed_file)
@@ -228,7 +228,7 @@ for f in filelist:
 		#f_min = 150; f_max = 300
 		f_min = 0
 		#f_max = 25
-		f_max = len(x_tau)-1
+		f_max = len(x_tau)/2
 		step = 1
 		fit_x = []
 		fit_y = []
@@ -305,8 +305,8 @@ for f in filelist:
 			#print "Delta = ", parameter[2], " +- ", perr[2]
 			#print "------"
 			
-			print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2] * (2.*L*L)**0.5, 2))
-			#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2], 5)) + "\t\t" + str(round(perr[2], 2))
+			#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2] * (2.*L*L)**0.5, 2))
+			print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2], 5)) + "\t\t" + str(round(perr[2], 2))
 		
 		
 		'''
