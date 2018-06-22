@@ -252,9 +252,9 @@ struct wick_kekule_K
 		const numeric_t *ca_et_gf_0 = et_gf_0.data(), *ca_et_gf_t = et_gf_t.data(), *ca_td_gf = td_gf.data();
 		numeric_t kek = 0.;
 		auto& K = lat.symmetry_point("K");
-		//std::array<const std::vector<std::pair<int, int>>*, 3> nn_bonds =
-		//	{&lat.bonds("nn_bond_1"), &lat.bonds("nn_bond_2"), &lat.bonds("nn_bond_3")};
-		std::array<const std::vector<std::pair<int, int>>*, 1> nn_bonds = {&lat.bonds("nn_bond_2")};
+		std::array<const std::vector<std::pair<int, int>>*, 3> nn_bonds =
+			{&lat.bonds("nn_bond_1"), &lat.bonds("nn_bond_2"), &lat.bonds("nn_bond_3")};
+		//std::array<const std::vector<std::pair<int, int>>*, 1> nn_bonds = {&lat.bonds("nn_bond_2")};
 		
 		const int N = nn_bonds.size(), M = nn_bonds[0]->size(), ns = lat.n_sites();
 		for (int i = 0; i < N; ++i)
@@ -363,6 +363,7 @@ struct wick_chern
 	{
 		const numeric_t *ca_et_gf_0 = et_gf_0.data(), *ca_et_gf_t = et_gf_t.data(), *ca_td_gf = td_gf.data();
 		numeric_t ch = 0.;
+		/*
 		{
 		auto& bonds_c1 = lat.bonds("chern_x");
 		auto& bonds_c2 = lat.bonds("chern_x");
@@ -426,6 +427,28 @@ struct wick_chern
 		{
 		auto& bonds_c1 = lat.bonds("chern_x_2");
 		auto& bonds_c2 = lat.bonds("chern_x_2");
+		const int N = 1, ns = lat.n_sites();
+		for (int i = 0; i < N; ++i)
+			for (int j = 0; j < N; ++j)
+			{
+				auto& a = bonds_c1[i];
+				auto& b = bonds_c2[j];
+
+				ch += ca_et_gf_t[a.first*ns+a.second] * ca_et_gf_0[b.second*ns+b.first]
+					+ lat.parity(a.first) * lat.parity(b.first) * ca_td_gf[b.first*ns+a.first] * ca_td_gf[b.second*ns+a.second];
+				ch -= ca_et_gf_t[a.second*ns+a.first] * ca_et_gf_0[b.second*ns+b.first]
+					+ lat.parity(a.second) * lat.parity(b.first) * ca_td_gf[b.first*ns+a.second] * ca_td_gf[b.second*ns+a.first];
+				ch -= ca_et_gf_t[a.first*ns+a.second] * ca_et_gf_0[b.first*ns+b.second]
+					+ lat.parity(a.first) * lat.parity(b.second) * ca_td_gf[b.second*ns+a.first] * ca_td_gf[b.first*ns+a.second];
+				ch += ca_et_gf_t[a.second*ns+a.first] * ca_et_gf_0[b.first*ns+b.second]
+					+ lat.parity(a.second) * lat.parity(b.second) * ca_td_gf[b.second*ns+a.second] * ca_td_gf[b.first*ns+a.first];
+			}
+		}
+		*/
+		
+		{
+		auto& bonds_c1 = lat.bonds("chern");
+		auto& bonds_c2 = lat.bonds("chern");
 		const int N = 1, ns = lat.n_sites();
 		for (int i = 0; i < N; ++i)
 			for (int j = 0; j < N; ++j)
@@ -444,28 +467,6 @@ struct wick_chern
 			}
 		}
 		
-		/*
-		{
-		auto& bonds_c1 = lat.bonds("chern_2");
-		auto& bonds_c2 = lat.bonds("chern_2");
-		const int N = 1, ns = lat.n_sites();
-		for (int i = 0; i < N; ++i)
-			for (int j = 0; j < N; ++j)
-			{
-				auto& a = bonds_c1[i];
-				auto& b = bonds_c2[j];
-
-				ch -= ca_et_gf_t[a.first*ns+a.second] * ca_et_gf_0[b.second*ns+b.first]
-					+ lat.parity(a.first) * lat.parity(b.first) * ca_td_gf[b.first*ns+a.first] * ca_td_gf[b.second*ns+a.second];
-				ch += ca_et_gf_t[a.second*ns+a.first] * ca_et_gf_0[b.second*ns+b.first]
-					+ lat.parity(a.second) * lat.parity(b.first) * ca_td_gf[b.first*ns+a.second] * ca_td_gf[b.second*ns+a.first];
-				ch += ca_et_gf_t[a.first*ns+a.second] * ca_et_gf_0[b.first*ns+b.second]
-					+ lat.parity(a.first) * lat.parity(b.second) * ca_td_gf[b.second*ns+a.first] * ca_td_gf[b.first*ns+a.second];
-				ch -= ca_et_gf_t[a.second*ns+a.first] * ca_et_gf_0[b.first*ns+b.second]
-					+ lat.parity(a.second) * lat.parity(b.second) * ca_td_gf[b.second*ns+a.second] * ca_td_gf[b.first*ns+a.first];
-			}
-		}
-		*/
 		return std::real(ch) / std::pow(lat.n_bonds(), 2.);
 	}
 };
