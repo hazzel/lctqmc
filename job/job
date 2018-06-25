@@ -1,9 +1,10 @@
-SWEEPS = 10000
-warmup = 100
-prebin = 32
+SWEEPS = 10000000
+warmup = 500
+prebin = 2048
 
 tprime = 0.
 
+method = projective
 trial_wave_function = t_only
 block_size = 0.1
 
@@ -19,8 +20,8 @@ dyn_delta_tau = 0.1
 static_obs = energy,epsilon,M2,S_cdw_q,kekule
 obs = M2,epsilon,epsilon_as,kekule_s,kekule_as,kekule_K,gamma_mod,chern,sp,tp
 
-theta = 20
-
-L = 2
 inv_symmetry = -1
-{V = 0.5}
+
+L = 3
+theta = 80
+{V = 1.0}

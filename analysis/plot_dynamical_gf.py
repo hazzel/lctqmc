@@ -17,7 +17,7 @@ from texify import *
 import scipy.integrate
 
 def FitFunctionL(x, a, b, c):
-	return b*np.exp(-c*x)
+	return b*np.exp(-c*x)+a
 
 def FitFunctionR(x, a, b, c):
 	return a + b*np.exp(c*x)
@@ -288,8 +288,8 @@ for f in filelist:
 
 			
 			#min = 0; nmax = 2*int(plist[i]["discrete_tau"])
-			nmin = fit_x[fit_re.index(min(np.abs(fit_re)))]; nmax = f_max
-			#nmin = 5; nmax = 25
+			#nmin = fit_x[fit_re.index(min(np.abs(fit_re)))]; nmax = f_max
+			nmin = 1; nmax = 50
 			#parameter, perr = fit_function( [1., 6., 1.2], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
 			parameter, perr = fit_function( [0.1, 0.1, 1.], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
 			#parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[0.1, 0.1, 1.])

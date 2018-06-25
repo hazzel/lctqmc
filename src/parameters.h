@@ -10,4 +10,5 @@ struct parameters
 	std::vector<std::string> dyn_obs, static_obs;
 	double sign_phase=1.;
 	std::string trial_wave_function;
+	bool projective;
 };

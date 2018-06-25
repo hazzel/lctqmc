@@ -473,6 +473,8 @@ struct event_set_trial_wf
 	void trigger()
 	{
 		matrix_t K = set_K_matrix();
+		if (!param.projective)
+			return;
 		matrix_t tw = set_twf_matrix();
 		
 		matrix_t P;

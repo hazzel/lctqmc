@@ -95,7 +95,8 @@ struct event_static_measurement
 			return;
 		++param.static_measure_cnt;
 		if (param.static_measure_cnt >= param.static_measure_interval)
-		if (std::abs(gf.tau() - param.theta/2.) < param.measure_window/2.)
+		if ((param.projective and std::abs(gf.tau() - param.theta/2.) < param.measure_window/2.)
+			or (!param.projective))
 		{
 			//std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
 			gf.measure_static_observables(measure, names, obs, vec_names, vec_obs);
@@ -184,8 +185,8 @@ struct event_dynamic_measurement
 		if (obs.size() == 0 and vec_obs.size() == 0)
 			return;
 		
-		if (std::abs(gf.tau() - (param.theta/2. + param.dyn_tau_max/2 + param.block_size/2.)) < 1E-6
-			or std::abs(gf.tau() - (param.theta/2. - param.dyn_tau_max/2 + param.block_size/2.)) < 1E-6)
+		if (param.projective and (std::abs(gf.tau() - (param.theta/2. + param.dyn_tau_max/2 + param.block_size/2.)) < 1E-6
+			or std::abs(gf.tau() - (param.theta/2. - param.dyn_tau_max/2 + param.block_size/2.)) < 1E-6))
 		//if (std::abs(gf.tau() - (param.theta/2. + param.dyn_tau_max/2 + param.block_size/2.)) <= 1E-6)
 		//if (std::abs(gf.tau() - (param.theta/2. - param.dyn_tau_max/2 + param.block_size/2.)) <= 1E-6)
 		{
