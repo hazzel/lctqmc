@@ -89,7 +89,7 @@ struct measure_M
 		measure.add_observable("k_L k_R", param.n_prebin);
 		measure.add_observable("k_L", param.n_prebin);
 		measure.add_observable("k_R", param.n_prebin);
-		measure.add_vectorobservable("dyn_Hv_tau", param.theta / param.block_size, param.n_prebin);
+		measure.add_vectorobservable("dyn_Hv_tau", param.ep_tau_steps, param.n_prebin);
 	}
 	
 	void perform()

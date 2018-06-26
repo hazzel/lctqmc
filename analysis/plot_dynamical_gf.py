@@ -110,9 +110,13 @@ for f in filelist:
 		
 	for i in range(len(plist)):
 		h = float(plist[i]["V"])
-		theta = float(plist[i]["theta"])
 		L = float(plist[i]["L"])
+		theta = float(plist[i]["theta"])
 		dtau = float(plist[i]["dyn_delta_tau"])
+		n_discrete_tau = float(plist[i]["dyn_tau_max"]) / dtau
+		if obs == "Hv":
+			dtau = float(plist[i]["ep_delta_tau"])
+			n_discrete_tau = float(plist[i]["ep_tau_max"]) / dtau
 		P = "1" #plist[i]["inv_symmetry"]
 		
 		#if h > 1.:
@@ -133,8 +137,6 @@ for f in filelist:
 		
 
 		figure.suptitle(r"$L = " + str(L) + ", V = " + str(h) + ", 2 \Theta = " + str(theta) + "$", fontsize=16)# + str(1./T/2.) + "$")
-		
-		n_discrete_tau = float(plist[i]["dyn_tau_max"]) / dtau
 		
 		x_tau = np.linspace(0, theta, n_discrete_tau+1)
 		y_tau = np.array(ArrangePlot(elist[i], "dyn_"+obs+"_tau")[0])
@@ -177,8 +179,8 @@ for f in filelist:
 			y_tau = (np.array(ArrangePlot(elist[i], "dyn_tp_mat_0_tau")[0]) + np.array(ArrangePlot(elist[i], "dyn_tp_mat_3_tau")[0]))/2.
 			err_tau = np.sqrt(np.array(ArrangePlot(elist[i], "dyn_tp_mat_0_tau")[1])**2. + np.array(ArrangePlot(elist[i], "dyn_tp_mat_3_tau")[1])**2.)/2.
 		elif obs == "Hv":
-			y_tau = np.abs(y_tau[numpy.isfinite(y_tau)])
-			err_tau = err_tau[numpy.isfinite(err_tau)]
+			y_tau = np.abs(y_tau[numpy.isfinite(y_tau)]) / ArrangePlot(elist[i], "pert_order")[0][0]
+			err_tau = err_tau[numpy.isfinite(err_tau)] / ArrangePlot(elist[i], "pert_order")[0][0]
 
 			e = ArrangePlot(elist[i], "epsilon")[0][0]
 			s = ArrangePlot(elist[i], "epsilon")[1][0]
@@ -226,10 +228,10 @@ for f in filelist:
 		
 		j = 1
 		#f_min = 150; f_max = 300
-		f_min = 0
+		f_min = 1
 		#f_max = 25
 		f_max = len(x_tau)/2
-		step = 1
+		step = 10
 		fit_x = []
 		fit_y = []
 		fit_e = []
@@ -289,7 +291,7 @@ for f in filelist:
 			
 			#min = 0; nmax = 2*int(plist[i]["discrete_tau"])
 			#nmin = fit_x[fit_re.index(min(np.abs(fit_re)))]; nmax = f_max
-			nmin = 1; nmax = 50
+			nmin = 20; nmax = len(x_tau)-1
 			#parameter, perr = fit_function( [1., 6., 1.2], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
 			parameter, perr = fit_function( [0.1, 0.1, 1.], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
 			#parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[0.1, 0.1, 1.])

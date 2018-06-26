@@ -776,15 +776,21 @@ class green_function
 
 		std::vector<double> measure_Hv_tau()
 		{
-			std::vector<double> hv_tau(param.theta / param.block_size, 0.);
-			for(int i = 0; i < vlist.size(); ++i)
-				for(int j = i; j < vlist.size(); ++j)
+			std::vector<double> hv_tau(param.ep_tau_steps, 0.);
+			auto lower = std::lower_bound(vlist.begin(), vlist.end(), param.theta/2.-param.ep_window/2., vertex::less()); 
+			auto upper = std::upper_bound(vlist.begin(), vlist.end(), param.theta/2.+param.ep_window/2., vertex::less_equal());  //equal is exclude
+			
+			int i_lower = std::distance(vlist.begin(), lower);
+			int i_upper = std::distance(vlist.begin(), upper);
+			
+			for(int i = i_lower; i < i_upper; ++i)
+				for(int j = i+1; j < i_upper; ++j)
 				{
 					double delta_tau = std::abs(vlist[i].tau - vlist[j].tau);
-					int tau_block = (delta_tau < param.theta/2.) ? delta_tau / param.dyn_delta_tau : (param.theta - delta_tau) / param.dyn_delta_tau;
-					//int tau_block = delta_tau / param.dyn_delta_tau;
-					if (tau_block < hv_tau.size())
-						hv_tau[tau_block] += 1./2.;// / vlist.size();
+					int tau_block = (delta_tau < param.ep_window/2.) ? delta_tau / param.ep_delta_tau : (param.ep_window - delta_tau) / param.ep_delta_tau;
+					//int tau_block = delta_tau / param.ep_delta_tau;
+					if (tau_block < param.ep_tau_steps)
+						hv_tau[tau_block] += 1. / param.V / param.V;// / vlist.size();
 				}
 
 			/*

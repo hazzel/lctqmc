@@ -1,6 +1,6 @@
-SWEEPS = 10000000
+SWEEPS = 100000000
 warmup = 500
-prebin = 2048
+prebin = 4096
 
 tprime = 0.
 
@@ -16,6 +16,9 @@ static_measure_interval = 2
 
 dyn_tau_max = 10
 dyn_delta_tau = 0.1
+ep_tau_max = 2
+ep_delta_tau = 0.02
+ep_window = 40
 
 static_obs = energy,epsilon,M2,S_cdw_q,kekule
 obs = M2,epsilon,epsilon_as,kekule_s,kekule_as,kekule_K,gamma_mod,chern,sp,tp
@@ -23,5 +26,17 @@ obs = M2,epsilon,epsilon_as,kekule_s,kekule_as,kekule_K,gamma_mod,chern,sp,tp
 inv_symmetry = -1
 
 L = 3
+theta = 20
+{V = 1.0}
+
+L = 3
+theta = 40
+{V = 1.0}
+
+L = 3
 theta = 80
+{V = 1.0}
+
+L = 3
+theta = 160
 {V = 1.0}

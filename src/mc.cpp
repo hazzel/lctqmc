@@ -32,6 +32,10 @@ mc::mc(const std::string& dir)
 	param.dyn_tau_max = pars.value_or_default<double>("dyn_tau_max", 10);
 	param.dyn_delta_tau = pars.value_or_default<double>("dyn_delta_tau", 0.25);
 	param.dyn_tau_steps = static_cast<int>((param.dyn_tau_max / param.dyn_delta_tau) + 0.5);
+	param.ep_tau_max = pars.value_or_default<double>("ep_tau_max", 2);
+	param.ep_delta_tau = pars.value_or_default<double>("ep_delta_tau", 0.02);
+	param.ep_tau_steps = static_cast<int>((param.ep_tau_max / param.ep_delta_tau) + 0.5);
+	param.ep_window = pars.value_or_default<double>("ep_window", param.theta);
 	
 	param.L = pars.value_or_default<int>("L", 2);
 	param.V = pars.value_or_default<double>("V", 1.0);
