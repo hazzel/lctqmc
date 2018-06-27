@@ -1,6 +1,6 @@
 SWEEPS = 100000000
 warmup = 500
-prebin = 4096
+prebin = 256
 
 tprime = 0.
 
@@ -12,31 +12,18 @@ updates_per_block = 2
 rebuild_interval = 4
 wrap_refresh_interval = 4
 
-static_measure_interval = 2
+static_measure_interval = 1
 
 dyn_tau_max = 10
 dyn_delta_tau = 0.1
-ep_tau_max = 2
-ep_delta_tau = 0.02
-ep_window = 40
+ep_tau_max = 4
 
 static_obs = energy,epsilon,M2,S_cdw_q,kekule
 obs = M2,epsilon,epsilon_as,kekule_s,kekule_as,kekule_K,gamma_mod,chern,sp,tp
 
-inv_symmetry = -1
+inv_symmetry = 1
 
-L = 3
-theta = 20
-{V = 1.0}
-
-L = 3
-theta = 40
-{V = 1.0}
-
-L = 3
+L = 6
 theta = 80
-{V = 1.0}
-
-L = 3
-theta = 160
-{V = 1.0}
+ep_delta_tau = 0.02
+{V = 1.3}

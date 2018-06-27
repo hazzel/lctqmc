@@ -179,8 +179,9 @@ for f in filelist:
 			y_tau = (np.array(ArrangePlot(elist[i], "dyn_tp_mat_0_tau")[0]) + np.array(ArrangePlot(elist[i], "dyn_tp_mat_3_tau")[0]))/2.
 			err_tau = np.sqrt(np.array(ArrangePlot(elist[i], "dyn_tp_mat_0_tau")[1])**2. + np.array(ArrangePlot(elist[i], "dyn_tp_mat_3_tau")[1])**2.)/2.
 		elif obs == "Hv":
-			y_tau = np.abs(y_tau[numpy.isfinite(y_tau)]) / ArrangePlot(elist[i], "pert_order")[0][0]
-			err_tau = err_tau[numpy.isfinite(err_tau)] / ArrangePlot(elist[i], "pert_order")[0][0]
+			k = ArrangePlot(elist[i], "pert_order")[0][0]
+			y_tau = np.abs(y_tau[numpy.isfinite(y_tau)])# / (k*(k-1)/2)
+			err_tau = err_tau[numpy.isfinite(err_tau)]# / (k*(k-1)/2)
 
 			e = ArrangePlot(elist[i], "epsilon")[0][0]
 			s = ArrangePlot(elist[i], "epsilon")[1][0]
@@ -210,12 +211,12 @@ for f in filelist:
 		ax.set_yscale("log")
 		
 		if cnt == 0:
-			ax.plot(x_tau, y_tau, marker="o", color="green", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+', P = ' + P + '$')
+			ax.plot(x_tau, y_tau, marker="o", color="green", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+', P = ' + P + ', \Theta = ' + str(theta) + '$')
 			(_, caps, _) = ax.errorbar(x_tau, y_tau, yerr=err_tau, marker='None', capsize=8, color="green")
 			for cap in caps:
 				cap.set_markeredgewidth(1.6)
 		else:
-			ax.plot(x_tau, y_tau, marker="o", color="red", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+', P = ' + P + '$')
+			ax.plot(x_tau, y_tau, marker="o", color="red", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+', P = ' + P + ', \Theta = ' + str(theta) + '$')
 			(_, caps, _) = ax.errorbar(x_tau, y_tau, yerr=err_tau, marker='None', capsize=8, color="red")
 			for cap in caps:
 				cap.set_markeredgewidth(1.6)
@@ -225,13 +226,13 @@ for f in filelist:
 			ax.plot(ed_tau, ed_data[ed_n], marker='o', color="b", markersize=10.0, linewidth=0.0, label=r'$L='+str(int(L))+'$')
 			#ax.plot(ed_tau, np.flipud(ed_data[ed_n]), marker='o', color="b", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+'$')
 		
-		
+		'''
 		j = 1
 		#f_min = 150; f_max = 300
-		f_min = 1
+		f_min = 0
 		#f_max = 25
-		f_max = len(x_tau)/2
-		step = 10
+		f_max = len(x_tau)-1
+		step = 50
 		fit_x = []
 		fit_y = []
 		fit_e = []
@@ -246,7 +247,7 @@ for f in filelist:
 				#fit_x.append(nmin)
 				#fit_y.append(parameter[2]*(2.*L*L)**0.5)
 				#fit_e.append(perr[2]*(2.*L*L)**0.5)
-				#fit_re.append(perr[2] / parameter[2]*(2.*L*L)**0.5)
+				#fit_re.append((perr[2] / parameter[2])*(2.*L*L)**0.5)
 				
 				parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[0.1, 0.1, 1.], method='trf')
 				fit_x.append(nmin)
@@ -292,8 +293,10 @@ for f in filelist:
 			#min = 0; nmax = 2*int(plist[i]["discrete_tau"])
 			#nmin = fit_x[fit_re.index(min(np.abs(fit_re)))]; nmax = f_max
 			nmin = 20; nmax = len(x_tau)-1
+			#nmin = 5; nmax = 25
 			#parameter, perr = fit_function( [1., 6., 1.2], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
 			parameter, perr = fit_function( [0.1, 0.1, 1.], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
+			print parameter
 			#parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[0.1, 0.1, 1.])
 		
 			px = np.linspace(x_tau[nmin], x_tau[nmax], 1000)
@@ -309,7 +312,7 @@ for f in filelist:
 			
 			#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2] * (2.*L*L)**0.5, 2))
 			print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2], 5)) + "\t\t" + str(round(perr[2], 2))
-		
+		'''
 		
 		'''
 		nmin = 35
@@ -344,4 +347,5 @@ for f in filelist:
 
 plt.legend()
 plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+plt.savefig("dynamical_gf.pdf", bbox_inches='tight', pad_inches = 0.1)
 plt.show()

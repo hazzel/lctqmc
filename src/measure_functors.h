@@ -89,7 +89,7 @@ struct measure_M
 		measure.add_observable("k_L k_R", param.n_prebin);
 		measure.add_observable("k_L", param.n_prebin);
 		measure.add_observable("k_R", param.n_prebin);
-		measure.add_vectorobservable("dyn_Hv_tau", param.ep_tau_steps, param.n_prebin);
+		measure.add_vectorobservable("dyn_Hv_tau", param.ep_tau_steps, param.n_prebin * (param.measure_window / param.block_size) / param.static_measure_interval);
 	}
 	
 	void perform()
@@ -103,8 +103,6 @@ struct measure_M
 			measure.add("k_L", k_L);
 			measure.add("k_R", k_R);
 			measure.add("avg_norm_error", gf.reset_norm_error());
-			std::vector<double> hv_tau = gf.measure_Hv_tau();
-			measure.add("dyn_Hv_tau", hv_tau);
 		}
 	}
 

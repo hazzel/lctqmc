@@ -102,6 +102,9 @@ struct event_static_measurement
 			gf.measure_static_observables(measure, names, obs, vec_names, vec_obs);
 			//std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
 			//std::cout << "Time of static measurement: " << std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count() << std::endl;
+			
+			std::vector<double> hv_tau = gf.measure_Hv_tau();
+			measure.add("dyn_Hv_tau", hv_tau);
 			param.static_measure_cnt = 0;
 		}
 	}

@@ -787,10 +787,14 @@ class green_function
 				for(int j = i+1; j < i_upper; ++j)
 				{
 					double delta_tau = std::abs(vlist[i].tau - vlist[j].tau);
-					int tau_block = (delta_tau < param.ep_window/2.) ? delta_tau / param.ep_delta_tau : (param.ep_window - delta_tau) / param.ep_delta_tau;
-					//int tau_block = delta_tau / param.ep_delta_tau;
+					int tau_block;
+					if (param.trial_wave_function == "t_only")
+						tau_block = (delta_tau < param.ep_window/2.) ? delta_tau / param.ep_delta_tau : (param.ep_window - delta_tau) / param.ep_delta_tau;
+					else
+						tau_block = delta_tau / param.ep_delta_tau;
+					int k = i_upper - i_lower;
 					if (tau_block < param.ep_tau_steps)
-						hv_tau[tau_block] += 1. / param.V / param.V;// / vlist.size();
+						hv_tau[tau_block] += 1. / param.V / param.V / param.ep_delta_tau / (k * (k - 1.)/2.) * param.ep_window / param.theta;
 				}
 
 			/*
