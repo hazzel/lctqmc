@@ -783,7 +783,25 @@ class green_function
 			int i_lower = std::distance(vlist.begin(), lower);
 			int i_upper = std::distance(vlist.begin(), upper);
 			
+			int i = rng() * (i_upper - i_lower) + i_lower;
+			for(int j = i_lower; j < i_upper; ++j)
+			{
+				if (i == j)
+					continue;
+				double delta_tau = vlist[j].tau - vlist[i].tau;
+				int tau_block;
+				if (delta_tau > 0.)
+					tau_block = delta_tau / param.ep_delta_tau;
+				else
+					tau_block = (param.theta + delta_tau) / param.ep_delta_tau;
+				int k = i_upper - i_lower;
+				if (tau_block < param.ep_tau_steps)
+					hv_tau[tau_block] += 1. / param.V / param.V / param.ep_delta_tau * param.ep_window / param.theta;
+			}
+				
+			/*
 			for(int i = i_lower; i < i_upper; ++i)
+			//int i = rng() * (i_upper - i_lower) + i_lower;
 				for(int j = i+1; j < i_upper; ++j)
 				{
 					double delta_tau = std::abs(vlist[i].tau - vlist[j].tau);
@@ -794,32 +812,8 @@ class green_function
 						tau_block = delta_tau / param.ep_delta_tau;
 					int k = i_upper - i_lower;
 					if (tau_block < param.ep_tau_steps)
-						hv_tau[tau_block] += 1. / param.V / param.V / param.ep_delta_tau / (k * (k - 1.)/2.) * param.ep_window / param.theta;
+						hv_tau[tau_block] += 1. / param.V / param.V / param.ep_delta_tau * param.ep_window / param.theta / k;
 				}
-
-			/*
-			std::vector<double> hv_tau(param.theta / param.block_size, 0.);
-			for (int i=0; i < param.theta / param.block_size; ++i)
-			{
-        		auto lower = std::lower_bound(vlist.begin(), vlist.end(), i*param.block_size, vertex::less()); 
-        		auto upper = std::upper_bound(vlist.begin(), vlist.end(), (i+1)*param.block_size, vertex::less_equal());  //equal is exclude
- 
-        		hv_tau[i] = 1.*std::distance(lower, upper) / param.V / param.V; //number of vertices in this block
-    		}
-    		*/
-			/*
-			std::vector<double> hv_tau(param.theta / param.block_size, 0.);
-			vlist_t vertices = vlist;
-			while (vertices.size() >= 2)
-			{
-				int v1 = rng() * vertices.size(), v2 = rng() * vertices.size();
-				while (v1 == v2)
-					v2 = rng() * vertices.size();
-				int tau_block = std::abs(vertices[v1].tau - vertices[v2].tau) / param.dyn_delta_tau;
-				hv_tau[tau_block] += 1. / vlist.size();
-				vertices.erase(vertices.begin() + std::max(v1, v2));
-				vertices.erase(vertices.begin() + std::min(v1, v2));
-			}
 			*/
 
 			return hv_tau;

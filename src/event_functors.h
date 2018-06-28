@@ -70,6 +70,8 @@ struct event_static_measurement
 				add_wick(wick_static_M4{rng, param, lat}, param.static_obs[i]);
 			else if (param.static_obs[i] == "epsilon")
 				add_wick(wick_static_epsilon{rng, param, lat}, param.static_obs[i]);
+			else if (param.static_obs[i] == "Hv")
+				add_wick(wick_static_Hv{rng, param, lat}, param.static_obs[i]);
 			else if (param.static_obs[i] == "kekule")
 				add_wick(wick_static_kek{rng, param, lat}, param.static_obs[i]);
 		}

@@ -73,7 +73,7 @@ for f in filelist:
 	if obs == "M2":
 		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{cdw}(\tau) O_{cdw}^{\dag} \right \rangle$", fontsize=16)
-	elif obs == "epsilon_V":
+	elif obs == "epsilon_V" or obs == "Hv":
 		ed_n = 2
 		ax.set_ylabel(r"$\left \langle O_{\epsilon_V}(\tau) O_{\epsilon_V}^{\dag} \right \rangle$", fontsize=16)
 	elif obs == "epsilon_as":
@@ -127,7 +127,7 @@ for f in filelist:
 			ed_glob = glob.glob("../../ctint/data/ed*_rhom_" + "*_Lx_" + str(int(L)) + "*V_" + format(h, '.6f') + "*GS*__gc")
 		#ed_glob = glob.glob("../../ctint/data/ed*" + "L_" + str(int(L)) + "*V_" + format(h, '.6f') + "*T_" + format(0.01, '.6f') + "*")
 		
-		ed_glob = []
+		#ed_glob = []
 		if len(ed_glob) > 0:
 			ed_file = open(ed_glob[0])
 			ed_data = parse_ed_file(ed_file)
@@ -164,11 +164,12 @@ for f in filelist:
 			#y_tau = np.abs((y_tau[numpy.isfinite(y_tau)] - 0.23882))
 			#err_tau = err_tau[numpy.isfinite(err_tau)]
 			
-			
-			y_tau = np.abs(y_tau[numpy.isfinite(y_tau)])
-			err_tau = err_tau[numpy.isfinite(err_tau)]
 			e = ArrangePlot(elist[i], "epsilon_V")[0][0]
 			s = ArrangePlot(elist[i], "epsilon_V")[1][0]
+			
+			y_tau = np.abs(y_tau[numpy.isfinite(y_tau)])*e
+			err_tau = err_tau[numpy.isfinite(err_tau)]*e
+			
 			plt.axhline(e*e, color='r', linewidth=2.0, linestyle='--')
 			plt.axhline(e*e+2.*s*e, color='r', linewidth=1.0, linestyle='--')
 			plt.axhline(e*e-2.*s*e, color='r', linewidth=1.0, linestyle='--')
@@ -180,14 +181,16 @@ for f in filelist:
 			err_tau = np.sqrt(np.array(ArrangePlot(elist[i], "dyn_tp_mat_0_tau")[1])**2. + np.array(ArrangePlot(elist[i], "dyn_tp_mat_3_tau")[1])**2.)/2.
 		elif obs == "Hv":
 			k = ArrangePlot(elist[i], "pert_order")[0][0]
-			y_tau = np.abs(y_tau[numpy.isfinite(y_tau)])# / (k*(k-1)/2)
-			err_tau = err_tau[numpy.isfinite(err_tau)]# / (k*(k-1)/2)
+			e = np.abs(ArrangePlot(elist[i], "Hv")[0][0])
+			s = ArrangePlot(elist[i], "Hv")[1][0]
+			
+			y_tau = np.abs(y_tau[numpy.isfinite(y_tau)])
+			err_tau = err_tau[numpy.isfinite(err_tau)]
 
-			e = ArrangePlot(elist[i], "epsilon")[0][0]
-			s = ArrangePlot(elist[i], "epsilon")[1][0]
 			plt.axhline(e*e, color='r', linewidth=2.0, linestyle='--')
-			plt.axhline(e*e+2.*s*e, color='r', linewidth=1.0, linestyle='--')
-			plt.axhline(e*e-2.*s*e, color='r', linewidth=1.0, linestyle='--')
+			plt.axhline(e*e+e*s, color='r', linewidth=1.0, linestyle='--')
+			plt.axhline(e*e-e*s, color='r', linewidth=1.0, linestyle='--')
+			
 		else:
 			y_tau = np.abs(y_tau[numpy.isfinite(y_tau)])
 			err_tau = err_tau[numpy.isfinite(err_tau)]
@@ -226,7 +229,7 @@ for f in filelist:
 			ax.plot(ed_tau, ed_data[ed_n], marker='o', color="b", markersize=10.0, linewidth=0.0, label=r'$L='+str(int(L))+'$')
 			#ax.plot(ed_tau, np.flipud(ed_data[ed_n]), marker='o', color="b", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+'$')
 		
-		'''
+		
 		j = 1
 		#f_min = 150; f_max = 300
 		f_min = 0
@@ -292,8 +295,8 @@ for f in filelist:
 			
 			#min = 0; nmax = 2*int(plist[i]["discrete_tau"])
 			#nmin = fit_x[fit_re.index(min(np.abs(fit_re)))]; nmax = f_max
-			nmin = 20; nmax = len(x_tau)-1
-			#nmin = 5; nmax = 25
+			nmin = 10; nmax = len(x_tau)-1
+			#nmin = 5; nmax = 15
 			#parameter, perr = fit_function( [1., 6., 1.2], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
 			parameter, perr = fit_function( [0.1, 0.1, 1.], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
 			print parameter
@@ -312,7 +315,7 @@ for f in filelist:
 			
 			#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2] * (2.*L*L)**0.5, 2))
 			print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2], 5)) + "\t\t" + str(round(perr[2], 2))
-		'''
+		
 		
 		'''
 		nmin = 35

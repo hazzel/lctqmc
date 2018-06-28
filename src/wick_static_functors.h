@@ -59,6 +59,25 @@ struct wick_static_epsilon
 	}
 };
 
+struct wick_static_Hv
+{
+	Random& rng;
+	parameters& param;
+	lattice& lat;
+
+	wick_static_Hv(Random& rng_, parameters& param_, lattice& lat_)
+		: rng(rng_), param(param_), lat(lat_)
+	{}
+	
+	double get_obs(const matrix_t& et_gf)
+	{
+		numeric_t e = 0.;
+		for (auto& a : lat.bonds("single_d1_bonds"))
+			e -= param.V * std::real(et_gf(a.second, a.first) * et_gf(a.first, a.second));
+		return std::real(e);
+	}
+};
+
 // M2(tau) = sum_ij [ eta_i eta_j <(n_i - 1/2)(n_j - 1/2)> ]
 struct wick_static_M2
 {
