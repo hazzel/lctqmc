@@ -557,7 +557,6 @@ class green_function
 			Eigen::RowVectorXd rj = uK.row(sj) * g_tau - uK.row(sj);
 			g_tau.noalias() -= (g_tau*uKdag.col(sj)) * ri / gij + (g_tau*uKdag.col(si)) * rj / gji;
 			
-			
 			/*
 			vector_t W_L_uKdag_sj = W_tau * L_uKdag_sj;
 			vector_t L_uKdag_si = L_tau * uKdag.col(si);

@@ -1,5 +1,5 @@
-SWEEPS = 100000000
-warmup = 1000
+SWEEPS = 10000
+warmup = 100
 prebin = 32
 
 tprime = 0.
@@ -27,16 +27,4 @@ inv_symmetry = -1
 
 L = 2
 theta = 80
-{V = 1.0}
-
-L = 2
-theta = 160
-{V = 1.0}
-
-L = 2
-theta = 320
-{V = 1.0}
-
-L = 2
-theta = 640
 {V = 1.0}
