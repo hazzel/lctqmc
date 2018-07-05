@@ -17,7 +17,10 @@ from texify import *
 import scipy.integrate
 
 def FitFunctionL(x, a, b, c):
-	return b*np.exp(-c*x)+a
+	if obs == "Hv":
+		return b*np.exp(-c*x)+a
+	else:
+		return b*np.exp(-c*x)
 
 def FitFunctionR(x, a, b, c):
 	return a + b*np.exp(c*x)
@@ -54,10 +57,15 @@ marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
 filelist = []
 
 filelist.append(glob.glob("../job/*.out"))
+#filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/job_L5_ep/job_V1.0/*03.out"))
+#filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/job_L5_ep/job_V1.7/*02.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/lctqmc_L14_theta40/*0010.out"))
 #filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/cluster_work/code/lctqmc/jobs/K_point/lctqmc_L6_theta40/*08.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/tprime=0.5/lctqmc_L6_tprime0.5_theta40/*.out"))
+
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/K_point/theta160/lctqmc_L12_s_theta160/*00*.out"))
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/K_point/theta160/lctqmc_ep_L9_as_theta160/*0007.out"))
 
 filelist[0].sort()
 
@@ -181,15 +189,15 @@ for f in filelist:
 			err_tau = np.sqrt(np.array(ArrangePlot(elist[i], "dyn_tp_mat_0_tau")[1])**2. + np.array(ArrangePlot(elist[i], "dyn_tp_mat_3_tau")[1])**2.)/2.
 		elif obs == "Hv":
 			k = ArrangePlot(elist[i], "pert_order")[0][0]
-			e = np.abs(ArrangePlot(elist[i], "Hv")[0][0])
-			s = ArrangePlot(elist[i], "Hv")[1][0]
+			#e = np.abs(ArrangePlot(elist[i], "Hv")[0][0])
+			#s = ArrangePlot(elist[i], "Hv")[1][0]
 			
 			y_tau = np.abs(y_tau[numpy.isfinite(y_tau)])
 			err_tau = err_tau[numpy.isfinite(err_tau)]
 
-			plt.axhline(e*e, color='r', linewidth=2.0, linestyle='--')
-			plt.axhline(e*e+e*s, color='r', linewidth=1.0, linestyle='--')
-			plt.axhline(e*e-e*s, color='r', linewidth=1.0, linestyle='--')
+			#plt.axhline(e*e, color='r', linewidth=2.0, linestyle='--')
+			#plt.axhline(e*e+e*s, color='r', linewidth=1.0, linestyle='--')
+			#plt.axhline(e*e-e*s, color='r', linewidth=1.0, linestyle='--')
 			
 		else:
 			y_tau = np.abs(y_tau[numpy.isfinite(y_tau)])
@@ -230,12 +238,25 @@ for f in filelist:
 			#ax.plot(ed_tau, np.flipud(ed_data[ed_n]), marker='o', color="b", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+'$')
 		
 		
+		nmin = 15; nmax = len(x_tau)-1
+		#parameter, perr = fit_function( [5., 0.5, 0.5], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
+		parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[5., 0.5, 0.5], method='trf')
+	
+		px = np.linspace(x_tau[nmin], x_tau[nmax], 1000)
+		ax.plot(px, FitFunctionL(px, *parameter), 'k-', linewidth=3.0)
+		
+		#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2] * (2.*L*L)**0.5, 2))
+		#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2], 5)) + "\t\t" + str(round(perr[2], 2))
+		
+		print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2,2]**0.5 * (2.*L*L)**0.5, 2))
+			
+		'''
 		j = 1
 		#f_min = 150; f_max = 300
 		f_min = 0
 		#f_max = 25
 		f_max = len(x_tau)-1
-		step = 50
+		step = 5
 		fit_x = []
 		fit_y = []
 		fit_e = []
@@ -246,13 +267,13 @@ for f in filelist:
 			nmax = f_max
 			
 			try:
-				#parameter, perr = fit_function( [0.1, 0.1, 1.], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
+				#parameter, perr = fit_function( [10., 1., 1.], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
 				#fit_x.append(nmin)
 				#fit_y.append(parameter[2]*(2.*L*L)**0.5)
 				#fit_e.append(perr[2]*(2.*L*L)**0.5)
 				#fit_re.append((perr[2] / parameter[2])*(2.*L*L)**0.5)
 				
-				parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[0.1, 0.1, 1.], method='trf')
+				parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[5., 0.5, 0.5], method='trf')
 				fit_x.append(nmin)
 				fit_y.append(parameter[2]*(2.*L*L)**0.5)
 				fit_e.append(np.abs(np.sqrt(perr[2,2]))*(2.*L*L)**0.5)
@@ -295,11 +316,11 @@ for f in filelist:
 			
 			#min = 0; nmax = 2*int(plist[i]["discrete_tau"])
 			#nmin = fit_x[fit_re.index(min(np.abs(fit_re)))]; nmax = f_max
-			nmin = 10; nmax = len(x_tau)-1
-			#nmin = 5; nmax = 15
+			#nmin = 40; nmax = 70
+			nmin = 15; nmax = len(x_tau)-1
 			#parameter, perr = fit_function( [1., 6., 1.2], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
-			parameter, perr = fit_function( [0.1, 0.1, 1.], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
-			print parameter
+			parameter, perr = fit_function( [5., 0.5, 0.5], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
+			#print parameter
 			#parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[0.1, 0.1, 1.])
 		
 			px = np.linspace(x_tau[nmin], x_tau[nmax], 1000)
@@ -315,7 +336,8 @@ for f in filelist:
 			
 			#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2] * (2.*L*L)**0.5, 2))
 			print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2], 5)) + "\t\t" + str(round(perr[2], 2))
-		
+			print parameter
+		'''
 		
 		'''
 		nmin = 35

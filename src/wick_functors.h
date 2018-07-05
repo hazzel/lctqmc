@@ -506,6 +506,39 @@ struct wick_sp
 	}
 };
 
+struct wick_sp_q
+{
+	Random& rng;
+	parameters& param;
+	lattice& lat;
+
+	wick_sp_q(Random& rng_, parameters& param_, lattice& lat_)
+		: rng(rng_), param(param_), lat(lat_)
+	{}
+	
+	double get_obs(const matrix_t& et_gf_0, const matrix_t& et_gf_t,
+		const matrix_t& td_gf)
+	{
+		const numeric_t *ca_td_gf = td_gf.data();
+		numeric_t sp = 0.;
+		auto& K = lat.symmetry_point("Kq");
+		const int N = lat.n_sites();
+		for (int o = 0; o < 2; ++o)
+		for (int i = 0; i < N; i+=2)
+		{
+			auto& r_i = lat.real_space_coord(i);
+			for (int j = 0; j < N; j+=2)
+			{
+				auto& r_j = lat.real_space_coord(j);
+				double kdot = K.dot(r_i - r_j);
+				sp += std::cos(kdot) * ca_td_gf[(j+o)*N+(i+o)] * lat.parity(i+o)*lat.parity(j+o);
+				//sp += std::cos(kdot) * ca_td_gf[j*N+i] * (1. + lat.parity(i)*lat.parity(j));
+			}
+		}
+		return std::real(sp) / N;
+	}
+};
+
 struct wick_tp
 {
 	Random& rng;

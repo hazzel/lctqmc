@@ -128,6 +128,7 @@ struct honeycomb
 		points["Gamma"] = closest_k_point({0., 0.});
 		points["M"] = closest_k_point({2.*pi/3., 0.});
 		points["q"] = closest_k_point(b1 / Lx);
+		points["Kq"] = closest_k_point(b1 / Lx + Eigen::Vector2d{2.*pi/3., 2.*pi/3./std::sqrt(3.)});
 		l.add_symmetry_points(points);
 		
 		/*

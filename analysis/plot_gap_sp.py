@@ -40,7 +40,8 @@ def closest_k_point(L):
 			d_q = d_k
 	return [q, d_q]
 
-filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/sp-s-*tprime*-theta*.txt")[0]
+#filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/sp-s-*tprime*-theta*.txt")[0]
+filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/K_point/delta_sp.txt")[0]
 with open(filename) as f:
 	lines = (line for line in f if not line.startswith('L'))
 	new_del = []
@@ -69,21 +70,24 @@ for i in range(len(L_list)-1):
 	#data[L_list[i]:L_list[i+1],2] *= 3./2. * d_q / np.abs(float(e_k[str(L)]))
 	#data[L_list[i]:L_list[i+1],3] *= 3./2. * d_q / np.abs(float(e_k[str(L)]))
 	
-	ax.plot( data[L_list[i]:L_list[i+1],1], data[L_list[i]:L_list[i+1],2]*L, marker="o", color=color_cycle[cnt], markersize=10.0, linewidth=0.0, label=r"$L="+str(L)+"$")
-	(_, caps, _) = ax.errorbar(data[L_list[i]:L_list[i+1],1], data[L_list[i]:L_list[i+1],2]*L, yerr=data[L_list[i]:L_list[i+1],3]*L, marker='None', capsize=8, color=color_cycle[cnt], linewidth=0.0)
+	#data[L_list[i]:L_list[i+1],2] /= (2.*L*L)**0.5
+	#data[L_list[i]:L_list[i+1],3] /= (2.*L*L)**0.5
+	
+	ax.plot( data[L_list[i]:L_list[i+1],1], data[L_list[i]:L_list[i+1],2], marker="o", color=color_cycle[cnt], markersize=10.0, linewidth=0.0, label=r"$L="+str(L)+"$")
+	(_, caps, _) = ax.errorbar(data[L_list[i]:L_list[i+1],1], data[L_list[i]:L_list[i+1],2], yerr=data[L_list[i]:L_list[i+1],3], marker='None', capsize=8, color=color_cycle[cnt], linewidth=0.0)
 	for cap in caps:
 		cap.set_markeredgewidth(1.6)
 	
 	x = data[L_list[i]:L_list[i+1],1]
-	y = data[L_list[i]:L_list[i+1],2]*L
+	y = data[L_list[i]:L_list[i+1],2]
 	xnew = np.linspace(x.min(), x.max(), 300)
 	f = scipy.interpolate.interp1d(x, y, kind=1)
 	ax.plot( xnew, f(xnew), color=color_cycle[cnt], markersize=0.0, linewidth=2.0)
 	cnt += 1
 
 pylab.xlabel(r"$V$", fontsize=18)
-pylab.ylabel(r"$\Delta_{\text{cdw}} \ \sqrt{N} \ v_F \ |\boldsymbol{q}| \ / \ |E(\boldsymbol{K}+\boldsymbol{q})|$", fontsize=18)
-#pylab.ylabel(r"$\Delta_{\text{cdw}} \ \sqrt{N}$", fontsize=18)
+#pylab.ylabel(r"$\Delta_{\text{cdw}} \ \sqrt{N} \ v_F \ |\boldsymbol{q}| \ / \ |E(\boldsymbol{K}+\boldsymbol{q})|$", fontsize=18)
+pylab.ylabel(r"$\Delta_{\text{sp}} \ \sqrt{N}$", fontsize=18)
 #ax.axvline(1.355, color='k', linestyle='--')
 
 plt.legend(borderpad=0.05, labelspacing=0.)
