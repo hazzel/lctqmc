@@ -31,6 +31,9 @@ def ExpSumFunction(x, a, b, c, d):
 def LinearFunction(x, a, b):
 	return a - b*x
 
+def DecayFunction(x, a, b, c, d):
+	return b*np.exp(-c*x)+a
+
 def parse_ed_file(filename):
 	ed_data = []
 	ed_lines = ed_file.read().splitlines()
@@ -64,8 +67,14 @@ filelist.append(glob.glob("../job/*.out"))
 #filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/cluster_work/code/lctqmc/jobs/K_point/lctqmc_L6_theta40/*08.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/tprime=0.5/lctqmc_L6_tprime0.5_theta40/*.out"))
 
-#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/K_point/theta160/lctqmc_L12_s_theta160/*00*.out"))
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/K_point/theta160_sp_q/lctqmc_L9_as_theta160_sp_q/*16.out"))
+
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/K_point/theta160/lctqmc_ep_L9_as_theta160/*0007.out"))
+
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_ep_L8_theta40/*0011.out"))
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_ep_L7_theta40/*0006.out"))
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_ep_L5_theta40/*0010.out"))
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_ep_L5_theta40/*0011.out"))
 
 filelist[0].sort()
 
@@ -239,70 +248,64 @@ for f in filelist:
 		
 		
 		nmin = 15; nmax = len(x_tau)-1
-		#parameter, perr = fit_function( [5., 0.5, 0.5], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
-		parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[5., 0.5, 0.5], method='trf')
+		parameter, perr = fit_function( [5., 0.5, 0.5], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
+		#parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[5., 0.5, 0.5], method='trf')
 	
 		px = np.linspace(x_tau[nmin], x_tau[nmax], 1000)
 		ax.plot(px, FitFunctionL(px, *parameter), 'k-', linewidth=3.0)
 		
 		#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2] * (2.*L*L)**0.5, 2))
-		#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2], 5)) + "\t\t" + str(round(perr[2], 2))
+		print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2], 5)) + "\t\t" + str(round(perr[2], 2))
 		
-		print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2,2]**0.5 * (2.*L*L)**0.5, 2))
-			
-		'''
+		#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2,2]**0.5 * (2.*L*L)**0.5, 2))
+		
+		
 		j = 1
-		#f_min = 150; f_max = 300
 		f_min = 0
-		#f_max = 25
-		f_max = len(x_tau)-1
+		f_max = 40
 		step = 5
 		fit_x = []
 		fit_y = []
 		fit_e = []
 		fit_re = []
-		while f_min + j*step <= f_max:
+		while f_min + (j-1)*step <= f_max:
 			nmin = f_min + (j-1) * step
-			#nmax = f_min + j * step
-			nmax = f_max
+			nmax = len(x_tau)-1
 			
 			try:
-				#parameter, perr = fit_function( [10., 1., 1.], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
-				#fit_x.append(nmin)
-				#fit_y.append(parameter[2]*(2.*L*L)**0.5)
-				#fit_e.append(perr[2]*(2.*L*L)**0.5)
-				#fit_re.append((perr[2] / parameter[2])*(2.*L*L)**0.5)
-				
-				parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[5., 0.5, 0.5], method='trf')
+				parameter, perr = fit_function( [10., 1., 1.], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
 				fit_x.append(nmin)
 				fit_y.append(parameter[2]*(2.*L*L)**0.5)
-				fit_e.append(np.abs(np.sqrt(perr[2,2]))*(2.*L*L)**0.5)
-				fit_re.append(np.abs(np.sqrt(perr[2,2]) / parameter[2])*(2.*L*L)**0.5)
+				fit_e.append(perr[2]*(2.*L*L)**0.5)
+				fit_re.append((perr[2] / parameter[2])*(2.*L*L)**0.5)
+				
+				#parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[5., 0.5, 0.5], method='trf')
+				#fit_x.append(nmin)
+				#fit_y.append(parameter[2]*(2.*L*L)**0.5)
+				#fit_e.append(np.abs(np.sqrt(perr[2,2]))*(2.*L*L)**0.5)
+				#fit_re.append(np.abs(np.sqrt(perr[2,2]) / parameter[2])*(2.*L*L)**0.5)
 			except RuntimeError:
 				print "run time error during fit"
-		
-			px = np.linspace(x_tau[nmin], x_tau[nmax], 1000)
-			#ax.plot(px, FitFunctionL(px, *parameter), 'k-', linewidth=3.0)
-			#print "V = " + str(h)
-			#print parameter
-			#print perr
-			#print parameter*(2.*L*L)**0.5
-			#print perr*(2.*L*L)**0.5
 			
 			j+=1
 		ax.axvline(f_min*dtau, color='k', linestyle='--')
 		ax.axvline(f_max*dtau, color='k', linestyle='--')
 		ax.legend()
 		
-		#f2, ax2 = plt.subplots(1, 1)
-		#ax2.set_xlabel(r"$\tau_{min}$", fontsize=16)
-		#ax2.set_ylabel(r"$\Delta_{sp} \sqrt{N}$", fontsize=16)
-		#ax2.plot(fit_x, fit_y, marker='o', markersize=8.0, color="k")
-		#(_, caps, _) = ax2.errorbar(fit_x, fit_y, yerr=fit_e, marker='None', capsize=8, color="k")
-		#for cap in caps:
-		#	cap.set_markeredgewidth(1.6)
+		f2, ax2 = plt.subplots(1, 1)
+		ax2.set_xlabel(r"$\tau_{min}$", fontsize=16)
+		ax2.set_ylabel(r"$\Delta_{sp} \sqrt{N}$", fontsize=16)
+		ax2.plot(fit_x, fit_y, marker='o', markersize=8.0, color="k")
+		(_, caps, _) = ax2.errorbar(fit_x, fit_y, yerr=fit_e, marker='None', capsize=8, color="k")
+		for cap in caps:
+			cap.set_markeredgewidth(1.6)
 		
+		#parameter, perr = scipy.optimize.curve_fit( DecayFunction, fit_x, fit_y, p0=[1., 0.5, 0.5, 0.1], method='trf')
+		#px = np.linspace(fit_x[0], fit_x[-1], 1000)
+		#ax2.plot(px, DecayFunction(px, *parameter), 'r-', linewidth=3.0)
+		#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[0], 5)) + "\t\t\t\t\t" + str(round(perr[0,0]**0.5, 2))
 		
+		'''
 		if len(fit_re) > 0:
 			#ax2.axvline(fit_x[fit_re.index(min(np.abs(fit_re)))])
 			#ax2.axhline(fit_y[fit_re.index(min(np.abs(fit_re)))])
@@ -334,9 +337,9 @@ for f in filelist:
 			#print "Delta = ", parameter[2], " +- ", perr[2]
 			#print "------"
 			
-			#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2] * (2.*L*L)**0.5, 2))
-			print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2], 5)) + "\t\t" + str(round(perr[2], 2))
-			print parameter
+			print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2] * (2.*L*L)**0.5, 2))
+			#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2], 5)) + "\t\t" + str(round(perr[2], 2))
+			#print parameter
 		'''
 		
 		'''

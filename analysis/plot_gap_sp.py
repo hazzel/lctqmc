@@ -18,6 +18,9 @@ from texify import *
 import scipy.integrate
 import scipy.interpolate
 
+def LinearFunction(x, a, b):
+	return a + b*x
+
 plt.rc('text', usetex=True)
 plt.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
 plt.rcParams.update({'font.size': 20})
@@ -35,13 +38,14 @@ def closest_k_point(L):
 	d_q = np.linalg.norm(q - K)
 	for i in range(len(k)):
 		d_k = np.linalg.norm(k[i] - K)
-		if d_k < d_q:
+		if d_k < d_q and d_k > 1E-12:
 			q = k[i]
 			d_q = d_k
 	return [q, d_q]
 
 #filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/sp-s-*tprime*-theta*.txt")[0]
-filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/K_point/delta_sp.txt")[0]
+#filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/gapped_spectrum/delta_sp.txt")[0]
+filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/K_point/delta_sp_q.txt")[0]
 with open(filename) as f:
 	lines = (line for line in f if not line.startswith('L'))
 	new_del = []
@@ -53,7 +57,7 @@ cnt = 0
 L_list = []
 ax = plt.gca()
 
-e_k = {"4" : "-1", "5" : "-0.618034", "7" : "-0.554958", "8" : "-0.414214", "10" : "-0.381966", "11" : "-0.309721", "13" : "0.29079", "14" : "0.24698"}
+e_k = {"4" : "-1", "5" : "-0.618034", "6" : "-1", "7" : "-0.554958", "8" : "-0.414214", "9" : "-0.68404", "10" : "-0.381966", "11" : "-0.309721", "13" : "0.29079", "14" : "0.24698"}
 b1 = np.array([2.*np.pi/3., 2.*np.pi/np.sqrt(3.)])
 b2 = np.array([2.*np.pi/3., -2.*np.pi/np.sqrt(3.)])
 K = [2.*np.pi/3., 2.*np.pi/3./np.sqrt(3.)]
@@ -67,8 +71,8 @@ for i in range(len(L_list)-1):
 	L = int(data[L_list[i], 0])
 	
 	q, d_q = closest_k_point(L)
-	#data[L_list[i]:L_list[i+1],2] *= 3./2. * d_q / np.abs(float(e_k[str(L)]))
-	#data[L_list[i]:L_list[i+1],3] *= 3./2. * d_q / np.abs(float(e_k[str(L)]))
+	data[L_list[i]:L_list[i+1],2] *= 3./2. * d_q / np.abs(float(e_k[str(L)]))
+	data[L_list[i]:L_list[i+1],3] *= 3./2. * d_q / np.abs(float(e_k[str(L)]))
 	
 	#data[L_list[i]:L_list[i+1],2] /= (2.*L*L)**0.5
 	#data[L_list[i]:L_list[i+1],3] /= (2.*L*L)**0.5
@@ -83,6 +87,14 @@ for i in range(len(L_list)-1):
 	xnew = np.linspace(x.min(), x.max(), 300)
 	f = scipy.interpolate.interp1d(x, y, kind=1)
 	ax.plot( xnew, f(xnew), color=color_cycle[cnt], markersize=0.0, linewidth=2.0)
+	
+	nmin = 0
+	nmax = 7
+	parameter, perr = fit_function( [6., 1.], x[nmin:nmax], y[nmin:nmax], LinearFunction, datayerrors=data[L_list[i]:L_list[i+1],3][nmin:nmax])
+	px = np.linspace(x[0], x[-1], 1000)
+	ax.plot(px, LinearFunction(px, *parameter), 'k-', linewidth=3.0)
+	print "L = ", L, ", v = ", parameter[1], " +- ", perr[1]
+	
 	cnt += 1
 
 pylab.xlabel(r"$V$", fontsize=18)
