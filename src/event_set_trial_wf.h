@@ -497,17 +497,17 @@ struct event_set_trial_wf
 		
 		//std::cout << solver.eigenvalues() << std::endl;
 		
-		std::vector<numeric_t> total_quantum_numbers = {{1., 1., 1., 1., 1.}};
-		std::vector<numeric_t> ph_2p_parity(4);
-		std::vector<std::vector<int>> energy_levels = get_energy_levels(solver.eigenvalues());
-		
-		auto S_f = symmetrize_EV(solver.eigenvectors(), solver.eigenvalues(), inv_pm);
-		
 		if (lat.n_sites() % 3 != 0)
-			P = S_f.leftCols(lat.n_sites()/2);
-			//P = solver.eigenvectors().leftCols(lat.n_sites()/2);
+			P = solver.eigenvectors().leftCols(lat.n_sites()/2);
+			//P = S_f.leftCols(lat.n_sites()/2);
 		else
 		{
+			std::vector<numeric_t> total_quantum_numbers = {{1., 1., 1., 1., 1.}};
+			std::vector<numeric_t> ph_2p_parity(4);
+			std::vector<std::vector<int>> energy_levels = get_energy_levels(solver.eigenvalues());
+			
+			auto S_f = symmetrize_EV(solver.eigenvectors(), solver.eigenvalues(), inv_pm);
+		
 			for (int i = 0; i < lat.n_sites()/2-2; ++i)
 			{
 				total_quantum_numbers[0] *= (S_f.col(i).adjoint() * inv_pm * S_f.col(i)).trace();
