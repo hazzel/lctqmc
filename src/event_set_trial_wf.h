@@ -505,6 +505,8 @@ struct event_set_trial_wf
 			return;
 		matrix_t tw = set_twf_matrix();
 		
+		std::cout << tw << std::endl;
+		
 		matrix_t P;
 		Eigen::SelfAdjointEigenSolver<matrix_t> solver(tw);
 		matrix_t inv_pm = matrix_t::Zero(lat.n_sites(), lat.n_sites()),

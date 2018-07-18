@@ -86,8 +86,6 @@ class green_function
 		
 		void set_trial_wf(const matrix_t& P)
 		{
-			print_matrix(P);
-			
 			uKdagP = uKdag * P;
 			
 			//Eigen::JacobiSVD<matrix_t> svd(uKdagP, Eigen::ComputeThinU);
