@@ -206,6 +206,11 @@ class green_function
 				}
 			}
 			g_tau = g_stable();
+			std::cout << "tau = " << tpos << std::endl;
+			std::cout << "gf:" << std::endl;
+			matrix_t g_site = uK * g_tau * uKdag;
+			print_matrix(g_site);
+			std::cout << std::endl;
 			//stabilize();
 		}
 		
@@ -529,12 +534,6 @@ class green_function
 					}
 				}
 			}
-			
-			std::cout << "tau = " << tpos << std::endl;
-			std::cout << "gf:" << std::endl;
-			matrix_t g_site = uK * g_tau * uKdag;
-			print_matrix(g_site);
-			std::cout << std::endl;
 		}
 		
 		numeric_t gij(const int si, const int sj)

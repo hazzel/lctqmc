@@ -26,6 +26,7 @@ mc::mc(const std::string& dir)
 	
 	param.trial_wave_function = pars.value_or_default<std::string>("trial_wave_function", "t_only");
 	param.projective = pars.value_or_default<std::string>("method", "projective") == "projective" ? true : false;
+	std::cout << "projective: " << param.projective << std::endl;
 	param.theta = pars.value_or_default<double>("theta", 40);
 	param.block_size = pars.value_or_default<double>("block_size", 0.25);
 	param.measure_window = pars.value_or_default<double>("measure_window", param.theta/4.);
