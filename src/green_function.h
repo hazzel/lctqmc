@@ -529,6 +529,12 @@ class green_function
 					}
 				}
 			}
+			
+			std::cout << "tau = " << tpos << std::endl;
+			std::cout << "gf:" << std::endl;
+			matrix_t g_site = uK * g_tau * uKdag;
+			print_matrix(g_site);
+			std::cout << std::endl;
 		}
 		
 		numeric_t gij(const int si, const int sj)
@@ -669,11 +675,6 @@ class green_function
 			const std::vector<vector_wick_static_base<matrix_t>>& vec_obs)
 		{
 			matrix_t g_site = uK * g_tau * uKdag;
-			
-			std::cout << "tau = " << tpos << std::endl;
-			std::cout << "gf:" << std::endl;
-			print_matrix(g_site);
-			std::cout << std::endl;
 			
 			/*
 			matrix_t g_site;
