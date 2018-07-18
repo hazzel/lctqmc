@@ -107,6 +107,10 @@ class green_function
 				int block = tpos / param.block_size;
 				storage[0] = uKdagP;
 				
+				std::cout << "uKdagP" << std::endl;
+				std::cout << uKdagP << std::endl;
+				std::cout << std::endl;
+				
 				for (int i=0; i < block; ++i)
 				{
 					matrix_t UR = storage[i];
