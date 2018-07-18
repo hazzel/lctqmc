@@ -23,7 +23,8 @@ struct event_build
 
 	void trigger()
 	{
-		unsigned Nv = 0.15 * (param.theta * lat.n_sites() * param.V);
+		//unsigned int Nv = 0.15 * (param.theta * lat.n_sites() * param.V);
+		unsigned int Nv = 0;
 		green_function::vlist_t vlist;
 		for (int i = 0; i < Nv; ++i)
 		{
