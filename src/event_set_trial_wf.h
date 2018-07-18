@@ -523,7 +523,7 @@ struct event_set_trial_wf
 			ph_pm(i, i) = lat.parity(i);
 		}
 		
-		std::cout << solver.eigenvalues() << std::endl;
+		//std::cout << solver.eigenvalues() << std::endl;
 		//P = solver.eigenvectors().leftCols(lat.n_sites()/2);
 		
 		if (lat.n_sites() % 3 != 0)
