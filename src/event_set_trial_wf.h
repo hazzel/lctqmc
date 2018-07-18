@@ -459,6 +459,34 @@ struct event_set_trial_wf
 		{
 			for (auto& a : lat.bonds("nearest neighbors"))
 				tw(a.first, a.second) += -param.t;
+
+			/*
+			std::complex<double> im(0., 1.);
+			const double pi = std::atan(1.0)*4;
+			double theta_x = pi, theta_y = pi;
+			for (auto& a : lat.bonds("edge_x"))
+			{
+				tw(a.first, a.second) = -param.t * std::exp(im * theta_x);
+				tw(a.second, a.first) = -param.t * std::exp(-im * theta_x);
+			}
+			for (auto& a : lat.bonds("edge_y"))
+			{
+				tw(a.first, a.second) = -param.t * std::exp(im * theta_y);
+				tw(a.second, a.first) = -param.t * std::exp(-im * theta_y);
+			}
+			*/
+			/*
+			for (auto& a : lat.bonds("edge_x"))
+			{
+				tw(a.first, a.second) = +param.t;
+				tw(a.second, a.first) = +param.t;
+			}
+			for (auto& a : lat.bonds("edge_y"))
+			{
+				tw(a.first, a.second) = +param.t;
+				tw(a.second, a.first) = +param.t;
+			}
+			*/
 		}
 		else
 		{
@@ -495,7 +523,8 @@ struct event_set_trial_wf
 			ph_pm(i, i) = lat.parity(i);
 		}
 		
-		//std::cout << solver.eigenvalues() << std::endl;
+		std::cout << solver.eigenvalues() << std::endl;
+		//P = solver.eigenvectors().leftCols(lat.n_sites()/2);
 		
 		if (lat.n_sites() % 3 != 0)
 			P = solver.eigenvectors().leftCols(lat.n_sites()/2);

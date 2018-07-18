@@ -463,5 +463,28 @@ struct honeycomb
 					list.push_back({l.inverted_site(neighbor_site(n, 1)), l.inverted_site(n)});
 				}
 		});
+		
+		l.generate_bond_map("edge_x", [&]
+		(lattice::pair_vector_t& list)
+		{
+			for (int i = 0; i < Lx; ++i)
+			{
+				int m = i * 2 * Lx;
+				int n = (i+1) * 2 * Lx - 1;
+				list.push_back({m, n});
+			}
+		});
+		
+		l.generate_bond_map("edge_y", [&]
+		(lattice::pair_vector_t& list)
+		{
+			list.push_back({(Ly - 1) * 2 * Ly, 2 * Lx - 1});
+			for (int j = 1; j < Ly; ++j)
+			{
+				int m = (j - 1) * 2 + 1;
+				int n = (Ly - 1) * 2 * Ly + j * 2;
+				list.push_back({m, n});
+			}
+		});
 	}
 };

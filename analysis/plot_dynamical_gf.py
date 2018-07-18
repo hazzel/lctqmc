@@ -59,7 +59,7 @@ marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
 
 filelist = []
 
-filelist.append(glob.glob("../job/*.out"))
+#filelist.append(glob.glob("../job/*.out"))
 #filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/job_L5_ep/job_V1.0/*03.out"))
 #filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/job_L5_ep/job_V1.7/*02.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*.out"))
@@ -69,7 +69,7 @@ filelist.append(glob.glob("../job/*.out"))
 
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/K_point/theta160_sp_q/lctqmc_L9_as_theta160_sp_q/*16.out"))
 
-#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/K_point/theta160/lctqmc_ep_L9_as_theta160/*0007.out"))
+filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/K_point/theta160/lctqmc_ep_L9_as_theta160/*7.out"))
 
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_ep_L8_theta40/*0011.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_ep_L7_theta40/*0006.out"))
@@ -247,22 +247,22 @@ for f in filelist:
 			#ax.plot(ed_tau, np.flipud(ed_data[ed_n]), marker='o', color="b", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+'$')
 		
 		
-		nmin = 15; nmax = len(x_tau)-1
+		nmin = 50; nmax = len(x_tau)-1
 		parameter, perr = fit_function( [5., 0.5, 0.5], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
 		#parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[5., 0.5, 0.5], method='trf')
 	
 		px = np.linspace(x_tau[nmin], x_tau[nmax], 1000)
 		ax.plot(px, FitFunctionL(px, *parameter), 'k-', linewidth=3.0)
 		
-		#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2] * (2.*L*L)**0.5, 2))
-		print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2], 5)) + "\t\t" + str(round(perr[2], 2))
+		print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2] * (2.*L*L)**0.5, 2))
+		#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2], 5)) + "\t\t" + str(round(perr[2], 2))
 		
 		#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2,2]**0.5 * (2.*L*L)**0.5, 2))
 		
 		
 		j = 1
 		f_min = 0
-		f_max = 40
+		f_max = 60
 		step = 5
 		fit_x = []
 		fit_y = []

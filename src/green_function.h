@@ -63,7 +63,8 @@ class green_function
 {
 	public:
 		using numeric_t = double;
-		using vector_t = Eigen::VectorXd;
+		//using numeric_t = std::complex<double>;
+		using vector_t = Eigen::Matrix<numeric_t, Eigen::Dynamic, 1>;
 		using row_vector_t = Eigen::Matrix<numeric_t, 1, Eigen::Dynamic>;
 		using matrix_t = Eigen::Matrix<numeric_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>;
 		using diag_matrix_t = Eigen::DiagonalMatrix<numeric_t, Eigen::Dynamic>;
@@ -530,7 +531,7 @@ class green_function
 			}
 		}
 		
-		double gij(const int si, const int sj)
+		numeric_t gij(const int si, const int sj)
 		{	// current g in the site basis 
 			// (U gtau U^{dagger} )_ij 
 			
@@ -549,12 +550,13 @@ class green_function
 		}
 		
 		//update changes g_tau 
-		void update(const int si, const int sj, const double gij, const double gji)
+		void update(const int si, const int sj, const numeric_t& gij, const numeric_t& gji)
 		{
 			
 			//update g_tau
-			Eigen::RowVectorXd ri = uK_si_gtau - uK.row(si);
-			Eigen::RowVectorXd rj = uK.row(sj) * g_tau - uK.row(sj);
+			row_vector_t ri = uK_si_gtau - uK.row(si);
+			row_vector_t rj = -uK.row(sj);
+			rj.noalias() += uK.row(sj) * g_tau;
 			g_tau.noalias() -= (g_tau*uKdag.col(sj)) * ri / gij + (g_tau*uKdag.col(si)) * rj / gji;
 			
 			/*
@@ -602,8 +604,8 @@ class green_function
 			unsigned num_vertices = std::distance(lower, upper); //number of vertices in this block
 			
 			wrap(v.tau);
-			double G = gij(v.si, v.sj); // rotate it to real space 
-			double ratio = -4.* G * G / (num_vertices + 1.); // gji = gij when they belongs to different sublattice 
+			numeric_t G = gij(v.si, v.sj); // rotate it to real space 
+			double ratio = -4.* std::abs(G) * std::abs(G) / (num_vertices + 1.); // gji = gij when they belongs to different sublattice 
 
 			if(!compute_only_weight)
 			{
@@ -626,8 +628,8 @@ class green_function
 
 			wrap(vpos->tau);
 			
-			double G = gij(vpos->si, vpos->sj);  
-			double ratio = -4.* G * G; // gji = gij when they belongs to different sublattice 
+			numeric_t G = gij(vpos->si, vpos->sj);
+			double ratio = -4.* std::abs(G) * std::abs(G); // gji = gij when they belongs to different sublattice 
 
 			if(!compute_only_weight)
 			{
@@ -650,8 +652,8 @@ class green_function
 
 			wrap(vpos->tau);
 			
-			double G = gij(vpos->sj, sj_prime);
-			double ratio = 4.* G * G; // gji = gij when they belongs to different sublattice 
+			numeric_t G = gij(vpos->sj, sj_prime);
+			double ratio = 4.* std::abs(G) * std::abs(G); // gji = gij when they belongs to different sublattice 
 
 			if(!compute_only_weight)
 			{

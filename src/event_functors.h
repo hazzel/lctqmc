@@ -106,14 +106,19 @@ struct event_static_measurement
 			//std::cout << "Time of static measurement: " << std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count() << std::endl;
 			param.static_measure_cnt = 0;
 		}
-		std::vector<double> hv_tau = gf.measure_Hv_tau();
-		measure.add("dyn_Hv_tau", hv_tau);
+		if (param.ep_tau_steps > 0)
+		{
+			std::vector<double> hv_tau = gf.measure_Hv_tau();
+			measure.add("dyn_Hv_tau", hv_tau);
+		}
 	}
 	
 	void init()
 	{
 		for (int i = 0; i < obs.size(); ++i)
 			measure.add_observable(names[i], param.n_prebin * (param.measure_window / param.block_size) / param.static_measure_interval);
+		if (param.ep_tau_steps > 0)
+			measure.add_vectorobservable("dyn_Hv_tau", param.ep_tau_steps, param.n_prebin * (param.measure_window / param.block_size) / param.static_measure_interval);
 	}
 };
 
