@@ -107,10 +107,6 @@ class green_function
 				int block = tpos / param.block_size;
 				storage[0] = uKdagP;
 				
-				std::cout << "uKdagP" << std::endl;
-				std::cout << uKdagP << std::endl;
-				std::cout << std::endl;
-				
 				for (int i=0; i < block; ++i)
 				{
 					matrix_t UR = storage[i];
@@ -138,7 +134,7 @@ class green_function
 					storage[i] = p_q * qr_solver.matrixQ().adjoint();
 
 					//qr_solver.compute(VL);
-					//matrix_t r = qr_solver.matrixQR().template triangularView<Eigen::Upper>();
+					//matrix_t r = qr_solver.matrixQR().triangularView<Eigen::Upper>();
 					//storage[i] = r * qr_solver.colsPermutation().transpose();
 					//for (int i = 0; i < storage[i].rows(); ++i)
 					//	storage[i].row(i) = 1./qr_solver.matrixQR()(i, i) * storage[i].row(i);
@@ -172,7 +168,7 @@ class green_function
 					*/
 					
 					qr_solver.compute(storage_U[i+1] * storage_D[i]);
-					matrix_t R = qr_solver.matrixQR().template triangularView<Eigen::Upper>();
+					matrix_t R = qr_solver.matrixQR().triangularView<Eigen::Upper>();
 					storage_U[i+1] = qr_solver.matrixQ();
 					storage_D[i+1] = qr_solver.matrixQR().diagonal().asDiagonal();
 					storage_V[i+1] = R * (qr_solver.colsPermutation().transpose() * storage_V[i]);
@@ -198,7 +194,7 @@ class green_function
 					
 					qr_solver.compute(storage_D[i+1] * storage_V[i]);
 					matrix_t Q = qr_solver.matrixQ();
-					matrix_t R = qr_solver.matrixQR().template triangularView<Eigen::Upper>();
+					matrix_t R = qr_solver.matrixQR().triangularView<Eigen::Upper>();
 					matrix_t U_r = storage_U[i];
 					matrix_t D_r = storage_D[i];
 					matrix_t V_r = storage_V[i];
@@ -511,7 +507,7 @@ class green_function
 						VL = p_q * qr_solver.matrixQ().adjoint();
 
 						//qr_solver.compute(VL);
-						//matrix_t r = qr_solver.matrixQR().template triangularView<Eigen::Upper>();
+						//matrix_t r = qr_solver.matrixQR().triangularView<Eigen::Upper>();
 						//storage[new_block+1] = r * qr_solver.colsPermutation().transpose();
 						//for (int i = 0; i < storage[new_block+1].rows(); ++i)
 						//	storage[new_block+1].row(i) = 1./qr_solver.matrixQR()(i, i) * storage[new_block+1].row(i);
