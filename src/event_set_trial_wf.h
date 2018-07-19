@@ -504,6 +504,7 @@ struct event_set_trial_wf
 		if (!param.projective)
 			return;
 		matrix_t tw = set_twf_matrix();
+		return;
 		
 		matrix_t P;
 		Eigen::SelfAdjointEigenSolver<matrix_t> solver(tw);

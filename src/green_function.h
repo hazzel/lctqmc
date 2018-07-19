@@ -82,18 +82,20 @@ class green_function
 			uKdag = solver.eigenvectors().adjoint();
 			for (int i=0; i < uK.rows(); ++i)
 				uKcr.push_back(uKdag.col(i) * uK.row(i));
+			
+			set_trial_wf(uK.leftCols(lat.n_sites()/2));
 		}
 		
 		void set_trial_wf(const matrix_t& P)
 		{
 			uKdagP = uKdag * P;
 			
-			Eigen::JacobiSVD<matrix_t> svd(uKdagP, Eigen::ComputeThinU);
-			uKdagP = svd.matrixU();
+			//Eigen::JacobiSVD<matrix_t> svd(uKdagP, Eigen::ComputeThinU);
+			//uKdagP = svd.matrixU();
 	
-			//qr_solver.compute(uKdagP);
-			//matrix_t p_q = matrix_t::Identity(uKdagP.rows(), uKdagP.cols());
-			//uKdagP = qr_solver.matrixQ() * p_q;
+			qr_solver.compute(uKdagP);
+			matrix_t p_q = matrix_t::Identity(uKdagP.rows(), uKdagP.cols());
+			uKdagP = qr_solver.matrixQ() * p_q;
 		}
 		
 		void initialize(double tau, const std::vector<vertex>& vlist_)
@@ -112,12 +114,12 @@ class green_function
 					matrix_t UR = storage[i];
 					prop_from_left(-1, (i+1)*param.block_size, i*param.block_size, UR);
 
-					Eigen::JacobiSVD<matrix_t> svd(UR, Eigen::ComputeThinU); 
-					storage[i+1] = svd.matrixU();
+					//Eigen::JacobiSVD<matrix_t> svd(UR, Eigen::ComputeThinU); 
+					//storage[i+1] = svd.matrixU();
 
-					//qr_solver.compute(UR);
-					//matrix_t p_q = matrix_t::Identity(UR.rows(), UR.cols());
-					//storage[i+1] = qr_solver.matrixQ() * p_q;
+					qr_solver.compute(UR);
+					matrix_t p_q = matrix_t::Identity(UR.rows(), UR.cols());
+					storage[i+1] = qr_solver.matrixQ() * p_q;
 				}
 
 				storage.back() = uKdagP.adjoint();
@@ -126,12 +128,12 @@ class green_function
 					matrix_t VL = storage[i+1];
 					prop_from_right(-1, (i+1)*param.block_size, i*param.block_size, VL);
 					
-					Eigen::JacobiSVD<matrix_t> svd(VL, Eigen::ComputeThinV); 
-					storage[i] = svd.matrixV().adjoint();
+					//Eigen::JacobiSVD<matrix_t> svd(VL, Eigen::ComputeThinV); 
+					//storage[i] = svd.matrixV().adjoint();
 
-					//qr_solver.compute(VL.adjoint());
-					//matrix_t p_q = matrix_t::Identity(VL.rows(), VL.cols());
-					//storage[i] = p_q * qr_solver.matrixQ().adjoint();
+					qr_solver.compute(VL.adjoint());
+					matrix_t p_q = matrix_t::Identity(VL.rows(), VL.cols());
+					storage[i] = p_q * qr_solver.matrixQ().adjoint();
 
 					/*
 					qr_solver.compute(VL);
@@ -463,12 +465,12 @@ class green_function
 					
 					if (param.wrap_refresh_cnt >= param.wrap_refresh_interval)
 					{
-						Eigen::JacobiSVD<matrix_t> svd(UR, Eigen::ComputeThinU);
-						UR = svd.matrixU();
+						//Eigen::JacobiSVD<matrix_t> svd(UR, Eigen::ComputeThinU);
+						//UR = svd.matrixU();
 
-						//qr_solver.compute(UR);
-						//matrix_t p_q = matrix_t::Identity(UR.rows(), UR.cols());
-						//UR = qr_solver.matrixQ() * p_q;
+						qr_solver.compute(UR);
+						matrix_t p_q = matrix_t::Identity(UR.rows(), UR.cols());
+						UR = qr_solver.matrixQ() * p_q;
 						
 						param.wrap_refresh_cnt = 0;
 					}
@@ -501,12 +503,12 @@ class green_function
 					
 					if (param.wrap_refresh_cnt >= param.wrap_refresh_interval)
 					{
-						Eigen::JacobiSVD<matrix_t> svd(VL, Eigen::ComputeThinV);
-						VL = svd.matrixV().adjoint();
+						//Eigen::JacobiSVD<matrix_t> svd(VL, Eigen::ComputeThinV);
+						//VL = svd.matrixV().adjoint();
 
-						//qr_solver.compute(VL.adjoint());
-						//matrix_t p_q = matrix_t::Identity(VL.rows(), VL.cols());
-						//VL = p_q * qr_solver.matrixQ().adjoint();
+						qr_solver.compute(VL.adjoint());
+						matrix_t p_q = matrix_t::Identity(VL.rows(), VL.cols());
+						VL = p_q * qr_solver.matrixQ().adjoint();
 
 						//qr_solver.compute(VL);
 						//matrix_t r = qr_solver.matrixQR().triangularView<Eigen::Upper>();
