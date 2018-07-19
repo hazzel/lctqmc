@@ -523,10 +523,6 @@ struct event_set_trial_wf
 			ph_pm(i, i) = lat.parity(i);
 		}
 		
-		std::cout << solver.eigenvalues() << std::endl;
-		std::cout << solver.eigenvectors() << std::endl;
-		std::cout << std::endl;
-		
 		if (lat.n_sites() % 3 != 0)
 			P = solver.eigenvectors().leftCols(lat.n_sites()/2);
 			//P = S_f.leftCols(lat.n_sites()/2);
@@ -617,6 +613,11 @@ struct event_set_trial_wf
 				throw(std::runtime_error("Wrong parity in trial wave function."));
 			}
 		}
+		
+		std::cout << solver.eigenvalues() << std::endl;
+		std::cout << solver.eigenvectors() << std::endl;
+		std::cout << std::endl;
+		std::cout << P * P.adjoint() << std::endl;
 		
 		gf.set_trial_wf(P);
 	}
