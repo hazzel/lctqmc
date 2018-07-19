@@ -61,7 +61,7 @@ INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
 # Compiler flags
 set(DEFINES "${DEFINES} -DMCL_DUMP_BUFFER=0 -DMCL_MEASUREMENTS_APPEND=0 -DMCL_MCL_RNG_MT -ftree-vectorizer-verbose=0")
 if("$ENV{MCLL_SYSTEM_INFO}" STREQUAL "rwthcluster")
-	if("$ENV{CXX}" STREQUAL "ipcc")
+	if("$ENV{CXX}" STREQUAL "icpc")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -ip -ipo -axCORE-AVX2 -fp-model fast=2 -DMKL_DIRECT_CALL -std=c++11 ${DEFINES} -DEIGEN_USE_MKL_ALL")
 	elseif("$ENV{CXX}" STREQUAL "g++")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -std=c++11 -pipe -g ${DEFINES}")
