@@ -323,9 +323,9 @@ class green_function
 				A.noalias() -= 2.* (A*uKdag.col(si))* uK.row(si) + 2.* (A*uKdag.col(sj)) * uK.row(sj);
 			*/
 			if (side == "L")
-				A.noalias() -= 2.* (uKcr[si] + uKcr[sj]) * A;
+				A -= 2.* (uKcr[si] + uKcr[sj]) * A;
 			else if (side == "R")
-				A.noalias() -= 2.* A * (uKcr[si] + uKcr[sj]);
+				A -= 2.* A * (uKcr[si] + uKcr[sj]);
 		}
 		
 		void rebuild()
