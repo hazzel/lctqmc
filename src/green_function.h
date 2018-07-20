@@ -82,8 +82,6 @@ class green_function
 			uKdag = solver.eigenvectors().adjoint();
 			for (int i=0; i < uK.rows(); ++i)
 				uKcr.push_back(uKdag.col(i) * uK.row(i));
-			
-			set_trial_wf(uK.leftCols(lat.n_sites()/2));
 		}
 		
 		void set_trial_wf(const matrix_t& P)
