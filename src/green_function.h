@@ -430,6 +430,10 @@ class green_function
 			std::cout << "VL" << std::endl;
 			print_matrix(VL);
 			std::cout << std::endl;
+			matrix_t v = matrix_t::Identity(lat.n_sites(), lat.n_sites());
+			V_prop(vlist[0].si, vlist[0].sj, "R", v);
+			print_matrix(v);
+			std::cout << std::endl;
 			return id - UR * (VL * UR).inverse() * VL;
 		}
 		
