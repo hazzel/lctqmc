@@ -424,6 +424,12 @@ class green_function
 			matrix_t VL = uKdagP.adjoint();
 			prop_from_right(-1, param.theta, tpos, VL);
 			matrix_t id = matrix_t::Identity(lat.n_sites(), lat.n_sites());
+			std::cout << "UR" << std::endl;
+			print_matrix(UR);
+			std::cout << std::endl;
+			std::cout << "VL" << std::endl;
+			print_matrix(VL);
+			std::cout << std::endl;
 			return id - UR * (VL * UR).inverse() * VL;
 		}
 		
