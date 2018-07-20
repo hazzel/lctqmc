@@ -213,7 +213,8 @@ class green_function
 			matrix_t g_site = uK * g_tau * uKdag;
 			print_matrix(g_site);
 			std::cout << std::endl;
-			//stabilize();
+			std::cout << "exact" << std::endl;
+			print_matrix(uK * g_exact() * uKdag);
 		}
 		
 		unsigned int pert_order()
