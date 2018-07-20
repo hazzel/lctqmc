@@ -23,7 +23,6 @@ struct event_build
 
 	void trigger()
 	{
-		/*
 		int Nv = 0.15 * std::abs(param.theta * lat.n_sites() * param.V);
 		green_function::vlist_t vlist;
 		for (int i = 0; i < Nv; ++i)
@@ -33,9 +32,6 @@ struct event_build
 			vlist.push_back({tau, b.first, b.second});
 		}
 		std::sort(vlist.begin(), vlist.end(), vertex::less());
-		*/
-		green_function::vlist_t vlist;
-		vlist.push_back({1.01, 0, 1});
 		gf.initialize(0, vlist);
 	}
 	

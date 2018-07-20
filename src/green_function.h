@@ -208,13 +208,6 @@ class green_function
 				}
 			}
 			g_tau = g_stable();
-			std::cout << "tau = " << tpos << std::endl;
-			std::cout << "gf:" << std::endl;
-			matrix_t g_site = uK * g_tau * uKdag;
-			print_matrix(g_site);
-			std::cout << std::endl;
-			std::cout << "exact" << std::endl;
-			print_matrix(uK * g_exact() * uKdag);
 		}
 		
 		unsigned int pert_order()
@@ -318,9 +311,9 @@ class green_function
 		{
 			/*
 			if (side == "L")
-				A.noalias() -= 2.* uKdag.col(si) * (uK.row(si)* A) + 2.* uKdag.col(sj) * (uK.row(sj)* A); 
+				A -= 2.* uKdag.col(si) * (uK.row(si)* A) + 2.* uKdag.col(sj) * (uK.row(sj)* A); 
 			else if (side == "R")
-				A.noalias() -= 2.* (A*uKdag.col(si))* uK.row(si) + 2.* (A*uKdag.col(sj)) * uK.row(sj);
+				A -= 2.* (A*uKdag.col(si))* uK.row(si) + 2.* (A*uKdag.col(sj)) * uK.row(sj);
 			*/
 			if (side == "L")
 				A -= 2.* (uKcr[si] + uKcr[sj]) * A;
@@ -424,16 +417,6 @@ class green_function
 			matrix_t VL = uKdagP.adjoint();
 			prop_from_right(-1, param.theta, tpos, VL);
 			matrix_t id = matrix_t::Identity(lat.n_sites(), lat.n_sites());
-			std::cout << "UR" << std::endl;
-			print_matrix(UR);
-			std::cout << std::endl;
-			std::cout << "VL" << std::endl;
-			print_matrix(VL);
-			std::cout << std::endl;
-			matrix_t v = matrix_t::Identity(lat.n_sites(), lat.n_sites());
-			V_prop(vlist[0].si, vlist[0].sj, "R", v);
-			print_matrix(v);
-			std::cout << std::endl;
 			return id - UR * (VL * UR).inverse() * VL;
 		}
 		
@@ -575,7 +558,7 @@ class green_function
 			row_vector_t ri = uK_si_gtau - uK.row(si);
 			row_vector_t rj = -uK.row(sj);
 			rj.noalias() += uK.row(sj) * g_tau;
-			g_tau.noalias() -= (g_tau*uKdag.col(sj)) * ri / gij + (g_tau*uKdag.col(si)) * rj / gji;
+			g_tau -= (g_tau*uKdag.col(sj)) * ri / gij + (g_tau*uKdag.col(si)) * rj / gji;
 			
 			/*
 			vector_t W_L_uKdag_sj = W_tau * L_uKdag_sj;
@@ -585,9 +568,9 @@ class green_function
 			W_tau.noalias() += 1./gij * (W_L_uKdag_sj * uK_si_R_W);
 			W_tau.noalias() += 1./gji * (W_L_uKdag_si * uK_sj_R_W);
 			
-			//W_tau.noalias() += ((W_tau * L_uKdag_sj) * uK_si_R_W) / gij + ((W_tau * (L_tau*uKdag.col(si))) * ((uK.row(sj)*R_tau)*W_tau)) / gji;
+			//W_tau += ((W_tau * L_uKdag_sj) * uK_si_R_W) / gij + ((W_tau * (L_tau*uKdag.col(si))) * ((uK.row(sj)*R_tau)*W_tau)) / gji;
 			
-			//W_tau.noalias() += ((W_tau * (L_tau*uKdag.col(sj))) * ((uK.row(si)*R_tau)*W_tau)) / gij + ((W_tau * (L_tau*uKdag.col(si))) * ((uK.row(sj)*R_tau)*W_tau)) / gji;
+			//W_tau += ((W_tau * (L_tau*uKdag.col(sj))) * ((uK.row(si)*R_tau)*W_tau)) / gij + ((W_tau * (L_tau*uKdag.col(si))) * ((uK.row(sj)*R_tau)*W_tau)) / gji;
 			V_prop(si, sj, "L",  R_tau);
 			*/
 			

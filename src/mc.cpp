@@ -186,10 +186,10 @@ void mc::do_update()
 	gf.wrap(0.5 * param.block_size);
 	for (int i = gf.tau() / param.block_size; i < param.theta / param.block_size; ++i)
 	{
-		t0 = std::chrono::steady_clock::now();
+		//t0 = std::chrono::steady_clock::now();
 		gf.wrap((i + 0.5) * param.block_size);
 		//gf.rebuild();
-		t1 = std::chrono::steady_clock::now();
+		//t1 = std::chrono::steady_clock::now();
 		//std::cout << "Time of wrap: " << std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count() << std::endl;
 		
 		if (is_thermalized())
@@ -204,16 +204,16 @@ void mc::do_update()
 			qmc.do_update();
 			rebuild();
 		}
-		t1 = std::chrono::steady_clock::now();
+		//t1 = std::chrono::steady_clock::now();
 		//std::cout << "Time of updates: " << std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count() << std::endl;
 		//std::cout << std::endl << "---" << std::endl;
 	}
 	for (int i = param.theta / param.block_size - 1; i >= 0; --i)
 	{
-		t0 = std::chrono::steady_clock::now();
+		// = std::chrono::steady_clock::now();
 		gf.wrap((i + 0.5) * param.block_size);
 		//gf.rebuild();
-		t1 = std::chrono::steady_clock::now();
+		//t1 = std::chrono::steady_clock::now();
 		//std::cout << "Time of wrap: " << std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count() << std::endl;
 
 		if (is_thermalized())
@@ -228,7 +228,7 @@ void mc::do_update()
 			qmc.do_update();
 			rebuild();
 		}
-		t1 = std::chrono::steady_clock::now();
+		//t1 = std::chrono::steady_clock::now();
 		//std::cout << "Time of updates: " << std::chrono::duration_cast<std::chrono::duration<float>>(t1 - t0).count() << std::endl;
 		//std::cout << std::endl << "---" << std::endl;
 	}
