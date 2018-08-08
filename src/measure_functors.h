@@ -113,6 +113,10 @@ struct measure_M
 			measure.add_evalable("B_cdw", "M2", "M4", eval_B_cdw);
 		if (contains("M2") && contains("S_cdw_q"))
 			measure.add_evalable("R_cdw", "M2", "S_cdw_q", eval_R_cdw);
+		if (contains("M2") && contains("S_cdw_q2"))
+			measure.add_evalable("R_cdw_20", "M2", "S_cdw_q20", eval_R_cdw);
+		if (contains("M2") && contains("S_cdw_q11"))
+			measure.add_evalable("R_cdw_11", "M2", "S_cdw_q11", eval_R_cdw);
 		
 		os << "PARAMETERS" << std::endl;
 		pars.get_all(os);

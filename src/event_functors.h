@@ -66,12 +66,16 @@ struct event_static_measurement
 				add_wick(wick_static_M2{rng, param, lat}, param.static_obs[i]);
 			else if (param.static_obs[i] == "S_cdw_q")
 				add_wick(wick_static_S_cdw_q{rng, param, lat}, param.static_obs[i]);
+			else if (param.static_obs[i] == "S_cdw_q20")
+				add_wick(wick_static_S_cdw_q20{rng, param, lat}, param.static_obs[i]);
+			else if (param.static_obs[i] == "S_cdw_q11")
+				add_wick(wick_static_S_cdw_q11{rng, param, lat}, param.static_obs[i]);
 			else if (param.static_obs[i] == "M4")
 				add_wick(wick_static_M4{rng, param, lat}, param.static_obs[i]);
 			else if (param.static_obs[i] == "epsilon")
 				add_wick(wick_static_epsilon{rng, param, lat}, param.static_obs[i]);
 			else if (param.static_obs[i] == "Hv")
-				add_wick(wick_static_Hv{rng, param, lat}, param.static_obs[i]);
+				add_wick(wick_static_Hv{rng, param, lat, gf}, param.static_obs[i]);
 			else if (param.static_obs[i] == "kekule")
 				add_wick(wick_static_kek{rng, param, lat}, param.static_obs[i]);
 		}
@@ -165,6 +169,8 @@ struct event_dynamic_measurement
 				add_wick(wick_sp{rng, param, lat}, param.dyn_obs[i]);
 			if (param.dyn_obs[i] == "sp_q")
 				add_wick(wick_sp_q{rng, param, lat}, param.dyn_obs[i]);
+			if (param.dyn_obs[i] == "sp_site")
+				add_vector_wick(wick_sp_site{rng, param, lat}, param.dyn_obs[i], lat.n_sites()*lat.n_sites()/4);
 			if (param.dyn_obs[i] == "tp")
 				add_wick(wick_tp{rng, param, lat}, param.dyn_obs[i]);
 			if (param.dyn_obs[i] == "tp_mat")

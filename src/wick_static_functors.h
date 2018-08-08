@@ -10,6 +10,7 @@
 #include "measurements.h"
 #include "parameters.h"
 #include "lattice.h"
+#include "green_function.h"
 
 typedef green_function::matrix_t matrix_t;
 typedef green_function::numeric_t numeric_t;
@@ -64,9 +65,10 @@ struct wick_static_Hv
 	Random& rng;
 	parameters& param;
 	lattice& lat;
+	green_function& gf;
 
-	wick_static_Hv(Random& rng_, parameters& param_, lattice& lat_)
-		: rng(rng_), param(param_), lat(lat_)
+	wick_static_Hv(Random& rng_, parameters& param_, lattice& lat_, green_function& gf_)
+		: rng(rng_), param(param_), lat(lat_), gf(gf_)
 	{}
 	
 	double get_obs(const matrix_t& et_gf)
@@ -117,6 +119,68 @@ struct wick_static_S_cdw_q
 		const numeric_t *ca_et_gf_0 = et_gf.data();
 		numeric_t S = 0.;
 		auto& q = lat.symmetry_point("q");
+		const int N = lat.n_sites();
+		for (int i = 0; i < N; ++i)
+		{
+			auto& r_i = lat.real_space_coord((i/2)*2);
+			for (int j = 0; j < N; ++j)
+			{
+				auto& r_j = lat.real_space_coord((j/2)*2);
+				double qr = q.dot(r_i - r_j);
+				S += ca_et_gf_0[j * N + i] * ca_et_gf_0[j * N + i] * std::cos(qr);
+			}
+		}
+		return std::real(S) / std::pow(lat.n_sites(), 2.);
+	}
+};
+
+// S_cdw(q) = sum_ij [ <(n_i - 1/2)(n_j - 1/2)> e^(i q (r_i - r_j)) ]
+struct wick_static_S_cdw_q20
+{
+	Random& rng;
+	parameters& param;
+	lattice& lat;
+
+	wick_static_S_cdw_q20(Random& rng_, parameters& param_, lattice& lat_)
+		: rng(rng_), param(param_), lat(lat_)
+	{}
+	
+	double get_obs(const matrix_t& et_gf)
+	{
+		const numeric_t *ca_et_gf_0 = et_gf.data();
+		numeric_t S = 0.;
+		auto& q = lat.symmetry_point("q20");
+		const int N = lat.n_sites();
+		for (int i = 0; i < N; ++i)
+		{
+			auto& r_i = lat.real_space_coord((i/2)*2);
+			for (int j = 0; j < N; ++j)
+			{
+				auto& r_j = lat.real_space_coord((j/2)*2);
+				double qr = q.dot(r_i - r_j);
+				S += ca_et_gf_0[j * N + i] * ca_et_gf_0[j * N + i] * std::cos(qr);
+			}
+		}
+		return std::real(S) / std::pow(lat.n_sites(), 2.);
+	}
+};
+
+// S_cdw(q) = sum_ij [ <(n_i - 1/2)(n_j - 1/2)> e^(i q (r_i - r_j)) ]
+struct wick_static_S_cdw_q11
+{
+	Random& rng;
+	parameters& param;
+	lattice& lat;
+
+	wick_static_S_cdw_q11(Random& rng_, parameters& param_, lattice& lat_)
+		: rng(rng_), param(param_), lat(lat_)
+	{}
+	
+	double get_obs(const matrix_t& et_gf)
+	{
+		const numeric_t *ca_et_gf_0 = et_gf.data();
+		numeric_t S = 0.;
+		auto& q = lat.symmetry_point("q11");
 		const int N = lat.n_sites();
 		for (int i = 0; i < N; ++i)
 		{

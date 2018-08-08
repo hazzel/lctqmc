@@ -23,8 +23,13 @@ struct move_insert
 
 	double attempt()
 	{
-		v = gf.generate_random_vertex();
-		return -0.25 * param.block_size * param.V * lat.n_bonds() * gf.add_vertex(v, true);
+		if (std::abs(param.V) > 0.)
+		{
+			v = gf.generate_random_vertex();
+			return -0.25 * param.block_size * param.V * lat.n_bonds() * gf.add_vertex(v, true);
+		}
+		else
+			return 0.;
 	}
 
 	double accept()
@@ -61,8 +66,13 @@ struct move_remove
 
 	double attempt()
 	{
-		int num_vertices = gf.select_random_vertex(vpos);
-		return -4 * num_vertices / (param.block_size * param.V * lat.n_bonds()) * gf.remove_vertex(vpos, true);
+		if (std::abs(param.V) > 0.)
+		{
+			int num_vertices = gf.select_random_vertex(vpos);
+			return -4 * num_vertices / (param.block_size * param.V * lat.n_bonds()) * gf.remove_vertex(vpos, true);
+		}
+		else
+			return 0.;
 	}
 
 	double accept()
@@ -101,16 +111,21 @@ struct move_shift
 
 	double attempt()
 	{
-		int num_vertices = gf.select_random_vertex(vpos);
-		if (num_vertices > 0)
+		if (std::abs(param.V) > 0.)
 		{
-			si_prime = vpos->si;
-			sj_prime = vpos->sj;
-			auto& neighbors = lat.neighbors(vpos->si, "nearest neighbors");
-			while (sj_prime == vpos->sj)
-				sj_prime = neighbors[rng() * neighbors.size()];
+			int num_vertices = gf.select_random_vertex(vpos);
+			if (num_vertices > 0)
+			{
+				si_prime = vpos->si;
+				sj_prime = vpos->sj;
+				auto& neighbors = lat.neighbors(vpos->si, "nearest neighbors");
+				while (sj_prime == vpos->sj)
+					sj_prime = neighbors[rng() * neighbors.size()];
+			}
+			return gf.shift_vertex(vpos, si_prime, sj_prime, true);
 		}
-		return gf.shift_vertex(vpos, si_prime, sj_prime, true);
+		else
+			return 0.;
 	}
 
 	double accept()

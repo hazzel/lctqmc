@@ -59,7 +59,7 @@ marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
 
 filelist = []
 
-#filelist.append(glob.glob("../job/*.out"))
+#filelist.append(glob.glob("../job/*01.out"))
 #filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/job_L5_ep/job_V1.0/*03.out"))
 #filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/job_L5_ep/job_V1.7/*02.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*.out"))
@@ -67,9 +67,11 @@ filelist = []
 #filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/cluster_work/code/lctqmc/jobs/K_point/lctqmc_L6_theta40/*08.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/tprime=0.5/lctqmc_L6_tprime0.5_theta40/*.out"))
 
-#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/K_point/theta160_sp_q/lctqmc_L9_as_theta160_sp_q/*16.out"))
+#filelist.append(glob.glob("/scratch/work/hesselmann/andreas/dec/and-L9-s-theta20-dt3200/*02.out"))
 
-filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/K_point/theta160/lctqmc_ep_L9_as_theta160/*7.out"))
+filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/K_point/theta160/old/lctqmc_ep_L9_as_theta160/*03.out"))
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/K_point/theta160/old/lctqmc_ep_L9_as_theta160/*04.out"))
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/K_point/theta160/lctqmc_L9_as_theta160/*10.out"))
 
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_ep_L8_theta40/*0011.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_ep_L7_theta40/*0006.out"))
@@ -155,7 +157,6 @@ for f in filelist:
 
 		figure.suptitle(r"$L = " + str(L) + ", V = " + str(h) + ", 2 \Theta = " + str(theta) + "$", fontsize=16)# + str(1./T/2.) + "$")
 		
-		x_tau = np.linspace(0, theta, n_discrete_tau+1)
 		y_tau = np.array(ArrangePlot(elist[i], "dyn_"+obs+"_tau")[0])
 		err_tau = np.array(ArrangePlot(elist[i], "dyn_"+obs+"_tau")[1])
 
@@ -197,7 +198,7 @@ for f in filelist:
 			y_tau = (np.array(ArrangePlot(elist[i], "dyn_tp_mat_0_tau")[0]) + np.array(ArrangePlot(elist[i], "dyn_tp_mat_3_tau")[0]))/2.
 			err_tau = np.sqrt(np.array(ArrangePlot(elist[i], "dyn_tp_mat_0_tau")[1])**2. + np.array(ArrangePlot(elist[i], "dyn_tp_mat_3_tau")[1])**2.)/2.
 		elif obs == "Hv":
-			k = ArrangePlot(elist[i], "pert_order")[0][0]
+			#k = ArrangePlot(elist[i], "pert_order")[0][0]
 			#e = np.abs(ArrangePlot(elist[i], "Hv")[0][0])
 			#s = ArrangePlot(elist[i], "Hv")[1][0]
 			
@@ -247,7 +248,7 @@ for f in filelist:
 			#ax.plot(ed_tau, np.flipud(ed_data[ed_n]), marker='o', color="b", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+'$')
 		
 		
-		nmin = 50; nmax = len(x_tau)-1
+		nmin = 55; nmax = len(x_tau)-1
 		parameter, perr = fit_function( [5., 0.5, 0.5], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
 		#parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[5., 0.5, 0.5], method='trf')
 	
@@ -259,10 +260,12 @@ for f in filelist:
 		
 		#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2,2]**0.5 * (2.*L*L)**0.5, 2))
 		
+		#print parameter
+		
 		
 		j = 1
 		f_min = 0
-		f_max = 60
+		f_max = 100
 		step = 5
 		fit_x = []
 		fit_y = []

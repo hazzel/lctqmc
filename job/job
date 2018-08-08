@@ -1,6 +1,6 @@
-SWEEPS = 100
-warmup = 100
-prebin = 16
+SWEEPS = 2000
+warmup = 500
+prebin = 256
 
 tprime = 0.
 
@@ -19,12 +19,11 @@ dyn_delta_tau = 0.1
 ep_tau_max = 6
 ep_delta_tau = 0.025
 
-static_obs = energy,epsilon,M2,S_cdw_q,kekule
-obs = sp
+static_obs = energy,Hv,epsilon,M2,S_cdw_q,S_cdw_q20,S_cdw_q11,kekule
+obs = epsilon,epsilon_as,sp,sp_site
 
-L = 2
-inv_symmetry = 1
+theta = 40
 
-theta = 2
-
+L = 3
+inv_symmetry = -1
 {V = 1.0}
