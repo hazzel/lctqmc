@@ -29,13 +29,17 @@ cnt = 0
 
 list_of_files_R = []
 
-list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L6-s-*tprime*-theta8*.txt")
-list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L9-s-*tprime*-theta8*.txt")
-list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L12-s-*tprime*-theta8*.txt")
-list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L15-s-*tprime*-theta8*.txt")
-list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L18-s-*tprime*-theta8*.txt")
-list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L21-s-*tprime*-theta8*.txt")
+#list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L6-s-*tprime*-theta8*.txt")
+#list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L9-s-*tprime*-theta8*.txt")
+#list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L12-s-*tprime*-theta8*.txt")
+#list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L15-s-*tprime*-theta8*.txt")
+#list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L18-s-*tprime*-theta8*.txt")
+#list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L21-s-*tprime*-theta8*.txt")
+list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw_11-*-s-*tprime*-theta320*.txt")
+#list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L18-s-*tprime*-theta8*.txt")
+#list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L21-s-*tprime*-theta8*.txt")
 
+#list_of_files_R.sort()
 data_list_R = [ ( pylab.loadtxt(filename), label ) for label, filename in enumerate(list_of_files_R) ]
 
 nu = 1./1.101#1./1.14
@@ -52,14 +56,14 @@ for data, label in data_list_R:
 	#x = float(L)**(1./nu) * (data[:,0] - Vc) / Vc
 	y = data[:,1]
 	#ax = plt.subplot(121)
-	ax.plot( x, y, marker="o", color=color_cycle[cnt], markersize=10.0, linewidth=0.0, label=r"$L="+L+", \Theta=" + theta + "$")
+	ax.plot( x, y, marker="o", color=color_cycle[cnt], markersize=10.0, linewidth=2.0, label=r"$L="+L+", \Theta=" + theta + "$")
 	if len(data[0,:]) > 2:
-		(_, caps, _) = ax.errorbar(x, y, yerr=data[:,2], marker='None', capsize=8, color=color_cycle[cnt], linewidth=0.0, )
+		(_, caps, _) = ax.errorbar(x, y, yerr=data[:,2], marker='None', capsize=8, color=color_cycle[cnt], linewidth=2.0, )
 		for cap in caps:
 			cap.set_markeredgewidth(1.6)
-	xnew = np.linspace(x.min(), x.max(), 300)
-	f = scipy.interpolate.interp1d(x, y, kind=3)
-	ax.plot( xnew, f(xnew), color=color_cycle[cnt], markersize=0.0, linewidth=2.0)
+	#xnew = np.linspace(x.min(), x.max(), 300)
+	#f = scipy.interpolate.interp1d(x, y, kind=1)
+	#ax.plot( xnew, f(xnew), color=color_cycle[cnt], markersize=0.0, linewidth=2.0)
 	ax.legend()
 	cnt += 1
 	

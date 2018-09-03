@@ -80,8 +80,9 @@ class green_function
 			wK = solver.eigenvalues(); 
 			uK = solver.eigenvectors();
 			uKdag = solver.eigenvectors().adjoint();
-			for (int i=0; i < uK.rows(); ++i)
-				uKcr.push_back(uKdag.col(i) * uK.row(i));
+			//for (int i=0; i < uK.rows(); ++i)
+			//	uKcr.push_back(uKdag.col(i) * uK.row(i));
+			//std::cout << uKcr.begin()->rows() << " x " << uKcr.begin()->cols() << std::endl;
 		}
 		
 		void set_trial_wf(const matrix_t& P)
@@ -309,16 +310,18 @@ class green_function
 
 		void V_prop(int si, int sj, const std::string& side,  matrix_t& A) const // A*U^{dagger} V U or U^{dagger} V U * A 
 		{
-			/*
+			
 			if (side == "L")
 				A -= 2.* uKdag.col(si) * (uK.row(si)* A) + 2.* uKdag.col(sj) * (uK.row(sj)* A); 
 			else if (side == "R")
 				A -= 2.* (A*uKdag.col(si))* uK.row(si) + 2.* (A*uKdag.col(sj)) * uK.row(sj);
-			*/
+			
+			/*
 			if (side == "L")
 				A -= 2.* (uKcr[si] + uKcr[sj]) * A;
 			else if (side == "R")
 				A -= 2.* A * (uKcr[si] + uKcr[sj]);
+			*/
 		}
 		
 		void rebuild()
