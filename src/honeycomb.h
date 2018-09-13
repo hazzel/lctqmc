@@ -60,11 +60,47 @@ struct honeycomb
 		}
 	}
 
-	graph_t* graph()
+	graph_t* graph(lattice& l)
 	{
 		int n_sites = 2 * Lx * Ly;
 		graph_t* g = new graph_t(n_sites);
 		add_edges(g);
+		
+		l.a1 = a1;
+		l.a2 = a2;
+		l.b1 = b1;
+		l.b2 = b2;
+		l.center = center;
+		l.delta = delta;
+		l.Lx = Lx;
+		l.Ly = Ly;
+	
+		//Symmetry points
+		std::map<std::string, Eigen::Vector2d> points;
+
+		points["K"] = closest_k_point({2.*pi/3., 2.*pi/3./std::sqrt(3.)});
+		points["Kp"] = closest_k_point({2.*pi/3., -2.*pi/3./std::sqrt(3.)});
+		points["Gamma"] = closest_k_point({0., 0.});
+		points["M"] = closest_k_point({2.*pi/3., 0.});
+		points["q"] = closest_k_point(b1 / Lx);
+		points["q20"] = closest_k_point(2. * b2 / Ly);
+		points["q11"] = closest_k_point(b1 / Lx + b2 / Ly);
+		points["Kq"] = closest_k_point(b1 / Lx + Eigen::Vector2d{2.*pi/3., 2.*pi/3./std::sqrt(3.)});
+		l.add_symmetry_points(points);
+		
+		/*
+		for (int i = 0; i < Lx; ++i)
+			for (int j = 0; j < Ly; ++j)
+			{
+				Eigen::Vector2d y = static_cast<double>(i) / static_cast<double>(Lx)
+					* b1 + static_cast<double>(j) / static_cast<double>(Ly) * b2;
+				//std::cout << i << ", " << j << " : (" << y[0] << ", " << y[1] << ")" << std::endl;
+				std::cout << y[0] << " " << y[1] << std::endl;
+			}
+		std::cout << "K point: (" << 2.*pi/3. << ", " << 2.*pi/3./std::sqrt(3.) << ")" << std::endl;
+		std::cout << "closest to K point: (" << points["K"][0] << ", " << points["K"][1] << ")" << std::endl;
+		*/
+		
 		return g;
 	}
 
@@ -111,41 +147,6 @@ struct honeycomb
 
 	void generate_maps(lattice& l)
 	{
-		l.a1 = a1;
-		l.a2 = a2;
-		l.b1 = b1;
-		l.b2 = b2;
-		l.center = center;
-		l.delta = delta;
-		l.Lx = Lx;
-		l.Ly = Ly;
-	
-		//Symmetry points
-		std::map<std::string, Eigen::Vector2d> points;
-
-		points["K"] = closest_k_point({2.*pi/3., 2.*pi/3./std::sqrt(3.)});
-		points["Kp"] = closest_k_point({2.*pi/3., -2.*pi/3./std::sqrt(3.)});
-		points["Gamma"] = closest_k_point({0., 0.});
-		points["M"] = closest_k_point({2.*pi/3., 0.});
-		points["q"] = closest_k_point(b1 / Lx);
-		points["q20"] = closest_k_point(2. * b2 / Ly);
-		points["q11"] = closest_k_point(b1 / Lx + b2 / Ly);
-		points["Kq"] = closest_k_point(b1 / Lx + Eigen::Vector2d{2.*pi/3., 2.*pi/3./std::sqrt(3.)});
-		l.add_symmetry_points(points);
-		
-		/*
-		for (int i = 0; i < Lx; ++i)
-			for (int j = 0; j < Ly; ++j)
-			{
-				Eigen::Vector2d y = static_cast<double>(i) / static_cast<double>(Lx)
-					* b1 + static_cast<double>(j) / static_cast<double>(Ly) * b2;
-				//std::cout << i << ", " << j << " : (" << y[0] << ", " << y[1] << ")" << std::endl;
-				std::cout << y[0] << " " << y[1] << std::endl;
-			}
-		std::cout << "K point: (" << 2.*pi/3. << ", " << 2.*pi/3./std::sqrt(3.) << ")" << std::endl;
-		std::cout << "closest to K point: (" << points["K"][0] << ", " << points["K"][1] << ")" << std::endl;
-		*/
-
 		//Site maps
 		l.generate_neighbor_map("nearest neighbors", [&]
 			(lattice::vertex_t i, lattice::vertex_t j) {
@@ -156,9 +157,12 @@ struct honeycomb
 		l.generate_bond_map("single_d1_bonds", [&]
 			(lattice::vertex_t i, lattice::vertex_t j)
 			{ return l.distance(i, j) == 1 && i < j; });
-		l.generate_bond_map("d3_bonds", [&]
-			(lattice::vertex_t i, lattice::vertex_t j)
-			{ return l.distance(i, j) == 3; });
+		for (int d = 0; d < l.max_distance(); ++d)
+		{
+			l.generate_bond_map("d" + std::to_string(d) + "_bonds", [&]
+				(lattice::vertex_t i, lattice::vertex_t j)
+				{ return l.distance(i, j) == d; });
+		}
 		
 		l.generate_bond_map("t3_bonds", [&]
 			(lattice::pair_vector_t& list)

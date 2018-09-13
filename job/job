@@ -1,8 +1,8 @@
-SWEEPS = 1
-warmup = 1
-prebin = 1
+SWEEPS = 100000
+warmup = 500
+prebin = 500
 
-tprime = 0.5
+tprime = 0.
 
 trial_wave_function = t_and_tprime
 block_size = 0.1
@@ -20,10 +20,10 @@ ep_tau_max = 0
 ep_delta_tau = 0.025
 
 static_obs = energy,Hv,epsilon,M2,S_cdw_q,S_cdw_q20,S_cdw_q11,kekule
-obs = epsilon,epsilon_as,sp
+obs = epsilon,epsilon_as,sp,sp_site
 
-theta = 160
+theta = 80
 
-L = 18
+L = 6
 inv_symmetry = 1
 {V = 0.2}

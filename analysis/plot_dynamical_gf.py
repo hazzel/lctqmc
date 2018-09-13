@@ -59,7 +59,7 @@ marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
 
 filelist = []
 
-#filelist.append(glob.glob("../job/*01.out"))
+filelist.append(glob.glob("../job/*01.out"))
 #filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/job_L5_ep/job_V1.0/*03.out"))
 #filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/job_L5_ep/job_V1.7/*02.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*.out"))
@@ -69,7 +69,7 @@ filelist = []
 
 #filelist.append(glob.glob("/scratch/work/hesselmann/andreas/dec/and-L9-s-theta20-dt3200/*02.out"))
 
-filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/K_point/theta160/old/lctqmc_ep_L9_as_theta160/*03.out"))
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/K_point/theta160/old/lctqmc_ep_L9_as_theta160/*03.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/K_point/theta160/old/lctqmc_ep_L9_as_theta160/*04.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/K_point/theta160/lctqmc_L9_as_theta160/*10.out"))
 
@@ -88,7 +88,7 @@ for f in filelist:
 	plist = ParseParameters(f)
 	elist = ParseEvalables(f)
 
-	obs = "Hv"
+	obs = "sp"
 	if obs == "M2":
 		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{cdw}(\tau) O_{cdw}^{\dag} \right \rangle$", fontsize=16)
@@ -248,7 +248,7 @@ for f in filelist:
 			#ax.plot(ed_tau, np.flipud(ed_data[ed_n]), marker='o', color="b", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+'$')
 		
 		
-		nmin = 55; nmax = len(x_tau)-1
+		nmin = 60; nmax = len(x_tau)-1
 		parameter, perr = fit_function( [5., 0.5, 0.5], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
 		#parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[5., 0.5, 0.5], method='trf')
 	
@@ -262,7 +262,7 @@ for f in filelist:
 		
 		#print parameter
 		
-		
+		'''
 		j = 1
 		f_min = 0
 		f_max = 100
@@ -302,6 +302,7 @@ for f in filelist:
 		(_, caps, _) = ax2.errorbar(fit_x, fit_y, yerr=fit_e, marker='None', capsize=8, color="k")
 		for cap in caps:
 			cap.set_markeredgewidth(1.6)
+		'''
 		
 		#parameter, perr = scipy.optimize.curve_fit( DecayFunction, fit_x, fit_y, p0=[1., 0.5, 0.5, 0.1], method='trf')
 		#px = np.linspace(fit_x[0], fit_x[-1], 1000)

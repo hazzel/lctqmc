@@ -211,18 +211,18 @@ class green_function
 			g_tau = g_stable();
 		}
 		
-		unsigned int pert_order()
+		inline unsigned int pert_order()
 		{
 			return vlist.size();
 		}
 		
-		unsigned int pert_order(double tau)
+		inline unsigned int pert_order(double tau)
 		{
 			vlist_t::iterator lower = std::lower_bound(vlist.begin(), vlist.end(), tau, vertex::less_equal());	//equal is exclude
 			return std::distance(vlist.begin(), lower);
 		}
 		
-		double tau()
+		inline double tau()
 		{
 			return tpos;
 		}

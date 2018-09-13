@@ -69,7 +69,6 @@ mc::mc(const std::string& dir)
 	//Initialize lattice
 	honeycomb hc(param.L, param.L);
 	lat.generate_graph(hc);
-	hc.generate_maps(lat);
 
 	//Set up events
 	qmc.add_event(event_set_trial_wf{rng, param, lat, gf}, "trial_wf");
@@ -78,7 +77,7 @@ mc::mc(const std::string& dir)
 	qmc.add_event(event_dynamic_measurement{rng, measure, param, lat, gf}, "dynamic measure");
 	
 	qmc.trigger_event("trial_wf");
-
+	
 	#ifdef PROFILER
 		ProfilerStart("/net/home/lxtsfs1/tpc/hesselmann/code/profiler/gperftools.prof");
 	#endif

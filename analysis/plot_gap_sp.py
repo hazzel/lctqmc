@@ -45,7 +45,9 @@ def closest_k_point(L):
 
 #filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/sp-s-*tprime*-theta*.txt")[0]
 #filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/gapped_spectrum/delta_sp.txt")[0]
-filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/K_point/delta_sp_q.txt")[0]
+#filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/K_point/delta_sp_q.txt")[0]
+filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/science_paper/delta_sp.txt")[0]
+#filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/science_paper/delta_sp_q.txt")[0]
 with open(filename) as f:
 	lines = (line for line in f if not line.startswith('L'))
 	new_del = []
@@ -71,8 +73,8 @@ for i in range(len(L_list)-1):
 	L = int(data[L_list[i], 0])
 	
 	q, d_q = closest_k_point(L)
-	data[L_list[i]:L_list[i+1],2] *= 3./2. * d_q / np.abs(float(e_k[str(L)]))
-	data[L_list[i]:L_list[i+1],3] *= 3./2. * d_q / np.abs(float(e_k[str(L)]))
+	#data[L_list[i]:L_list[i+1],2] *= 3./2. * d_q / np.abs(float(e_k[str(L)]))# / d_q / (2.*L*L)**0.5
+	#data[L_list[i]:L_list[i+1],3] *= 3./2. * d_q / np.abs(float(e_k[str(L)]))# / d_q / (2.*L*L)**0.5
 	
 	#data[L_list[i]:L_list[i+1],2] /= (2.*L*L)**0.5
 	#data[L_list[i]:L_list[i+1],3] /= (2.*L*L)**0.5
@@ -88,22 +90,27 @@ for i in range(len(L_list)-1):
 	f = scipy.interpolate.interp1d(x, y, kind=1)
 	ax.plot( xnew, f(xnew), color=color_cycle[cnt], markersize=0.0, linewidth=2.0)
 	
+	'''
 	nmin = 0
 	nmax = 7
 	parameter, perr = fit_function( [6., 1.], x[nmin:nmax], y[nmin:nmax], LinearFunction, datayerrors=data[L_list[i]:L_list[i+1],3][nmin:nmax])
 	px = np.linspace(x[0], x[-1], 1000)
 	ax.plot(px, LinearFunction(px, *parameter), 'k-', linewidth=3.0)
-	print "L = ", L, ", v = ", parameter[1], " +- ", perr[1]
+	print "L = ", L, ", v = ", parameter[1], " +- ", perr[1], ", v0 = ", parameter[0], " +- ", perr[0]
+	'''
 	
 	cnt += 1
 
-pylab.xlabel(r"$V$", fontsize=18)
+pylab.xlabel(r"$U$", fontsize=18)
 #pylab.ylabel(r"$\Delta_{\text{cdw}} \ \sqrt{N} \ v_F \ |\boldsymbol{q}| \ / \ |E(\boldsymbol{K}+\boldsymbol{q})|$", fontsize=18)
-pylab.ylabel(r"$\Delta_{\text{sp}} \ \sqrt{N}$", fontsize=18)
+#pylab.ylabel(r"$\Delta_{\text{sp}} \ \sqrt{N}$", fontsize=18)
+pylab.ylabel(r"$\Delta (\vec{K})\ \sqrt{N}$", fontsize=18)
+#pylab.ylabel(r"$\Delta (\vec{K} - \vec{b}_1 / L)\ \sqrt{N}$", fontsize=18)
+#pylab.ylim(ymax = 55)
 #ax.axvline(1.355, color='k', linestyle='--')
 
 plt.legend(borderpad=0.05, labelspacing=0.)
-plt.tight_layout()
-plt.savefig("gap_cdw.pdf", bbox_inches='tight', pad_inches = 0.1)
+plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+plt.savefig("gap_sp.pdf", bbox_inches='tight', pad_inches = 0.1)
 
 plt.show()

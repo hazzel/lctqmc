@@ -24,7 +24,7 @@ struct wick_sp_site
 	wick_sp_site(Random& rng_, parameters& param_, lattice& lat_)
 		: rng(rng_), param(param_), lat(lat_)
 	{
-		values.resize(lat.n_sites()*lat.n_sites()/4);
+		values.resize(lat.max_distance());
 	}
 	
 	std::vector<double>& get_obs(const matrix_t& et_gf_0, const matrix_t& et_gf_t,
@@ -32,23 +32,22 @@ struct wick_sp_site
 	{
 		const numeric_t *ca_td_gf = td_gf.data();
 		const int N = lat.n_sites();
-		auto& K = lat.symmetry_point("K");
 		std::fill(values.begin(), values.end(), 0.);
-		for (int o = 0; o < 2; ++o)
-		for (int i = 0; i < N; i+=2)
+		for (int d = 0; d < lat.max_distance(); ++d)
 		{
-			auto& r_i = lat.real_space_coord(i);
-			for (int j = 0; j < N; j+=2)
+			auto& d_bonds = lat.bonds("d" + std::to_string(d) + "_bonds");
+			for (auto& b : d_bonds)
 			{
+				int i = b.first, j = b.second;
+				auto& r_i = lat.real_space_coord(i);
 				auto& r_j = lat.real_space_coord(j);
-				double kdot = K.dot(r_i - r_j);
-				values[i/2*N/2 + j/2] += std::cos(kdot) * ca_td_gf[(j+o)*N+(i+o)] * lat.parity(i+o)*lat.parity(j+o) / 2.;
+				values[d] += ca_td_gf[j*N+i] * lat.parity(i)*lat.parity(j);
 			}
+			values[d] /= d_bonds.size();
 		}
 		return values;
 	}
 };
-
 
 struct wick_tp_matrix
 {
