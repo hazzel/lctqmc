@@ -71,9 +71,9 @@ filelist.append(glob.glob("../job/*01.out"))
 
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/K_point/theta160/old/lctqmc_ep_L9_as_theta160/*03.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/K_point/theta160/old/lctqmc_ep_L9_as_theta160/*04.out"))
-#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/K_point/theta160/lctqmc_L9_as_theta160/*10.out"))
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/K_point/theta160/lctqmc_L6_s_theta160/*14.out"))
 
-#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_ep_L8_theta40/*0011.out"))
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_ep_L8_theta40/*0005.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_ep_L7_theta40/*0006.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_ep_L5_theta40/*0010.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_ep_L5_theta40/*0011.out"))
@@ -88,7 +88,7 @@ for f in filelist:
 	plist = ParseParameters(f)
 	elist = ParseEvalables(f)
 
-	obs = "sp"
+	obs = "gamma_mod"
 	if obs == "M2":
 		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{cdw}(\tau) O_{cdw}^{\dag} \right \rangle$", fontsize=16)
@@ -248,19 +248,19 @@ for f in filelist:
 			#ax.plot(ed_tau, np.flipud(ed_data[ed_n]), marker='o', color="b", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+'$')
 		
 		
-		nmin = 60; nmax = len(x_tau)-1
-		parameter, perr = fit_function( [5., 0.5, 0.5], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
-		#parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[5., 0.5, 0.5], method='trf')
+		nmin = 20; nmax = len(x_tau)-1
+		parameter, perr = fit_function( [1., 0.01, 1.], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
+		#parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[1., 0.01, 1.], method='trf')
 	
 		px = np.linspace(x_tau[nmin], x_tau[nmax], 1000)
 		ax.plot(px, FitFunctionL(px, *parameter), 'k-', linewidth=3.0)
 		
-		print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2] * (2.*L*L)**0.5, 2))
+		print(str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2] * (2.*L*L)**0.5, 2)))
 		#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2], 5)) + "\t\t" + str(round(perr[2], 2))
 		
 		#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2,2]**0.5 * (2.*L*L)**0.5, 2))
 		
-		#print parameter
+		print(parameter)
 		
 		'''
 		j = 1
@@ -363,7 +363,7 @@ for f in filelist:
 		except RuntimeError:
 			print "run time error during fit"
 		'''
-		
+		'''
 		if len(ed_glob) > 0 and len(ed_data) > ed_n:
 			nmin = len(ed_tau) / 2
 			nmax = len(ed_tau) - 1
@@ -373,8 +373,8 @@ for f in filelist:
 			px = np.linspace(ed_tau[nmin], ed_tau[nmax], 1000)
 			#px = np.linspace(ed_tau[len(ed_data[ed_n])/2], ed_tau[len(ed_data[ed_n])-1], 1000)
 			ax.plot(px, FitFunctionL(px, *parameter_ed), 'k-', linewidth=3.0)
-			print parameter_ed
-		
+			print(parameter_ed)
+		'''
 		cnt += 1
 
 plt.legend()

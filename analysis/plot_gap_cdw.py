@@ -5,19 +5,18 @@ import sys
 sys.path.append('/home/stephan/mc/ctqmc')
 sys.path.append("/net/home/lxtsfs1/tpc/hesselmann/mc/ctqmc")
 import numpy as np
+from cdecimal import *
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import pylab
+from ParseDataOutput import *
 sys.path.append("/net/home/lxtsfs1/tpc/hesselmann/mc/qising-SSE")
 sys.path.append("/home/stephan/mc/qising-SSE")
 from Fit import *
 from texify import *
 import scipy.integrate
 import scipy.interpolate
-
-def LinearFunction(x, a, b):
-	return a + b*x
 
 plt.rc('text', usetex=True)
 plt.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
@@ -36,16 +35,12 @@ def closest_k_point(L):
 	d_q = np.linalg.norm(q - K)
 	for i in range(len(k)):
 		d_k = np.linalg.norm(k[i] - K)
-		if d_k < d_q and d_k > 1E-12:
+		if d_k < d_q:
 			q = k[i]
 			d_q = d_k
 	return [q, d_q]
 
-#filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/sp-s-*tprime*-theta*.txt")[0]
-#filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/gapped_spectrum/delta_sp.txt")[0]
-#filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/K_point/delta_sp_q.txt")[0]
-filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/science_paper/delta_sp.txt")[0]
-#filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/science_paper/delta_sp_q.txt")[0]
+filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/K_point/delta_cdw.txt")[0]
 with open(filename) as f:
 	lines = (line for line in f if not line.startswith('L'))
 	new_del = []
@@ -71,12 +66,11 @@ for i in range(len(L_list)-1):
 	L = int(data[L_list[i], 0])
 	
 	q, d_q = closest_k_point(L)
-	#data[L_list[i]:L_list[i+1],2] *= 3./2. * d_q / np.abs(float(e_k[str(L)]))# / d_q / (2.*L*L)**0.5
-	#data[L_list[i]:L_list[i+1],3] *= 3./2. * d_q / np.abs(float(e_k[str(L)]))# / d_q / (2.*L*L)**0.5
+	#data[L_list[i]:L_list[i+1],2] *= 3./2. * d_q / np.abs(float(e_k[str(L)]))
+	#data[L_list[i]:L_list[i+1],3] *= 3./2. * d_q / np.abs(float(e_k[str(L)]))
 	
-	#data[L_list[i]:L_list[i+1],2] /= (2.*L*L)**0.5
-	#data[L_list[i]:L_list[i+1],3] /= (2.*L*L)**0.5
-	
+	#if int(L)>6:
+		#data[L_list[i]:L_list[i+1],4] -= 0.0025 * L*L
 	ax.plot( data[L_list[i]:L_list[i+1],1], data[L_list[i]:L_list[i+1],2], marker="o", color=color_cycle[cnt], markersize=10.0, linewidth=0.0, label=r"$L="+str(L)+"$")
 	(_, caps, _) = ax.errorbar(data[L_list[i]:L_list[i+1],1], data[L_list[i]:L_list[i+1],2], yerr=data[L_list[i]:L_list[i+1],3], marker='None', capsize=8, color=color_cycle[cnt], linewidth=0.0)
 	for cap in caps:
@@ -87,28 +81,15 @@ for i in range(len(L_list)-1):
 	xnew = np.linspace(x.min(), x.max(), 300)
 	f = scipy.interpolate.interp1d(x, y, kind=1)
 	ax.plot( xnew, f(xnew), color=color_cycle[cnt], markersize=0.0, linewidth=2.0)
-	
-	'''
-	nmin = 0
-	nmax = 7
-	parameter, perr = fit_function( [6., 1.], x[nmin:nmax], y[nmin:nmax], LinearFunction, datayerrors=data[L_list[i]:L_list[i+1],3][nmin:nmax])
-	px = np.linspace(x[0], x[-1], 1000)
-	ax.plot(px, LinearFunction(px, *parameter), 'k-', linewidth=3.0)
-	print "L = ", L, ", v = ", parameter[1], " +- ", perr[1], ", v0 = ", parameter[0], " +- ", perr[0]
-	'''
-	
 	cnt += 1
 
-pylab.xlabel(r"$U$", fontsize=18)
+pylab.xlabel(r"$V$", fontsize=18)
 #pylab.ylabel(r"$\Delta_{\text{cdw}} \ \sqrt{N} \ v_F \ |\boldsymbol{q}| \ / \ |E(\boldsymbol{K}+\boldsymbol{q})|$", fontsize=18)
-#pylab.ylabel(r"$\Delta_{\text{sp}} \ \sqrt{N}$", fontsize=18)
-pylab.ylabel(r"$\Delta (\vec{K})\ \sqrt{N}$", fontsize=18)
-#pylab.ylabel(r"$\Delta (\vec{K} - \vec{b}_1 / L)\ \sqrt{N}$", fontsize=18)
-#pylab.ylim(ymax = 55)
-#ax.axvline(1.355, color='k', linestyle='--')
+pylab.ylabel(r"$\Delta_{\text{cdw}} \ \sqrt{N}$", fontsize=18)
+ax.axvline(1.355, color='k', linestyle='--')
 
 plt.legend(borderpad=0.05, labelspacing=0.)
-plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-plt.savefig("gap_sp.pdf", bbox_inches='tight', pad_inches = 0.1)
+plt.tight_layout()
+plt.savefig("gap_cdw.pdf", bbox_inches='tight', pad_inches = 0.1)
 
 plt.show()

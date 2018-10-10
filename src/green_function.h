@@ -163,13 +163,13 @@ class green_function
 					storage_U[i+1] = storage_U[i];
 					prop_from_left(-1, (i+1)*param.block_size, i*param.block_size, storage_U[i+1]);
 
-					/*
+					
 					Eigen::JacobiSVD<matrix_t> svd(storage_U[i+1] * storage_D[i], Eigen::ComputeThinU | Eigen::ComputeThinV);
 					storage_U[i+1] = svd.matrixU();
 					storage_D[i+1] = svd.singularValues().asDiagonal();
 					storage_V[i+1] = svd.matrixV().adjoint() * storage_V[i];
-					*/
 					
+					/*
 					qr_solver.compute(storage_U[i+1] * storage_D[i]);
 					matrix_t R = qr_solver.matrixQR().triangularView<Eigen::Upper>();
 					storage_U[i+1] = qr_solver.matrixQ();
@@ -177,6 +177,7 @@ class green_function
 					storage_V[i+1] = R * (qr_solver.colsPermutation().transpose() * storage_V[i]);
 					for (int p = 0; p < storage_V[i+1].rows(); ++p)
 						storage_V[i+1].row(p) = 1./storage_D[i+1].diagonal()[p] * storage_V[i+1].row(p);
+					*/
 				}
 			
 				storage_U.back() = matrix_t::Identity(lat.n_sites(), lat.n_sites());
@@ -188,13 +189,13 @@ class green_function
 					storage_V[i] = storage_V[i+1];
 					prop_from_right(-1, (i+1)*param.block_size, i*param.block_size, storage_V[i]);
 
-					/*
+					
 					Eigen::JacobiSVD<matrix_t> svd(storage_D[i+1] * storage_V[i], Eigen::ComputeThinU | Eigen::ComputeThinV); 
 					storage_U[i] = storage_U[i+1]*svd.matrixU();
 					storage_D[i] = svd.singularValues().asDiagonal();
 					storage_V[i] = svd.matrixV().adjoint();
-					*/
 					
+					/*
 					qr_solver.compute(storage_D[i+1] * storage_V[i]);
 					matrix_t Q = qr_solver.matrixQ();
 					matrix_t R = qr_solver.matrixQR().triangularView<Eigen::Upper>();
@@ -206,6 +207,7 @@ class green_function
 					storage_U[i] = R * qr_solver.colsPermutation().transpose();
 					for (int p = 0; p < storage_U[i].rows(); ++p)
 						storage_U[i].row(p) = 1./storage_D[i].diagonal()[p] * storage_U[i].row(p);
+					*/
 				}
 			}
 			g_tau = g_stable();

@@ -380,7 +380,7 @@ class lattice
 							distance_map[(i*(2*n_sites()-1-i))/2 + j - i - 1] = n;
 					}
 				}
-			print_distance_map();
+			//print_distance_map();
 		}
 	public:
 		// Base vectors of Bravais lattice
