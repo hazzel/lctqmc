@@ -62,7 +62,6 @@ plt.axvline(x=3.85, ls="--", lw=2.0, color="grey")
 filelist = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/analysis/data_Hubbard.txt")
 filelist.sort()
 
-cnt_q = 0
 for filename in filelist:
 	with open(filename) as f:
 		lines = (line for line in f if not line.startswith('L'))
@@ -73,6 +72,7 @@ for filename in filelist:
 
 	data_filter = list(filter(lambda x : x[i_L] in L_list and x[i_gamma] in gamma_list and x[i_U] in U_list, data))
 
+	cnt_q = 0
 	for L in L_list:
 		data_filter_L = np.array(list(filter(lambda x : x[i_L] == L and x[i_U] in U_list, data_filter)))
 		

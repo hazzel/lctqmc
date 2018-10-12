@@ -53,15 +53,13 @@ ax.text(0.48, 0.95, r"$\gamma=0$", transform=ax.transAxes, fontsize=18, vertical
 ax.text(0.60, 0.35, r"$\text{40\% reduced } v_0$", transform=ax.transAxes, fontsize=18, verticalalignment='top')
 ax.text(0.60, 0.74, r"$v_0$", transform=ax.transAxes, fontsize=18, verticalalignment='top')
 
-filelist = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/analysis/data_of_q.txt")
+filelist = glob.glob("data_of_q.txt")
 filelist.sort()
 
 x = np.linspace(0., 2., 1000)
 ax.plot( x, v0*0.6 * x, color="k", ls="-.", linewidth=2.0)
 ax.plot( x, v0 * x, color="k", ls="--", linewidth=2.0)
 
-cnt_U = 0
-cnt_L = 0
 for filename in filelist:
 	with open(filename) as f:
 		lines = (line for line in f if not line.startswith('L'))
@@ -72,6 +70,8 @@ for filename in filelist:
 
 	data_filter = list(filter(lambda x : x[i_L] in L_list and x[i_gamma] in gamma_list and x[i_U] in U_list, data))
 
+	cnt_U = 0
+	cnt_L = 0
 	for U in U_list:
 		data_filter_U = np.array(list(filter(lambda x : x[i_U] == U, data_filter)))
 		for L in L_list:
