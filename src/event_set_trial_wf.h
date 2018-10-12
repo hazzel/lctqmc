@@ -503,13 +503,13 @@ struct event_set_trial_wf
 				e0_quantum_numbers[i].push_back(ph_2p_block[i].col(0).adjoint() * inv_pm * ph_2p_block[i].col(0)
 					* ph_2p_block[i].col(1).adjoint() * inv_pm * ph_2p_block[i].col(1));
 				e0_quantum_numbers[i].push_back(ph_2p_block[i].col(0).adjoint() * sv_pm * ph_2p_block[i].col(0)
-					* ph_2p_block[i].col(1).adjoint() * inv_pm * ph_2p_block[i].col(1));
+					* ph_2p_block[i].col(1).adjoint() * sv_pm * ph_2p_block[i].col(1));
 				e0_quantum_numbers[i].push_back(ph_2p_block[i].col(0).adjoint() * sh_pm * ph_2p_block[i].col(0)
-					* ph_2p_block[i].col(1).adjoint() * inv_pm * ph_2p_block[i].col(1));
+					* ph_2p_block[i].col(1).adjoint() * sh_pm * ph_2p_block[i].col(1));
 				e0_quantum_numbers[i].push_back(ph_2p_block[i].col(0).adjoint() * rot60_pm * ph_2p_block[i].col(0)
-					* ph_2p_block[i].col(1).adjoint() * inv_pm * ph_2p_block[i].col(1));
+					* ph_2p_block[i].col(1).adjoint() * rot60_pm * ph_2p_block[i].col(1));
 				e0_quantum_numbers[i].push_back(ph_2p_block[i].col(0).adjoint() * rot120_pm * ph_2p_block[i].col(0)
-					* ph_2p_block[i].col(1).adjoint() * inv_pm * ph_2p_block[i].col(1));
+					* ph_2p_block[i].col(1).adjoint() * rot120_pm * ph_2p_block[i].col(1));
 			}
 
 			P.resize(lat.n_sites(), lat.n_sites() / 2);

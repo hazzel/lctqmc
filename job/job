@@ -23,8 +23,8 @@ obs = M2,epsilon,epsilon_as,kekule_s,kekule_as,kekule_K,gamma_mod,sp,sp_q,tp
 theta = 80
 method = projective
 
-L = 12
+L = 3
 inv_symmetry = 1
 
 V = 0.5
-{tprime=0.3}
+{tprime=0.}
