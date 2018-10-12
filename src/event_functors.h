@@ -10,6 +10,7 @@
 #include "wick_base.h"
 #include "vector_wick_base.h"
 #include "wick_static_functors.h"
+#include "vector_wick_static_functors.h"
 #include "wick_functors.h"
 #include "vector_wick_functors.h"
 #include "event_set_trial_wf.h"
@@ -70,6 +71,8 @@ struct event_static_measurement
 				add_wick(wick_static_S_cdw_q20{rng, param, lat}, param.static_obs[i]);
 			else if (param.static_obs[i] == "S_cdw_q11")
 				add_wick(wick_static_S_cdw_q11{rng, param, lat}, param.static_obs[i]);
+			else if (param.static_obs[i] == "chi_cdw")
+				add_vector_wick(wick_static_chi_cdw{rng, param, lat}, param.static_obs[i], 4);
 			else if (param.static_obs[i] == "M4")
 				add_wick(wick_static_M4{rng, param, lat}, param.static_obs[i]);
 			else if (param.static_obs[i] == "epsilon")
@@ -89,9 +92,9 @@ struct event_static_measurement
 	}
 	
 	template<typename T>
-	void add_vector_wick(T&& functor, const std::string& name)
+	void add_vector_wick(T&& functor, const std::string& name, int n_values)
 	{
-		vec_obs.push_back(vector_wick_static_base<matrix_t>(std::forward<T>(functor)));
+		vec_obs.push_back(vector_wick_static_base<matrix_t>(std::forward<T>(functor), n_values));
 		vec_names.push_back(name);
 	}
 
@@ -119,10 +122,13 @@ struct event_static_measurement
 	
 	void init()
 	{
+		int static_prebin = param.n_prebin * (param.measure_window / param.block_size) / param.static_measure_interval;
 		for (int i = 0; i < obs.size(); ++i)
-			measure.add_observable(names[i], param.n_prebin * (param.measure_window / param.block_size) / param.static_measure_interval);
+			measure.add_observable(names[i], static_prebin);
+		for (int i = 0; i < vec_obs.size(); ++i)
+			measure.add_vectorobservable(vec_names[i], vec_obs[i].n_values, static_prebin);
 		if (param.ep_tau_steps > 0)
-			measure.add_vectorobservable("dyn_Hv_tau", param.ep_tau_steps, param.n_prebin * (param.measure_window / param.block_size) / param.static_measure_interval);
+			measure.add_vectorobservable("dyn_Hv_tau", param.ep_tau_steps, static_prebin);
 	}
 };
 
@@ -151,29 +157,31 @@ struct event_dynamic_measurement
 		{
 			if (param.dyn_obs[i] == "M2")
 				add_wick(wick_M2{rng, param, lat}, param.dyn_obs[i]);
-			if (param.dyn_obs[i] == "epsilon")
+			else if (param.dyn_obs[i] == "chi_cdw")
+				add_vector_wick(wick_chi_cdw{rng, param, lat}, param.dyn_obs[i], 4);
+			else if (param.dyn_obs[i] == "epsilon")
 				add_wick(wick_epsilon{rng, param, lat}, param.dyn_obs[i]);
-			if (param.dyn_obs[i] == "epsilon_as")
+			else if (param.dyn_obs[i] == "epsilon_as")
 				add_wick(wick_epsilon_as{rng, param, lat}, param.dyn_obs[i]);
-			if (param.dyn_obs[i] == "kekule_s")
+			else if (param.dyn_obs[i] == "kekule_s")
 				add_wick(wick_kekule_s{rng, param, lat}, param.dyn_obs[i]);
-			if (param.dyn_obs[i] == "kekule_as")
+			else if (param.dyn_obs[i] == "kekule_as")
 				add_wick(wick_kekule_as{rng, param, lat}, param.dyn_obs[i]);
-			if (param.dyn_obs[i] == "kekule_K")
+			else if (param.dyn_obs[i] == "kekule_K")
 				add_wick(wick_kekule_K{rng, param, lat}, param.dyn_obs[i]);
-			if (param.dyn_obs[i] == "gamma_mod")
+			else if (param.dyn_obs[i] == "gamma_mod")
 				add_wick(wick_gamma_mod{rng, param, lat}, param.dyn_obs[i]);
-			if (param.dyn_obs[i] == "chern")
+			else if (param.dyn_obs[i] == "chern")
 				add_wick(wick_chern{rng, param, lat}, param.dyn_obs[i]);
-			if (param.dyn_obs[i] == "sp")
+			else if (param.dyn_obs[i] == "sp")
 				add_wick(wick_sp{rng, param, lat}, param.dyn_obs[i]);
-			if (param.dyn_obs[i] == "sp_q")
+			else if (param.dyn_obs[i] == "sp_q")
 				add_wick(wick_sp_q{rng, param, lat}, param.dyn_obs[i]);
-			if (param.dyn_obs[i] == "sp_site")
+			else if (param.dyn_obs[i] == "sp_site")
 				add_vector_wick(wick_sp_site{rng, param, lat}, param.dyn_obs[i], lat.max_distance());
-			if (param.dyn_obs[i] == "tp")
+			else if (param.dyn_obs[i] == "tp")
 				add_wick(wick_tp{rng, param, lat}, param.dyn_obs[i]);
-			if (param.dyn_obs[i] == "tp_mat")
+			else if (param.dyn_obs[i] == "tp_mat")
 				add_vector_wick(wick_tp_matrix{rng, param, lat}, param.dyn_obs[i], 4);
 		}
 		for (int i = 0; i < obs.size(); ++i)

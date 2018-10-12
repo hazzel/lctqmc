@@ -16,7 +16,7 @@ color_cycle = prop_cycle.by_key()['color']
 marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
 fillstyle = ['none', 'full']
 
-filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/suscept/suscept.txt")[0]
+filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/suscept/R_cdw.txt")[0]
 
 with open(filename) as f:
 	lines = (line for line in f if not line.startswith('L'))
@@ -25,32 +25,30 @@ with open(filename) as f:
 		new_del.append(','.join(l.split()))
 	data = np.loadtxt(new_del, delimiter=',', skiprows=0)
 
+cnt = 0
 fig, ax = plt.subplots()
-ax.set_xlabel(r"$t^{''} / t$", fontsize=18)
+ax.set_xlabel(r"$V/t$", fontsize=18)
 ax.set_ylabel(r"$\chi_{CDW}$", fontsize=18)
 #props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
 #ax.text(0.05, 0.95, r"$L=6$", transform=ax.transAxes, fontsize=18, verticalalignment='top', bbox=props)
 
-L_list = [ 6, 9, 12 ]
-V_list = [ 0.1, 0.3, 0.5 ]
+L_list = [ 6, 9 ]
+tprime_list = [ 0.5 ]
 
-cnt_V, cnt_L = 0, 0
-for V in V_list:
-	cnt_L = 0
+for tprime in tprime_list:
 	for L in L_list:
-		data_filter = np.array(list(filter(lambda x : x[1] == V and x[0] == L, data)))
+		data_filter = np.array(list(filter(lambda x : x[2] == tprime and x[0] == L, data)))
 		
 		if data_filter.size > 0:
-			tprime = data_filter[:,2]
+			V = data_filter[:,1]
 			suscept = data_filter[:,3]
 			suscept_sigma = data_filter[:,4]
 
-			ax.plot( tprime, suscept, color=color_cycle[cnt_V%len(color_cycle)], marker=marker_cycle[cnt_L%len(marker_cycle)], markersize=10.0, linewidth=0.0, label=f"$V={V}, L={L}$")
-			(_, caps, _) = ax.errorbar(tprime, suscept, yerr=suscept_sigma, marker='None', capsize=10, color=color_cycle[cnt_V%len(color_cycle)], linewidth=3.0)
+			ax.plot( V, suscept, color=color_cycle[cnt], marker=marker_cycle[cnt], markersize=10.0, linewidth=0.0, label=f"$tprime={tprime}, L={L}$")
+			(_, caps, _) = ax.errorbar(V, suscept, yerr=suscept_sigma, marker='None', capsize=10, color=color_cycle[cnt], linewidth=3.0)
 			for cap in caps:
 				cap.set_markeredgewidth(2.0)
-			cnt_L += 1
-		cnt_V += 1
+			cnt += 1
 
 plt.legend(borderpad=0.05, labelspacing=0.075)
 leg = plt.legend()

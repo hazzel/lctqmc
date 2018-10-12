@@ -37,7 +37,7 @@ struct wick_static_energy
 			energy += param.tprime * et_gf(a.second, a.first);
 		for (int i = 0; i < lat.n_sites(); ++i)
 			energy += -lat.parity(i) * param.stag_mu * et_gf(i, i);
-		return std::real(energy / lat.n_sites());
+		return std::real(energy);
 	}
 };
 
@@ -99,7 +99,7 @@ struct wick_static_M2
 		for (int i = 0; i < N; ++i)
 			for (int j = 0; j < N; ++j)
 				M2 += ca_et_gf_0[j * N + i] * ca_et_gf_0[j * N + i];
-		return std::real(M2) / std::pow(lat.n_sites(), 2.);
+		return std::real(M2) / std::pow(N, 2.);
 	}
 };
 

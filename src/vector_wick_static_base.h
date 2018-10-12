@@ -11,7 +11,8 @@ class vector_wick_static_base
 {
 	public:
 		template<typename T>
-		vector_wick_static_base(T&& functor)
+		vector_wick_static_base(T&& functor, int n_values_)
+			: n_values(n_values_)
 		{
 			construct_delegation(new typename std::remove_reference<T>::type(
 				std::forward<T>(functor)));
@@ -31,6 +32,8 @@ class vector_wick_static_base
 			get_obs_fun = [functor](const matrix_t& et_gf) -> std::vector<double>&
 				{ return functor->get_obs(et_gf); };
 		}
+	public:
+		int n_values;
 	private:
 		std::shared_ptr<void> impl;
 		std::function<std::vector<double>&(const matrix_t&)> get_obs_fun;
