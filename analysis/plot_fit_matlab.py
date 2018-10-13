@@ -82,7 +82,7 @@ gamma_list = [ 0. ]
 L_list = [ 15 ]
 #U_list = [ 0.5, 1., 1.5, 2., 3., 3.6, 3.75, 4, 4.5 ]
 #L_list = [ 12 ]
-U_list = [ 3.6 ]
+U_list = [ 3.75 ]
 
 color_cycle = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'orange', 'darkgreen']
 marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
@@ -133,7 +133,7 @@ for data_G in data_filter:
 			cap.set_markeredgewidth(1.6)
 		cnt += 1
 			
-		nmin = 20; nmax = 60
+		nmin = 30; nmax = 80
 		parameter, perr = fit_function( [5., 0.5], tau[nmin:nmax], Gp[nmin:nmax], FitFunction, datayerrors=Gp_sigma[nmin:nmax])
 		#parameter, perr = scipy.optimize.curve_fit( FitFunction, tau[nmin:nmax], Gp[nmin:nmax], p0=[5., 0.5], method='trf')
 
@@ -144,7 +144,7 @@ for data_G in data_filter:
 	output = np.array(output)
 	output = output[np.argsort(output[:,0])]
 	for k in output:
-		print(str(int(L)) + "\t" + str(gamma) + "\t" + str(U) + "\t" + str(UoverUc) + "\t" + str(round(k[0], 5)) + "\t" + str(k[1]) + "\t\t" + str(k[2]) + "\t\t" + str(round(k[3], 5)) + "\t\t\t\t\t" + str(round(k[4], 5)))
+		print(str(int(L)) + "\t" + str(gamma) + "\t" + str(U) + "\t" + str(round(k[0], 5)) + "\t" + str(k[1]) + "\t\t" + str(k[2]) + "\t\t" + str(round(k[3], 5)) + "\t\t\t\t\t" + str(round(k[4], 5)))
 	print("")
 	
 
