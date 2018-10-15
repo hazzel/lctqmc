@@ -36,24 +36,18 @@ i_ky = 5
 i_delta = 6
 i_sigma = 7
 
-L_list = [ 15 ]
+L_list = [ 6, 9, 12, 15 ]
 gamma_list = [ 0. ]
 U_list = [ 0.5, 1., 1.5, 2., 2.5, 3., 3.4, 3.6, 3.75, 4, 4.5 ]
 #U_list = [ 0.1, 0.2, 0.3, 0.4, 0.5, 0.65, 0.8, 1., 1.5, 2, 2.5, 3, 3.2, 3.4, 3.55, 3.6, 3.65, 3.75, 4., 4.5, 5. ]
-q_list = [ 0, 1, 2]
+q_list = [ 2 ]
+v0 = 3.**0.5/2.
 
 fig, ax = plt.subplots()
-#plt.title(r"$\gamma = " + str(gamma_list[0]) + "$")
-ax.set_xlabel(r"$U/t$", fontsize=18)
-#ax.set_ylabel(r"$\Delta (\vec{K} - \vec{q})\  v_F |\vec{K} - \vec{q}|\  /\  E(\vec{K} - \vec{q})$", fontsize=16)
-ax.set_ylabel(r"$E/t$", fontsize=18)
-ax.set_ylim(-0.1,1.2)
-props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-ax.text(0.05, 0.95, r"$\gamma=0, L = 15$", transform=ax.transAxes, fontsize=18, verticalalignment='top', bbox=props)
-
-ax.text(0.20, 0.78, r"$a \Delta k = 0.97$", transform=ax.transAxes, fontsize=16, verticalalignment='top')
-ax.text(0.20, 0.49, r"$a \Delta k = 0.48$", transform=ax.transAxes, fontsize=16, verticalalignment='top')
-ax.text(0.20, 0.18, r"$a \Delta k = 0$", transform=ax.transAxes, fontsize=16, verticalalignment='top')
+ax.set_xlabel(r"$U / t$", fontsize=18)
+ax.set_ylabel(r"$[ E_n / \Delta k - v_0 n ] / v_0 t$", fontsize=18)
+#props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+#ax.text(0.05, 0.95, r"$\gamma=0$", transform=ax.transAxes, fontsize=18, verticalalignment='top', bbox=props)
 ax.text(0.53, 0.92, r"$U_c(0)/t = 3.85$", transform=ax.transAxes, fontsize=16, verticalalignment='top', color="grey")
 
 plt.axvline(x=3.85, ls="--", lw=2.0, color="grey")
@@ -77,18 +71,22 @@ for filename in filelist:
 		
 		for q_i in q_list:
 			data_filter_q = np.array(list(filter(lambda x : (np.abs(K[L]-b1/L*q_i - np.array([x[i_kx], x[i_ky]])) < 1E-6).all().any(), data_filter_L)))
-		
-			delta_list = data_filter_q[:, i_delta]
-			sigma_list = data_filter_q[:, i_sigma]
-			
-			ax.plot( U_list, delta_list, marker=marker_cycle[cnt_q], color=color_cycle[cnt_q], markersize=10.0, linewidth=0.0, label=r"$L="+str(L)+",\ i="+str(q_i)+"$")
-			(_, caps, _) = ax.errorbar(U_list, delta_list, yerr=sigma_list, marker='None', capsize=9, color=color_cycle[cnt_q], linewidth=2.0)
-			for cap in caps:
-				cap.set_markeredgewidth(1.8)
-			cnt_q += 1
 
-#plt.legend(borderpad=0.025, labelspacing=0.)
+			if len(data_filter_q > 0):
+				delta_k = np.linalg.norm(b1) / L
+				offset = v0 * q_i
+				delta_list = (data_filter_q[:, i_delta] / delta_k - offset) / v0
+				sigma_list = data_filter_q[:, i_sigma] / delta_k / v0
+				
+				ax.plot( U_list, delta_list, marker=marker_cycle[cnt_q], color=color_cycle[cnt_q], markersize=10.0, linewidth=0.0, label=f"$n={q_i}, L={L}$")
+				(_, caps, _) = ax.errorbar(U_list, delta_list, yerr=sigma_list, marker='None', capsize=9, color=color_cycle[cnt_q], linewidth=2.0)
+				for cap in caps:
+					cap.set_markeredgewidth(1.8)
+				cnt_q += 1
+
+leg = plt.legend(borderpad=0.05, labelspacing=0.075)
+leg.get_frame().set_linewidth(2.)
 plt.tight_layout()
-plt.savefig("pdf/gap_of_U.pdf", bbox_inches='tight', pad_inches = 0.1)
+plt.savefig(f"pdf/scaled_gap_n{q_list[0]}.pdf", bbox_inches='tight', pad_inches = 0.1)
 
 plt.show()

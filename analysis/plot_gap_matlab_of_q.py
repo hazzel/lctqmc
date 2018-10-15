@@ -105,8 +105,9 @@ for filename in filelist:
 			cnt_L += 1
 		cnt_U += 1
 
-plt.legend(borderpad=0.05, labelspacing=0.075, facecolor='wheat', framealpha=0.5)
+leg = plt.legend(borderpad=0.05, labelspacing=0.075)
+leg.get_frame().set_linewidth(2.)
 plt.tight_layout()
-plt.savefig("gap_of_q.pdf", bbox_inches='tight', pad_inches = 0.1)
+plt.savefig("pdf/gap_of_q.pdf", bbox_inches='tight', pad_inches = 0.1)
 
 plt.show()
