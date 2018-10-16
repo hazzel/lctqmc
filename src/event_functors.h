@@ -176,7 +176,7 @@ struct event_dynamic_measurement
 			else if (param.dyn_obs[i] == "sp")
 				add_wick(wick_sp{rng, param, lat}, param.dyn_obs[i]);
 			else if (param.dyn_obs[i] == "sp_q")
-				add_wick(wick_sp_q{rng, param, lat}, param.dyn_obs[i]);
+				add_vector_wick(wick_sp_q{rng, param, lat}, param.dyn_obs[i], wick_sp_q::nq+1);
 			else if (param.dyn_obs[i] == "sp_site")
 				add_vector_wick(wick_sp_site{rng, param, lat}, param.dyn_obs[i], lat.max_distance());
 			else if (param.dyn_obs[i] == "tp")

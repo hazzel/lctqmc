@@ -1,6 +1,6 @@
-SWEEPS = 10
-warmup = 10
-prebin = 1
+SWEEPS = 10000
+warmup = 200
+prebin = 100
 
 trial_wave_function = t_and_tprime
 block_size = 0.1
@@ -20,11 +20,11 @@ ep_delta_tau = 0.025
 static_obs = energy,Hv,epsilon,M2,S_cdw_q,S_cdw_q20,S_cdw_q11,kekule
 obs = M2,epsilon,epsilon_as,kekule_s,kekule_as,kekule_K,gamma_mod,sp,sp_q,tp
 
-theta = 80
+theta = 40
 method = projective
 
-L = 3
+L = 6
 inv_symmetry = 1
 
-V = 0.5
+V = 1.
 {tprime=0.}
