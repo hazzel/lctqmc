@@ -79,10 +79,10 @@ corner = np.array(corner)
 K = { 6 : np.array([4.1887902, 0.]), 9 : np.array([4.1887902, 0.]), 12 : np.array([4.1887902, 0.]), 15 : np.array([4.1887902, 0.]) }
 
 gamma_list = [ 0. ]
-L_list = [ 15 ]
+L_list = [ 6 ]
 #U_list = [ 0.5, 1., 1.5, 2., 3., 3.6, 3.75, 4, 4.5 ]
 #L_list = [ 12 ]
-U_list = [ 3.75 ]
+U_list = [ 3.6 ]
 
 color_cycle = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'orange', 'darkgreen']
 marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
@@ -133,7 +133,7 @@ for data_G in data_filter:
 			cap.set_markeredgewidth(1.6)
 		cnt += 1
 			
-		nmin = 30; nmax = 80
+		nmin = 20; nmax = 60
 		parameter, perr = fit_function( [5., 0.5], tau[nmin:nmax], Gp[nmin:nmax], FitFunction, datayerrors=Gp_sigma[nmin:nmax])
 		#parameter, perr = scipy.optimize.curve_fit( FitFunction, tau[nmin:nmax], Gp[nmin:nmax], p0=[5., 0.5], method='trf')
 

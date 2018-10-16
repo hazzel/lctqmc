@@ -1,6 +1,6 @@
-SWEEPS = 10000
-warmup = 200
-prebin = 100
+SWEEPS = 100000
+warmup = 500
+prebin = 1000
 
 trial_wave_function = t_and_tprime
 block_size = 0.1

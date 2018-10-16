@@ -88,7 +88,7 @@ struct wick_sp_q
 	wick_sp_q(Random& rng_, parameters& param_, lattice& lat_)
 		: rng(rng_), param(param_), lat(lat_)
 	{
-		values.resize(lat.max_distance());
+		values.resize(nq+1);
 	}
 	
 	std::vector<double>& get_obs(const matrix_t& et_gf_0, const matrix_t& et_gf_t,
@@ -98,10 +98,9 @@ struct wick_sp_q
 		numeric_t sp = 0.;
 		const int N = lat.n_sites();
 		std::fill(values.begin(), values.end(), 0.);
-		for (int q = 1; q <= nq; ++q)
+		for (int q = 0; q <= nq; ++q)
 		{
 			auto K = lat.symmetry_point("K") + q * lat.b1 / lat.Lx;
-			for (int o = 0; o < 2; ++o)
 			for (int i = 0; i < N; i+=2)
 			{
 				auto& r_i = lat.real_space_coord(i);
@@ -109,8 +108,7 @@ struct wick_sp_q
 				{
 					auto& r_j = lat.real_space_coord(j);
 					double kdot = K.dot(r_i - r_j);
-					values[q] += std::cos(kdot) * ca_td_gf[(j+o)*N+(i+o)] * lat.parity(i+o)*lat.parity(j+o);
-					//sp += std::cos(kdot) * ca_td_gf[j*N+i] * (1. + lat.parity(i)*lat.parity(j));
+					values[q] += std::cos(kdot) * (ca_td_gf[(j+0)*N+(i+0)] + ca_td_gf[(j+1)*N+(i+1)] + ca_td_gf[(j+0)*N+(i+1)] + ca_td_gf[(j+1)*N+(i+0)]);
 				}
 			}
 			values[q] /= N;
