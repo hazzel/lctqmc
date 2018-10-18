@@ -88,7 +88,7 @@ for f in filelist:
 	plist = ParseParameters(f)
 	elist = ParseEvalables(f)
 
-	obs = "gamma_mod"
+	obs = "chi_cdw_4"
 	if obs == "M2":
 		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{cdw}(\tau) O_{cdw}^{\dag} \right \rangle$", fontsize=16)
@@ -126,6 +126,8 @@ for f in filelist:
 	elif "tp" in obs:
 		ed_n = 12
 		ax.set_ylabel(r"$\left \langle O_{tp}(\tau) O_{tp}^{\dag} \right \rangle$", fontsize=16)
+	else:
+		ed_n = 1
 		
 	for i in range(len(plist)):
 		h = float(plist[i]["V"])
@@ -249,19 +251,19 @@ for f in filelist:
 			#ax.plot(ed_tau, np.flipud(ed_data[ed_n]), marker='o', color="b", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+'$')
 		
 		
-		nmin = 10; nmax = len(x_tau)-1
+		nmin = 2; nmax = 10#len(x_tau)-1
 		parameter, perr = fit_function( [1., 0.01, 1.], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
 		#parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[1., 0.01, 1.], method='trf')
 	
 		px = np.linspace(x_tau[nmin], x_tau[nmax], 1000)
 		ax.plot(px, FitFunctionL(px, *parameter), 'k-', linewidth=3.0)
 		
-		print(str(int(L)) + "\t" + str(h) + "\t" + str(tprime) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2] * (2.*L*L)**0.5, 2)))
-		#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2], 5)) + "\t\t" + str(round(perr[2], 2))
+		print(f"{int(L)} \t {h} \t\t {round(parameter[2] * (2.*L*L)**0.5, 5)} \t\t\t\t\t {round(perr[2] * (2.*L*L)**0.5, 5)}")
+		#print(f"{int(L)} \t {h} \t\t {round(parameter[2], 5)} \t\t\t\t\t {round(perr[2], 5)}")
 		
-		#print str(int(L)) + "\t" + str(h) + "\t\t" + str(round(parameter[2] * (2.*L*L)**0.5, 5)) + "\t\t\t\t\t" + str(round(perr[2,2]**0.5 * (2.*L*L)**0.5, 2))
+		#print(f"{int(L)} \t {h} \t\t {round(parameter[2] * (2.*L*L)**0.5, 5)} \t\t\t\t\t {round(perr[2,2]**0.5 * (2.*L*L)**0.5, 2)}")
 		
-		print(parameter)
+		#print(parameter)
 		
 		'''
 		j = 1

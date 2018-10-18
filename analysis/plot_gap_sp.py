@@ -43,7 +43,7 @@ def closest_k_point(L):
 
 #filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/sp-s-*tprime*-theta*.txt")[0]
 #filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/gapped_spectrum/delta_sp.txt")[0]
-filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/K_point/delta_sp_q.txt")[0]
+filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/K_point/delta_sp.txt")[0]
 #filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/K_point/delta_sp_q.txt")[0]
 #filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/science_paper/delta_sp.txt")[0]
 #filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/science_paper/delta_sp_q.txt")[0]
@@ -71,9 +71,9 @@ L_list.append(len(data[:,0]))
 for i in range(len(L_list)-1):
 	L = int(data[L_list[i], 0])
 	
-	q, d_q = closest_k_point(L)
-	data[L_list[i]:L_list[i+1],2] *= 3./2. * d_q / np.abs(float(e_k[str(L)]))# / d_q / (2.*L*L)**0.5
-	data[L_list[i]:L_list[i+1],3] *= 3./2. * d_q / np.abs(float(e_k[str(L)]))# / d_q / (2.*L*L)**0.5
+	#q, d_q = closest_k_point(L)
+	#data[L_list[i]:L_list[i+1],2] *= 3./2. * d_q / np.abs(float(e_k[str(L)]))# / d_q / (2.*L*L)**0.5
+	#data[L_list[i]:L_list[i+1],3] *= 3./2. * d_q / np.abs(float(e_k[str(L)]))# / d_q / (2.*L*L)**0.5
 	
 	#data[L_list[i]:L_list[i+1],2] /= (2.*L*L)**0.5
 	#data[L_list[i]:L_list[i+1],3] /= (2.*L*L)**0.5

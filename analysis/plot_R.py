@@ -5,15 +5,10 @@ import sys
 sys.path.append('/home/stephan/mc/ctqmc')
 sys.path.append("/net/home/lxtsfs1/tpc/hesselmann/mc/ctqmc")
 import numpy as np
-from cdecimal import *
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import pylab
-from ParseDataOutput import *
-sys.path.append("/net/home/lxtsfs1/tpc/hesselmann/mc/qising-SSE")
-sys.path.append("/home/stephan/mc/qising-SSE")
-from Fit import *
 from texify import *
 import scipy.integrate
 import scipy.interpolate
@@ -35,11 +30,12 @@ list_of_files_R = []
 #list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L15-s-*tprime*-theta8*.txt")
 #list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L18-s-*tprime*-theta8*.txt")
 #list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L21-s-*tprime*-theta8*.txt")
-list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw_11-*-s-*tprime*-theta320*.txt")
+list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-*-s-*tprime*-theta320*.txt")
+list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-*-s-*tprime*-theta640*.txt")
 #list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L18-s-*tprime*-theta8*.txt")
 #list_of_files_R += glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/R_cdw-L21-s-*tprime*-theta8*.txt")
 
-#list_of_files_R.sort()
+list_of_files_R.sort()
 data_list_R = [ ( pylab.loadtxt(filename), label ) for label, filename in enumerate(list_of_files_R) ]
 
 nu = 1./1.101#1./1.14
@@ -62,7 +58,7 @@ for data, label in data_list_R:
 		for cap in caps:
 			cap.set_markeredgewidth(1.6)
 	xnew = np.linspace(x.min(), x.max(), 300)
-	f = scipy.interpolate.interp1d(x, y, kind=1)
+	f = scipy.interpolate.interp1d(x, y, kind=3)
 	ax.plot( xnew, f(xnew), color=color_cycle[cnt], markersize=0.0, linewidth=2.0)
 	ax.legend()
 	cnt += 1

@@ -72,7 +72,7 @@ struct event_static_measurement
 			else if (param.static_obs[i] == "S_cdw_q11")
 				add_wick(wick_static_S_cdw_q11{rng, param, lat}, param.static_obs[i]);
 			else if (param.static_obs[i] == "chi_cdw")
-				add_vector_wick(wick_static_chi_cdw{rng, param, lat}, param.static_obs[i], 4);
+				add_vector_wick(wick_static_chi_cdw{rng, param, lat}, param.static_obs[i], wick_static_chi_cdw::nq+1);
 			else if (param.static_obs[i] == "M4")
 				add_wick(wick_static_M4{rng, param, lat}, param.static_obs[i]);
 			else if (param.static_obs[i] == "epsilon")
@@ -158,7 +158,7 @@ struct event_dynamic_measurement
 			if (param.dyn_obs[i] == "M2")
 				add_wick(wick_M2{rng, param, lat}, param.dyn_obs[i]);
 			else if (param.dyn_obs[i] == "chi_cdw")
-				add_vector_wick(wick_chi_cdw{rng, param, lat}, param.dyn_obs[i], 4);
+				add_vector_wick(wick_chi_cdw{rng, param, lat}, param.dyn_obs[i], wick_chi_cdw::nq+1);
 			else if (param.dyn_obs[i] == "epsilon")
 				add_wick(wick_epsilon{rng, param, lat}, param.dyn_obs[i]);
 			else if (param.dyn_obs[i] == "epsilon_as")

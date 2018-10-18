@@ -20,23 +20,34 @@ struct wick_static_chi_cdw
 	parameters& param;
 	lattice& lat;
 	std::vector<double> values;
+	static constexpr int nq = 4;
 
 	wick_static_chi_cdw(Random& rng_, parameters& param_, lattice& lat_)
 		: rng(rng_), param(param_), lat(lat_)
 	{
-		values.resize(4);
+		values.resize(nq+1);
 	}
 	
 	std::vector<double>& get_obs(const matrix_t& et_gf)
 	{
 		const numeric_t *ca_et_gf_0 = et_gf.data();
-		const int N = lat.n_sites(), Ns = N*N;
+		const int N = lat.n_sites();
 		std::fill(values.begin(), values.end(), 0.);
-		for (int i = 0; i < N; i+=2)
-			for (int j = 0; j < N; j+=2)
-				for (int u = 0; u < 2; ++u)
-					for (int v = 0; v < 2; ++v)
-						values[u*2+v] += ca_et_gf_0[(j+v) * N + i+u] * ca_et_gf_0[(j+v) * N + i+u] / Ns;
+		for (int q = 0; q <= nq; ++q)
+		{
+			auto gamma_q = q * lat.b1 / lat.Lx;
+			for (int i = 0; i < N; ++i)
+			{
+				auto& r_i = lat.real_space_coord((i/2)*2);
+				for (int j = 0; j < N; ++j)
+				{
+					auto& r_j = lat.real_space_coord((j/2)*2);
+					double qr = gamma_q.dot(r_i - r_j);
+					values[q] += std::cos(qr) * ca_et_gf_0[j * N + i] * ca_et_gf_0[j * N + i];
+				}
+			}
+			values[q] /= N * N;
+		}
 		return values;
 	}
 };

@@ -419,19 +419,19 @@ struct event_set_trial_wf
 			auto S_f = solver.eigenvectors();
 			S_f = project_symmetry(S_f, energy_levels, inv_pm);
 			split_quantum_numbers(energy_levels, S_f, inv_pm);
-			print_energy_levels(S_f, solver.eigenvalues(), energy_levels, inv_pm, sv_pm, sh_pm, rot60_pm, rot120_pm);
+			//print_energy_levels(S_f, solver.eigenvalues(), energy_levels, inv_pm, sv_pm, sh_pm, rot60_pm, rot120_pm);
 			
 			S_f = project_symmetry(S_f, energy_levels, sv_pm);
 			split_quantum_numbers(energy_levels, S_f, sv_pm);
-			print_energy_levels(S_f, solver.eigenvalues(), energy_levels, inv_pm, sv_pm, sh_pm, rot60_pm, rot120_pm);
+			//print_energy_levels(S_f, solver.eigenvalues(), energy_levels, inv_pm, sv_pm, sh_pm, rot60_pm, rot120_pm);
 		
 			S_f = project_symmetry(S_f, energy_levels, sh_pm);
 			split_quantum_numbers(energy_levels, S_f, sh_pm);
-			print_energy_levels(S_f, solver.eigenvalues(), energy_levels, inv_pm, sv_pm, sh_pm, rot60_pm, rot120_pm);
+			//print_energy_levels(S_f, solver.eigenvalues(), energy_levels, inv_pm, sv_pm, sh_pm, rot60_pm, rot120_pm);
 			
 			S_f = project_symmetry(S_f, energy_levels, rot60_pm);
 			split_quantum_numbers(energy_levels, S_f, rot60_pm);
-			print_energy_levels(S_f, solver.eigenvalues(), energy_levels, inv_pm, sv_pm, sh_pm, rot60_pm, rot120_pm);
+			//print_energy_levels(S_f, solver.eigenvalues(), energy_levels, inv_pm, sv_pm, sh_pm, rot60_pm, rot120_pm);
 			
 			P = S_f.leftCols(lat.n_sites()/2);
 			

@@ -5,7 +5,6 @@ import sys
 sys.path.append('/home/stephan/mc/ctqmc')
 sys.path.append("/net/home/lxtsfs1/tpc/hesselmann/mc/ctqmc")
 import numpy as np
-from cdecimal import *
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
@@ -18,7 +17,7 @@ from texify import *
 import scipy.integrate
 
 def FitFunction(x, a, b, c):
-	return a*x + b
+	return a*x*x + b*x + c
 
 plt.rc('text', usetex=True)
 plt.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
@@ -49,14 +48,15 @@ for filename in list_of_files:
 	for cap in caps:
 		cap.set_markeredgewidth(1.6)
 	
-	n = 3
+	n = 6
 	parameter, perr = scipy.optimize.curve_fit( FitFunction, 1./data[-n:,0], data[-n:,1], p0=[0.1, 0.1, 1.], method='trf')
 	xnew = np.linspace(0, 1./data[-n,0], 300)
 	ax1.plot( xnew, FitFunction(xnew, *parameter), color="k", markersize=0.0, linewidth=2.0)
-	print("R* = ", parameter[1])
+	print(f"R* = {parameter[2]} +- {perr[2,2]}")
 
 	ax1.set_ylim(bottom = 0)
 	ax1.set_xlabel(r"$1 / L$", fontsize=18)
+	ax1.set_ylabel(r"$V_c$", fontsize=18)
 	ax1.legend()
 	cnt += 1
 plt.tight_layout()
