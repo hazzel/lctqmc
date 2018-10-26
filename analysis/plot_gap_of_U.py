@@ -1,5 +1,7 @@
 import numpy as np
 import scipy as sp
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import matplotlib.ticker as ticker
@@ -139,7 +141,9 @@ for L in L_list:
 			ax2.errorbar(U_list, delta_list, yerr=sigma_list, markeredgewidth=1.6, capsize=8, fmt=marker[cnt_q]+'-', markersize=markerSize[cnt_q], color=ecolor[cnt_q], ecolor=ecolor[cnt_q], mfc=fcolor[cnt_q], label=f"$L={L}$")
 			cnt_q += 1
 
-plt.tight_layout()
+#plt.tight_layout()
+fig.subplots_adjust(left=0.1, bottom=0.1,right=0.9,top=0.9,wspace=0.05)
 leg = plt.legend(borderpad=0.15, labelspacing=0.4, loc=6, fontsize=16)
 leg.get_frame().set_linewidth(0.)
-plt.savefig("pdf/gap_of_U.pdf", bbox_inches='tight', pad_inches = 0.1)
+plt.savefig("pdf/gap_of_U.pdf", bbox_inches='tight', pad_inches = 0.)
+plt.show()

@@ -13,8 +13,8 @@ from texify import *
 fig, ax = plt.subplots()
 ax.set_aspect("equal")
 
-Lx = 3
-Ly = 3
+Lx = 8
+Ly = 8
 
 
 # BZ:
@@ -22,16 +22,16 @@ Ly = 3
 # |  |
 #  \/
 
-a1 = (3./2., np.sqrt(3.)/2.)
-a2 = (3./2., -np.sqrt(3.)/2.)
-delta = (1./2., np.sqrt(3.)/2.)
+a1 = np.array([3./2., np.sqrt(3.)/2.])
+a2 = np.array([3./2., -np.sqrt(3.)/2.])
+delta = np.array([1./2., np.sqrt(3.)/2.])
 
-b1 = (2.*np.pi/3., 2.*np.pi/np.sqrt(3.))
-b2 = (2.*np.pi/3., -2.*np.pi/np.sqrt(3.))
-K = (2.*np.pi/3., 2.*np.pi/3./np.sqrt(3.))
-Kp = (2.*np.pi/3., -2.*np.pi/3./np.sqrt(3.))
-M = (2.*np.pi/3., 0.)
-Gamma = (0., 0.)
+b1 = np.array([2.*np.pi/3., 2.*np.pi/np.sqrt(3.)])
+b2 = np.array([2.*np.pi/3., -2.*np.pi/np.sqrt(3.)])
+K = np.array([2.*np.pi/3., 2.*np.pi/3./np.sqrt(3.)])
+Kp = np.array([2.*np.pi/3., -2.*np.pi/3./np.sqrt(3.)])
+M = np.array([2.*np.pi/3., 0.])
+Gamma = np.array([0., 0.])
 
 print(np.linalg.norm(b1) * 3./2. * 2.**0.5)
 
@@ -65,6 +65,8 @@ ax.arrow(0, 0, b1[0], b1[1], head_width=0.25, head_length=0.25, fc='k', ec='k')
 ax.arrow(0, 0, b2[0], b2[1], head_width=0.25, head_length=0.25, fc='k', ec='k')
 ax.arrow(b1[0], b1[1], b2[0], b2[1], head_width=0., head_length=0., fc='k', ec='k')
 ax.arrow(b2[0], b2[1], b1[0], b1[1], head_width=0., head_length=0., fc='k', ec='k')
+
+print(4.*2.**0.5*Lx * 3./2*np.linalg.norm(K - (Lx//3+1)*2*b1/Lx - (Lx//3+1)*b2/Lx))
 
 #for kx, ky in sorted(zip(x, y), key=lambda n: n[0]):
 #	print(kx, ky)

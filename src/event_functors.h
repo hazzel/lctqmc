@@ -171,6 +171,8 @@ struct event_dynamic_measurement
 				add_wick(wick_kekule_K{rng, param, lat}, param.dyn_obs[i]);
 			else if (param.dyn_obs[i] == "gamma_mod")
 				add_wick(wick_gamma_mod{rng, param, lat}, param.dyn_obs[i]);
+			else if (param.dyn_obs[i] == "2d_rep")
+				add_wick(wick_2d_rep{rng, param, lat}, param.dyn_obs[i]);
 			else if (param.dyn_obs[i] == "chern")
 				add_wick(wick_chern{rng, param, lat}, param.dyn_obs[i]);
 			else if (param.dyn_obs[i] == "sp")

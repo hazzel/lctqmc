@@ -49,7 +49,7 @@ ax.set_xlabel(r"$a \Delta k$", fontsize=18)
 ax.set_ylabel(r"$E / t$", fontsize=18)
 
 props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-ax.text(0.48, 0.95, r"$\gamma=0$", transform=ax.transAxes, fontsize=18, verticalalignment='top', bbox=props)
+ax.text(0.52, 0.95, r"$\gamma=0$", transform=ax.transAxes, fontsize=18, verticalalignment='top', bbox=props)
 ax.text(0.60, 0.35, r"$\text{40\% reduced } v_0$", transform=ax.transAxes, fontsize=18, verticalalignment='top')
 ax.text(0.60, 0.74, r"$v_0$", transform=ax.transAxes, fontsize=18, verticalalignment='top')
 
@@ -91,6 +91,7 @@ for filename in filelist:
 				delta_list[i] *= v0 * q / E(k)
 				sigma_list[i] *= v0 * q / E(k)
 			
+			#delta_list -= v0 * q_list
 			
 			if U == 0.5:
 				label = r"$U/t="+str(U)+",\ \, \ L="+str(L)+"$"
@@ -108,6 +109,6 @@ for filename in filelist:
 leg = plt.legend(borderpad=0.05, labelspacing=0.075)
 leg.get_frame().set_linewidth(2.)
 plt.tight_layout()
-plt.savefig("pdf/gap_of_q.pdf", bbox_inches='tight', pad_inches = 0.1)
+plt.savefig("pdf/gap_of_q.pdf", bbox_inches='tight', pad_inches = 0.)
 
 plt.show()

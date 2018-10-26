@@ -795,15 +795,30 @@ class green_function
 			{
 				if (i == j)
 					continue;
+				/*
 				double delta_tau = vlist[j].tau - vlist[i].tau;
 				int tau_block;
 				if (delta_tau > 0.)
 					tau_block = delta_tau / param.ep_delta_tau;
 				else
 					tau_block = (param.theta + delta_tau) / param.ep_delta_tau;
+				*/
+				double delta_tau = vlist[j].tau - vlist[i].tau;
+				int tau_block;
+				if (delta_tau > 0.)
+					if (delta_tau < param.theta/2.)
+						tau_block = delta_tau / param.ep_delta_tau;
+					else
+						tau_block = (param.theta - delta_tau) / param.ep_delta_tau;
+				else
+					if (param.theta + delta_tau < param.theta/2.)
+						tau_block = (param.theta + delta_tau) / param.ep_delta_tau;
+					else
+						tau_block = -delta_tau / param.ep_delta_tau;
+				
 				int k = i_upper - i_lower;
 				if (tau_block < param.ep_tau_steps)
-					hv_tau[tau_block] += 1. / param.V / param.V / param.ep_delta_tau * param.ep_window / param.theta;
+					hv_tau[tau_block] += 1. / param.V / param.V / param.ep_delta_tau * param.ep_window / param.theta / 2.;
 			}
 				
 			/*

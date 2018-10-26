@@ -29,7 +29,7 @@ def closest_k_point(L):
 			d_q = d_k
 	return [q, d_q]
 
-filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/gapped_spectrum/delta_ep.txt")[0]
+filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/gapped_spectrum/delta_ep_test.txt")[0]
 #filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/K_point/delta_ep.txt")[0]
 with open(filename) as f:
 	lines = (line for line in f if not line.startswith('L'))

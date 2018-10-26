@@ -347,6 +347,55 @@ struct wick_gamma_mod
 	}
 };
 
+struct wick_2d_rep
+{
+	Random& rng;
+	parameters& param;
+	lattice& lat;
+
+	wick_2d_rep(Random& rng_, parameters& param_, lattice& lat_)
+		: rng(rng_), param(param_), lat(lat_)
+	{}
+	
+	double get_obs(const matrix_t& et_gf_0, const matrix_t& et_gf_t,
+		const matrix_t& td_gf)
+	{
+		const numeric_t *ca_et_gf_0 = et_gf_0.data(), *ca_et_gf_t = et_gf_t.data(), *ca_td_gf = td_gf.data();
+		std::complex<double> gm = 0.;
+		double pi = 4. * std::atan(1.);
+		const int ns = lat.n_sites();
+		
+		std::complex<double> im = {0., 1.};
+		//std::array<std::complex<double>, 3> phase{std::exp(im * (0. * pi + pi/2.)), std::exp(im * (2./3. * pi + pi/2.)), std::exp(im * (4./3. * pi + pi/2.))};
+		std::array<double, 3> phase{0. * pi, 2./3. * pi, 4./3. * pi};
+		for (int i = 0; i < lat.n_sites(); i+=2)
+		{
+			auto& r_i = lat.real_space_coord(i);
+			std::array<long unsigned int, 3> b_i{lat.site_at_position(r_i + lat.delta), lat.site_at_position(r_i + lat.delta - lat.a1), lat.site_at_position(r_i + lat.delta - lat.a1 + lat.a2)};
+			for (int nj = 0; nj < b_i.size(); ++nj)
+			{
+				auto j = b_i[nj];
+				for (int m = 0; m < lat.n_sites(); m+=2)
+				{
+					auto& r_m = lat.real_space_coord(m);
+					std::array<long unsigned int, 3> b_m{lat.site_at_position(r_m + lat.delta), lat.site_at_position(r_m + lat.delta - lat.a1), lat.site_at_position(r_m + lat.delta - lat.a1 + lat.a2)};
+					for (int nm = 0; nm < b_m.size(); ++nm)
+					{
+						auto n = b_m[nm];
+						
+						gm += std::cos(phase[nj]) * std::cos(phase[nm]) * (ca_et_gf_t[i*ns+j] * ca_et_gf_0[n*ns+m] + lat.parity(i) * lat.parity(m) * ca_td_gf[m*ns+i] * ca_td_gf[n*ns+j]);
+						//gm += std::cos(phase[nj]) * std::cos(phase[nm]) * (ca_et_gf_t[j*ns+i] * ca_et_gf_0[n*ns+m] + lat.parity(j) * lat.parity(m) * ca_td_gf[m*ns+j] * ca_td_gf[n*ns+i]);
+						//gm += std::cos(phase[nj]) * std::cos(phase[nm]) * (ca_et_gf_t[i*ns+j] * ca_et_gf_0[m*ns+n] + lat.parity(i) * lat.parity(n) * ca_td_gf[n*ns+i] * ca_td_gf[m*ns+j]);
+						//gm += std::cos(phase[nj]) * std::cos(phase[nm]) * (ca_et_gf_t[j*ns+i] * ca_et_gf_0[m*ns+n] + lat.parity(j) * lat.parity(n) * ca_td_gf[n*ns+j] * ca_td_gf[m*ns+i]);
+					}
+				}
+			}
+		}
+		return std::real(gm) / std::pow(lat.n_bonds(), 2.);
+	}
+};
+
+
 // chern(tau) = sum_{chern} <c_i^dag(tau) c_j(tau) c_n^dag c_m>
 struct wick_chern
 {

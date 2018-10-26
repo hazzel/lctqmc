@@ -76,7 +76,9 @@ filelist.append(glob.glob("../job/*000*.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_ep_L8_theta40/*0005.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_ep_L7_theta40/*0006.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_ep_L5_theta40/*0010.out"))
-#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_ep_L5_theta40/*0011.out"))
+
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_ep_L5_theta40/*0004.out"))
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_L5_theta40/*.out"))
 
 filelist[0].sort()
 
@@ -88,7 +90,7 @@ for f in filelist:
 	plist = ParseParameters(f)
 	elist = ParseEvalables(f)
 
-	obs = "chi_cdw_4"
+	obs = "2d_rep"
 	if obs == "M2":
 		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{cdw}(\tau) O_{cdw}^{\dag} \right \rangle$", fontsize=16)
@@ -113,18 +115,21 @@ for f in filelist:
 	elif obs == "gamma_mod":
 		ed_n = 8
 		ax.set_ylabel(r"$\left \langle O_{phase}(\tau) O_{phase}^{\dag} \right \rangle$", fontsize=16)
-	elif obs == "gamma_mod_as":
+	elif obs == "2d_rep":
 		ed_n = 9
 		ax.set_ylabel(r"$\left \langle O_{phase}(\tau) O_{phase}^{\dag} \right \rangle$", fontsize=16)
-	elif obs == "epsilon":
+	elif obs == "gamma_mod_as":
 		ed_n = 10
+		ax.set_ylabel(r"$\left \langle O_{phase}(\tau) O_{phase}^{\dag} \right \rangle$", fontsize=16)
+	elif obs == "epsilon":
+		ed_n = 11
 		#ax.set_ylabel(r"$\left \langle O_{\epsilon}(\tau) O_{\epsilon}^{\dag} \right \rangle - \left \langle O_{\epsilon}\right \rangle^2$", fontsize=16)
 		ax.set_ylabel(r"$\left \langle O_{\epsilon}(\tau) O_{\epsilon}^{\dag} \right \rangle$", fontsize=16)
 	elif "sp" in obs:
-		ed_n = 11
+		ed_n = 12
 		ax.set_ylabel(r"$\left \langle O_{sp}(\tau) O_{sp}^{\dag} \right \rangle$", fontsize=16)
 	elif "tp" in obs:
-		ed_n = 12
+		ed_n = 13
 		ax.set_ylabel(r"$\left \langle O_{tp}(\tau) O_{tp}^{\dag} \right \rangle$", fontsize=16)
 	else:
 		ed_n = 1
@@ -251,25 +256,28 @@ for f in filelist:
 			#ax.plot(ed_tau, np.flipud(ed_data[ed_n]), marker='o', color="b", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+'$')
 		
 		
-		nmin = 2; nmax = 10#len(x_tau)-1
+		nmin = 20; nmax = 80#len(x_tau)-1
+#		if cnt == 0:
+#			nmin = 50; nmax = len(x_tau)-1
+#		else:
+#			nmin *= 2
 		parameter, perr = fit_function( [1., 0.01, 1.], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
 		#parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[1., 0.01, 1.], method='trf')
 	
 		px = np.linspace(x_tau[nmin], x_tau[nmax], 1000)
 		ax.plot(px, FitFunctionL(px, *parameter), 'k-', linewidth=3.0)
 		
-		print(f"{int(L)} \t {h} \t\t {round(parameter[2] * (2.*L*L)**0.5, 5)} \t\t\t\t\t {round(perr[2] * (2.*L*L)**0.5, 5)}")
-		#print(f"{int(L)} \t {h} \t\t {round(parameter[2], 5)} \t\t\t\t\t {round(perr[2], 5)}")
+		#print(f"{int(L)} \t {h} \t\t {round(parameter[2] * (2.*L*L)**0.5, 5)} \t\t\t\t\t {round(perr[2] * (2.*L*L)**0.5, 5)}")
+		print(f"{int(L)} \t {h} \t\t {round(parameter[2], 5)} \t\t\t\t\t {round(perr[2], 5)}")
 		
-		#print(f"{int(L)} \t {h} \t\t {round(parameter[2] * (2.*L*L)**0.5, 5)} \t\t\t\t\t {round(perr[2,2]**0.5 * (2.*L*L)**0.5, 2)}")
-		
+		#print(f"{int(L)} \t {h} \t\t {round(parameter[2], 5)} \t\t\t\t\t {round(perr[2,2]**0.5, 2)}")
 		#print(parameter)
 		
 		'''
 		j = 1
 		f_min = 0
 		f_max = 100
-		step = 5
+		step = 2
 		fit_x = []
 		fit_y = []
 		fit_e = []
@@ -281,9 +289,9 @@ for f in filelist:
 			try:
 				parameter, perr = fit_function( [10., 1., 1.], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
 				fit_x.append(nmin)
-				fit_y.append(parameter[2]*(2.*L*L)**0.5)
-				fit_e.append(perr[2]*(2.*L*L)**0.5)
-				fit_re.append((perr[2] / parameter[2])*(2.*L*L)**0.5)
+				fit_y.append(parameter[2])
+				fit_e.append(perr[2])
+				fit_re.append((perr[2] / parameter[2]))
 				
 				#parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[5., 0.5, 0.5], method='trf')
 				#fit_x.append(nmin)
@@ -291,7 +299,7 @@ for f in filelist:
 				#fit_e.append(np.abs(np.sqrt(perr[2,2]))*(2.*L*L)**0.5)
 				#fit_re.append(np.abs(np.sqrt(perr[2,2]) / parameter[2])*(2.*L*L)**0.5)
 			except RuntimeError:
-				print "run time error during fit"
+				print("run time error during fit")
 			
 			j+=1
 		ax.axvline(f_min*dtau, color='k', linestyle='--')
@@ -300,7 +308,7 @@ for f in filelist:
 		
 		f2, ax2 = plt.subplots(1, 1)
 		ax2.set_xlabel(r"$\tau_{min}$", fontsize=16)
-		ax2.set_ylabel(r"$\Delta_{sp} \sqrt{N}$", fontsize=16)
+		ax2.set_ylabel(r"$\Delta_{sp}$", fontsize=16)
 		ax2.plot(fit_x, fit_y, marker='o', markersize=8.0, color="k")
 		(_, caps, _) = ax2.errorbar(fit_x, fit_y, yerr=fit_e, marker='None', capsize=8, color="k")
 		for cap in caps:
@@ -366,9 +374,9 @@ for f in filelist:
 		except RuntimeError:
 			print "run time error during fit"
 		'''
-		'''
+		
 		if len(ed_glob) > 0 and len(ed_data) > ed_n:
-			nmin = len(ed_tau) / 2
+			nmin = len(ed_tau) // 2
 			nmax = len(ed_tau) - 1
 			#nmin = 1
 			#nmax = 6
@@ -377,7 +385,7 @@ for f in filelist:
 			#px = np.linspace(ed_tau[len(ed_data[ed_n])/2], ed_tau[len(ed_data[ed_n])-1], 1000)
 			ax.plot(px, FitFunctionL(px, *parameter_ed), 'k-', linewidth=3.0)
 			print(parameter_ed)
-		'''
+		
 		cnt += 1
 
 plt.legend()
