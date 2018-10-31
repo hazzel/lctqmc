@@ -71,7 +71,7 @@ filelist.append(glob.glob("../job/*000*.out"))
 
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/K_point/theta160/old/lctqmc_ep_L9_as_theta160/*03.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/K_point/theta160/old/lctqmc_ep_L9_as_theta160/*04.out"))
-#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/K_point/theta160/lctqmc_L6_s_theta160/*14.out"))
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/K_point/theta160/lctqmc_L6_s_theta160/*05.out"))
 
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_ep_L8_theta40/*0005.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_ep_L7_theta40/*0006.out"))
@@ -116,7 +116,7 @@ for f in filelist:
 		ed_n = 8
 		ax.set_ylabel(r"$\left \langle O_{phase}(\tau) O_{phase}^{\dag} \right \rangle$", fontsize=16)
 	elif obs == "2d_rep":
-		ed_n = 9
+		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{phase}(\tau) O_{phase}^{\dag} \right \rangle$", fontsize=16)
 	elif obs == "gamma_mod_as":
 		ed_n = 10
@@ -158,9 +158,10 @@ for f in filelist:
 		if len(ed_glob) > 0:
 			ed_file = open(ed_glob[0])
 			ed_data = parse_ed_file(ed_file)
-			n_ed_tau = int(ed_data[0][9]) 
-			n_ed_mat = int(ed_data[0][10])
-			ed_tau = np.linspace(0., n_ed_tau * 0.2, n_ed_tau + 1)
+			if len(ed_data) > 0:
+				n_ed_tau = int(ed_data[0][9])
+				n_ed_mat = int(ed_data[0][10])
+				ed_tau = np.linspace(0., n_ed_tau * 0.2, n_ed_tau + 1)
 		
 
 		figure.suptitle(r"$L = " + str(L) + ", V = " + str(h) + ", 2 \Theta = " + str(theta) + "$", fontsize=16)# + str(1./T/2.) + "$")
@@ -256,7 +257,7 @@ for f in filelist:
 			#ax.plot(ed_tau, np.flipud(ed_data[ed_n]), marker='o', color="b", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+'$')
 		
 		
-		nmin = 20; nmax = 80#len(x_tau)-1
+		nmin = 30; nmax = 100#len(x_tau)-1
 #		if cnt == 0:
 #			nmin = 50; nmax = len(x_tau)-1
 #		else:
