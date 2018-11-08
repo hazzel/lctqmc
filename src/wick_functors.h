@@ -65,6 +65,7 @@ struct wick_epsilon
 		auto& single_bonds = lat.bonds("single_d1_bonds");
 		auto& bonds = lat.bonds("nearest neighbors");
 		const int N = single_bonds.size(), M = bonds.size(), ns = lat.n_sites();
+		
 		for (int i = 0; i < N; ++i)
 		{
 			auto& a = single_bonds[i];
@@ -364,11 +365,8 @@ struct wick_2d_rep
 		std::complex<double> gm = 0.;
 		double pi = 4. * std::atan(1.);
 		const int ns = lat.n_sites();
-		
-		std::complex<double> im = {0., 1.};
-		//std::array<double, 3> factor_in{std::cos(0. * pi), std::cos(2./3. * pi), std::cos(4./3. * pi)};
-		//std::array<double, 3> factor_out{-std::cos(0. * pi), -std::cos(4./3. * pi), -std::cos(2./3. * pi)};
 		std::array<double, 3> factor_in{1., -0.5, -0.5};
+		//std::array<double, 3> factor_in{1., 1., -1.};
 		std::array<double, 3> factor_out{-factor_in[0], -factor_in[2], -factor_in[1]};
 		for (int i = 0; i < lat.n_sites(); i+=2)
 		{

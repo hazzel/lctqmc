@@ -11,12 +11,13 @@ plt.rc('legend',fontsize=15)
 plt.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
 plt.rc('text', usetex=True)
 
-prop_cycle = plt.rcParams['axes.prop_cycle']
-color_cycle = prop_cycle.by_key()['color']
-marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
+ecolor = ['#cc2909', '#efc600', '#60af92', '#3e77af','#3e77af','#60af92','#efc600','#cc2909']
+fcolor = ['#ea6868', '#eddea2', '#99d1b9', '#a3c1e5','#a3c1e5','#99d1b9','#eddea2','#ea6868']
+marker = ['o','s','D','^','o','s','D','^']
 fillstyle = ['none', 'full']
 
 filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/suscept/R_cdw.txt")[0]
+#filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/scan/R_cdw.txt")[0]
 
 with open(filename) as f:
 	lines = (line for line in f if not line.startswith('L'))
@@ -45,8 +46,8 @@ for V in V_list:
 			suscept = data_filter[:,3]
 			suscept_sigma = data_filter[:,4]
 
-			ax.plot( tprime, suscept, color=color_cycle[cnt_V], marker=marker_cycle[cnt_L], markersize=10.0, linewidth=0.0, label=f"$V={V}, L={L}$")
-			(_, caps, _) = ax.errorbar(tprime, suscept, yerr=suscept_sigma, marker='None', capsize=10, color=color_cycle[cnt_V], linewidth=3.0)
+			ax.plot( tprime, suscept, color=ecolor[cnt_V], marker=marker[cnt_L], markersize=10.0, linewidth=0.0, label=f"$V={V}, L={L}$")
+			(_, caps, _) = ax.errorbar(tprime, suscept, yerr=suscept_sigma, marker='None', capsize=10, color=ecolor[cnt_V], linewidth=3.0)
 			for cap in caps:
 				cap.set_markeredgewidth(2.0)
 			cnt_L += 1

@@ -95,12 +95,12 @@ struct wick_sp_q
 	parameters& param;
 	lattice& lat;
 	std::vector<double> values;
-	static constexpr int nq = 4;
+	static constexpr int nq = 3;
 
 	wick_sp_q(Random& rng_, parameters& param_, lattice& lat_)
 		: rng(rng_), param(param_), lat(lat_)
 	{
-		values.resize(nq+1);
+		values.resize((nq+1)*(nq+1));
 	}
 	
 	std::vector<double>& get_obs(const matrix_t& et_gf_0, const matrix_t& et_gf_t,
@@ -110,21 +110,22 @@ struct wick_sp_q
 		numeric_t sp = 0.;
 		const int N = lat.n_sites();
 		std::fill(values.begin(), values.end(), 0.);
-		for (int q = 0; q <= nq; ++q)
-		{
-			auto K = lat.symmetry_point("K") + q * lat.b1 / lat.Lx;
-			for (int i = 0; i < N; i+=2)
+		for (int p = 0; p <= nq; ++p)
+			for (int q = 0; q <= nq; ++q)
 			{
-				auto& r_i = lat.real_space_coord(i);
-				for (int j = 0; j < N; j+=2)
+				auto K = lat.symmetry_point("K") + q * lat.b1 / lat.Lx + p * lat.b2 / lat.Ly;
+				for (int i = 0; i < N; i+=2)
 				{
-					auto& r_j = lat.real_space_coord(j);
-					double kdot = K.dot(r_i - r_j);
-					values[q] += std::cos(kdot) * (ca_td_gf[(j+0)*N+(i+0)] + ca_td_gf[(j+1)*N+(i+1)] + ca_td_gf[(j+0)*N+(i+1)] + ca_td_gf[(j+1)*N+(i+0)]);
+					auto& r_i = lat.real_space_coord(i);
+					for (int j = 0; j < N; j+=2)
+					{
+						auto& r_j = lat.real_space_coord(j);
+						double kdot = K.dot(r_i - r_j);
+						values[p*(nq+1)+q] += std::cos(kdot) * (ca_td_gf[(j+0)*N+(i+0)] + ca_td_gf[(j+1)*N+(i+1)] - ca_td_gf[(j+0)*N+(i+1)] - ca_td_gf[(j+1)*N+(i+0)]);
+					}
 				}
+				values[q] /= N;
 			}
-			values[q] /= N;
-		}
 		return values;
 	}
 };

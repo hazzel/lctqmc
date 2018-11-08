@@ -11,12 +11,12 @@ plt.rc('legend',fontsize=15)
 plt.rcParams['text.latex.preamble']=[r"\usepackage{amsmath}"]
 plt.rc('text', usetex=True)
 
-prop_cycle = plt.rcParams['axes.prop_cycle']
-color_cycle = prop_cycle.by_key()['color']
-marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
+ecolor = ['#cc2909', '#efc600', '#60af92', '#3e77af','#3e77af','#60af92','#efc600','#cc2909']
+fcolor = ['#ea6868', '#eddea2', '#99d1b9', '#a3c1e5','#a3c1e5','#99d1b9','#eddea2','#ea6868']
+marker = ['o','s','D','^','o','s','D','^']
 fillstyle = ['none', 'full']
 
-filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/suscept/R_cdw.txt")[0]
+filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/scan/R_cdw.txt")[0]
 
 with open(filename) as f:
 	lines = (line for line in f if not line.startswith('L'))
@@ -29,11 +29,9 @@ cnt = 0
 fig, ax = plt.subplots()
 ax.set_xlabel(r"$V/t$", fontsize=18)
 ax.set_ylabel(r"$\chi_{CDW}$", fontsize=18)
-#props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-#ax.text(0.05, 0.95, r"$L=6$", transform=ax.transAxes, fontsize=18, verticalalignment='top', bbox=props)
 
 L_list = [ 6, 9 ]
-tprime_list = [ 0.5 ]
+tprime_list = [ 0.6 ]
 
 for tprime in tprime_list:
 	for L in L_list:
@@ -44,8 +42,8 @@ for tprime in tprime_list:
 			suscept = data_filter[:,3]
 			suscept_sigma = data_filter[:,4]
 
-			ax.plot( V, suscept, color=color_cycle[cnt], marker=marker_cycle[cnt], markersize=10.0, linewidth=0.0, label=f"$tprime={tprime}, L={L}$")
-			(_, caps, _) = ax.errorbar(V, suscept, yerr=suscept_sigma, marker='None', capsize=10, color=color_cycle[cnt], linewidth=3.0)
+			ax.plot( V, suscept, color=ecolor[cnt], marker=marker[cnt], markersize=10.0, linewidth=0.0, label=f"$tprime={tprime}, L={L}$")
+			(_, caps, _) = ax.errorbar(V, suscept, yerr=suscept_sigma, marker='None', capsize=10, color=ecolor[cnt], linewidth=3.0)
 			for cap in caps:
 				cap.set_markeredgewidth(2.0)
 			cnt += 1

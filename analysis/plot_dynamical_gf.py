@@ -59,7 +59,7 @@ marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
 
 filelist = []
 
-filelist.append(glob.glob("../job/*000*.out"))
+filelist.append(glob.glob("../job/*0001.out"))
 #filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/job_L5_ep/job_V1.0/*03.out"))
 #filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/job_L5_ep/job_V1.7/*02.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*.out"))
@@ -80,6 +80,8 @@ filelist.append(glob.glob("../job/*000*.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_ep_L5_theta40/*0004.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_L5_theta40/*.out"))
 
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/K_point/lctqmc_2d_rep/*0011.out"))
+
 filelist[0].sort()
 
 filelist = [item for sublist in filelist for item in sublist]
@@ -90,7 +92,7 @@ for f in filelist:
 	plist = ParseParameters(f)
 	elist = ParseEvalables(f)
 
-	obs = "2d_rep"
+	obs = "epsilon_as"
 	if obs == "M2":
 		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{cdw}(\tau) O_{cdw}^{\dag} \right \rangle$", fontsize=16)
@@ -122,6 +124,7 @@ for f in filelist:
 		ed_n = 10
 		ax.set_ylabel(r"$\left \langle O_{phase}(\tau) O_{phase}^{\dag} \right \rangle$", fontsize=16)
 	elif obs == "epsilon":
+		#ed_n = 1
 		ed_n = 11
 		#ax.set_ylabel(r"$\left \langle O_{\epsilon}(\tau) O_{\epsilon}^{\dag} \right \rangle - \left \langle O_{\epsilon}\right \rangle^2$", fontsize=16)
 		ax.set_ylabel(r"$\left \langle O_{\epsilon}(\tau) O_{\epsilon}^{\dag} \right \rangle$", fontsize=16)
@@ -257,7 +260,7 @@ for f in filelist:
 			#ax.plot(ed_tau, np.flipud(ed_data[ed_n]), marker='o', color="b", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+'$')
 		
 		
-		nmin = 30; nmax = 100#len(x_tau)-1
+		nmin = 10; nmax = len(x_tau)-1
 #		if cnt == 0:
 #			nmin = 50; nmax = len(x_tau)-1
 #		else:
@@ -268,10 +271,10 @@ for f in filelist:
 		px = np.linspace(x_tau[nmin], x_tau[nmax], 1000)
 		ax.plot(px, FitFunctionL(px, *parameter), 'k-', linewidth=3.0)
 		
-		#print(f"{int(L)} \t {h} \t\t {round(parameter[2] * (2.*L*L)**0.5, 5)} \t\t\t\t\t {round(perr[2] * (2.*L*L)**0.5, 5)}")
-		print(f"{int(L)} \t {h} \t\t {round(parameter[2], 5)} \t\t\t\t\t {round(perr[2], 5)}")
+		print(f"{int(L)}\t{h}\t\t{round(parameter[2] * (2.*L*L)**0.5, 5)}\t\t\t\t\t{round(perr[2] * (2.*L*L)**0.5, 5)}")
+		#print(f"{int(L)}\t {h}\t\t{round(parameter[2], 5)}\t\t\t\t\t{round(perr[2], 5)}")
 		
-		#print(f"{int(L)} \t {h} \t\t {round(parameter[2], 5)} \t\t\t\t\t {round(perr[2,2]**0.5, 2)}")
+		#print(f"{int(L)}\t {h}\t\t{round(parameter[2], 5)}\t\t\t\t\t{round(perr[2,2]**0.5, 2)}")
 		#print(parameter)
 		
 		'''
