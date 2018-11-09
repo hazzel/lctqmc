@@ -1,13 +1,13 @@
-SWEEPS = 10
+SWEEPS = 100000
 warmup = 300
-prebin = 200
+prebin = 64
 
 trial_wave_function = t_and_tprime
 block_size = 0.1
 
-updates_per_block = 2
-rebuild_interval = 1
-wrap_refresh_interval = 1
+updates_per_block = 10
+rebuild_interval = 2
+wrap_refresh_interval = 2
 
 static_measure_interval = 2
 
@@ -23,9 +23,20 @@ obs = M2,epsilon,epsilon_as,kekule_s,kekule_as,gamma_mod,2d_rep,sp,sp_q,tp
 theta = 160
 method = projective
 
-L = 3
-inv_symmetry = -1
-
 tprime=0.
 
-{V = 1.0}
+L = 6
+inv_symmetry = 1
+{V = 1.355}
+
+L = 9
+inv_symmetry = -1
+{V = 1.355}
+
+L = 12
+inv_symmetry = 1
+{V = 1.355}
+
+L = 15
+inv_symmetry = -1
+{V = 1.355}

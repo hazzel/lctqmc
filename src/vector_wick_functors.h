@@ -111,6 +111,7 @@ struct wick_sp_q
 		const int N = lat.n_sites();
 		std::fill(values.begin(), values.end(), 0.);
 		for (int p = 0; p <= nq; ++p)
+		{
 			for (int q = 0; q <= nq; ++q)
 			{
 				auto K = lat.symmetry_point("K") + q * lat.b1 / lat.Lx + p * lat.b2 / lat.Ly;
@@ -121,11 +122,13 @@ struct wick_sp_q
 					{
 						auto& r_j = lat.real_space_coord(j);
 						double kdot = K.dot(r_i - r_j);
-						values[p*(nq+1)+q] += std::cos(kdot) * (ca_td_gf[(j+0)*N+(i+0)] + ca_td_gf[(j+1)*N+(i+1)] - ca_td_gf[(j+0)*N+(i+1)] - ca_td_gf[(j+1)*N+(i+0)]);
+						//values[p*(nq+1)+q] += std::cos(kdot) * (ca_td_gf[(j+0)*N+(i+0)] + ca_td_gf[(j+1)*N+(i+1)] + ca_td_gf[(j+0)*N+(i+1)] + ca_td_gf[(j+1)*N+(i+0)]);
+						values[p*(nq+1)+q] += std::cos(kdot) * (ca_td_gf[(j+0)*N+(i+0)] + ca_td_gf[(j+1)*N+(i+1)]);
 					}
 				}
-				values[q] /= N;
+				values[p*(nq+1)+q] /= N;
 			}
+		}
 		return values;
 	}
 };

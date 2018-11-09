@@ -13,8 +13,8 @@ from texify import *
 fig, ax = plt.subplots()
 ax.set_aspect("equal")
 
-Lx = 8
-Ly = 8
+Lx = 6
+Ly = 6
 
 
 # BZ:

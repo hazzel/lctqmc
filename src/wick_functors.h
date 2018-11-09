@@ -365,8 +365,8 @@ struct wick_2d_rep
 		std::complex<double> gm = 0.;
 		double pi = 4. * std::atan(1.);
 		const int ns = lat.n_sites();
-		std::array<double, 3> factor_in{1., -0.5, -0.5};
-		//std::array<double, 3> factor_in{1., 1., -1.};
+		//std::array<double, 3> factor_in{1., -0.5, -0.5};
+		std::array<double, 3> factor_in{-1., 1., 1.};
 		std::array<double, 3> factor_out{-factor_in[0], -factor_in[2], -factor_in[1]};
 		for (int i = 0; i < lat.n_sites(); i+=2)
 		{
