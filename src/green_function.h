@@ -71,7 +71,7 @@ class green_function
 		using vlist_t = std::vector<vertex>;
 
 		green_function(Random& rng_, parameters& param_, lattice& lat_)
-			: rng(rng_), param(param_), lat(lat_), norm_error_sum(0.), norm_error_cnt(0)
+			: rng(rng_), param(param_), lat(lat_), norm_error_sum(0.), norm_error_cnt(0), dyn_norm_error_sum(0.), dyn_norm_error_cnt(0), dyn_measure_active(false)
 		{}
 		
 		void set_K_matrix(const matrix_t& K)
@@ -237,6 +237,14 @@ class green_function
 			return avg_norm_error;
 		}
 		
+		double reset_dyn_norm_error()
+		{
+			double avg_norm_error = dyn_norm_error_sum / dyn_norm_error_cnt;
+			dyn_norm_error_sum = 0.;
+			dyn_norm_error_cnt = 0;
+			return avg_norm_error;
+		}
+		
 		// it can do  B(tau_m)... B(tau_n) * A  when sign = -1
 		// or        A* B(tau_n)^{-1} ... B(tau_m)^{-1} when sign = 1 
 		// Btau(tau_n) does not contain vertex contribution  
@@ -343,10 +351,20 @@ class green_function
 			double err = ((g_prev - g_stab).cwiseAbs()).maxCoeff();
 			*/
 			
-			if (err > 1E-6)
-				std::cout << "Error (tau = " << tpos << "): " << err << std::endl;
-			norm_error_sum += err;
-			++norm_error_cnt;
+			if (dyn_measure_active)
+			{
+				if (err > 1E-6)
+					std::cout << "Dyn Error (tau = " << tpos << "): " << err << std::endl;
+				dyn_norm_error_sum += err;
+				++dyn_norm_error_cnt;
+			}
+			else
+			{
+				if (err > 1E-6)
+					std::cout << "Error (tau = " << tpos << "): " << err << std::endl;
+				norm_error_sum += err;
+				++norm_error_cnt;
+			}
 		}
 		
 		void calculate_gf(matrix_t& m)
@@ -693,6 +711,7 @@ class green_function
 			const std::vector<std::string>& vec_names,
 			const std::vector<vector_wick_base<matrix_t>>& vec_obs)
 		{
+			dyn_measure_active = true;
 			double tpos_buffer = tpos;
 			matrix_t g_tau_buffer = g_tau;
 			//matrix_t R_tau_buffer = R_tau;
@@ -779,6 +798,7 @@ class green_function
 			storage_U = storage_buffer_U;
 			storage_D = storage_buffer_D;
 			storage_V = storage_buffer_V;
+			dyn_measure_active = false;
 		}
 
 		std::vector<double> measure_Hv_tau()
@@ -915,6 +935,9 @@ class green_function
 		double tpos;
 		double norm_error_sum;
 		int norm_error_cnt;
+		double dyn_norm_error_sum;
+		int dyn_norm_error_cnt;
+		bool dyn_measure_active;
 		
 		matrix_t g_tau;
 		matrix_t L_tau;

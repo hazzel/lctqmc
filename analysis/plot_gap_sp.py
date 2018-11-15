@@ -41,10 +41,13 @@ def closest_k_point(L):
 			d_q = d_k
 	return [q, d_q]
 
+def E(k):
+	return np.linalg.norm(1. + np.exp(1.j * np.dot(k, a1)) + np.exp(1.j * np.dot(k, a1 - a2)))
+
 #filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/tprime=0.5/sp-s-*tprime*-theta*.txt")[0]
 #filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/gapped_spectrum/delta_sp.txt")[0]
-filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/K_point/delta_sp.txt")[0]
-#filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/K_point/delta_sp_q.txt")[0]
+#filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/K_point/delta_sp.txt")[0]
+filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/K_point/delta_sp_kappa^2=4.txt")[0]
 #filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/science_paper/delta_sp.txt")[0]
 #filename = glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/plot/science_paper/delta_sp_q.txt")[0]
 with open(filename) as f:
@@ -52,16 +55,19 @@ with open(filename) as f:
 	new_del = []
 	for l in lines:
 		new_del.append(','.join(l.split()))
-	data = np.loadtxt(new_del, delimiter=',', skiprows=0)
+	data = np.loadtxt(new_del, delimiter=',', skiprows=2)
 
 cnt = 0
 L_list = []
 ax = plt.gca()
 
-e_k = {"3" : "-1.73205", "4" : "-1", "5" : "-0.618034", "6" : "-1", "7" : "-0.554958", "8" : "-0.414214", "9" : "-0.68404", "10" : "-0.381966", "11" : "-0.309721", "13" : "0.29079", "14" : "0.24698"}
+e_k = {"3" : "-1.73205", "4" : "-1", "5" : "-0.618034", "6" : "-1", "7" : "-0.554958", "8" : "-0.414214", "9" : "-0.68404", "10" : "-0.381966", "11" : "-0.309721", "12" : "0.517638", "13" : "0.29079", "14" : "0.24698"}
+a1 = np.array([3./2., np.sqrt(3.)/2.])
+a2 = np.array([3./2., -np.sqrt(3.)/2.])
+delta = np.array([1./2., np.sqrt(3.)/2.])
 b1 = np.array([2.*np.pi/3., 2.*np.pi/np.sqrt(3.)])
 b2 = np.array([2.*np.pi/3., -2.*np.pi/np.sqrt(3.)])
-K = [2.*np.pi/3., 2.*np.pi/3./np.sqrt(3.)]
+K = np.array([2.*np.pi/3., 2.*np.pi/3./np.sqrt(3.)])
 
 for i in range(len(data[:,0])):
 	if len(L_list) == 0 or data[L_list[-1],0] != data[i,0]:
@@ -74,6 +80,11 @@ for i in range(len(L_list)-1):
 	#q, d_q = closest_k_point(L)
 	#data[L_list[i]:L_list[i+1],2] *= 3./2. * d_q / np.abs(float(e_k[str(L)]))# / d_q / (2.*L*L)**0.5
 	#data[L_list[i]:L_list[i+1],3] *= 3./2. * d_q / np.abs(float(e_k[str(L)]))# / d_q / (2.*L*L)**0.5
+	
+	q = 2*b1 / L + 0*b2 / L
+	d_q = np.linalg.norm(q)
+	data[L_list[i]:L_list[i+1],2] *= 3./2. * d_q / E(K + q)
+	data[L_list[i]:L_list[i+1],3] *= 3./2. * d_q / E(K + q)
 	
 	#data[L_list[i]:L_list[i+1],2] /= (2.*L*L)**0.5
 	#data[L_list[i]:L_list[i+1],3] /= (2.*L*L)**0.5

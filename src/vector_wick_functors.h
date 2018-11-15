@@ -95,7 +95,7 @@ struct wick_sp_q
 	parameters& param;
 	lattice& lat;
 	std::vector<double> values;
-	static constexpr int nq = 3;
+	static constexpr int nq = 2;
 
 	wick_sp_q(Random& rng_, parameters& param_, lattice& lat_)
 		: rng(rng_), param(param_), lat(lat_)

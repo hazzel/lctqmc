@@ -1,18 +1,18 @@
-SWEEPS = 100000
-warmup = 300
-prebin = 64
+SWEEPS = 100
+warmup = 100
+prebin = 1
 
 trial_wave_function = t_and_tprime
-block_size = 0.1
+block_size = 0.025
 
-updates_per_block = 10
+updates_per_block = 2
 rebuild_interval = 2
 wrap_refresh_interval = 2
 
 static_measure_interval = 2
 
 dyn_tau_max = 10
-dyn_delta_tau = 0.1
+dyn_delta_tau = 0.025
 
 ep_tau_max = 3
 ep_delta_tau = 0.005
@@ -25,18 +25,6 @@ method = projective
 
 tprime=0.
 
-L = 6
+L = 3
 inv_symmetry = 1
-{V = 1.355}
-
-L = 9
-inv_symmetry = -1
-{V = 1.355}
-
-L = 12
-inv_symmetry = 1
-{V = 1.355}
-
-L = 15
-inv_symmetry = -1
-{V = 1.355}
+PARAMETERRANGE V 0.2 1.4 0.4

@@ -364,33 +364,27 @@ struct wick_2d_rep
 		const numeric_t *ca_et_gf_0 = et_gf_0.data(), *ca_et_gf_t = et_gf_t.data(), *ca_td_gf = td_gf.data();
 		std::complex<double> gm = 0.;
 		double pi = 4. * std::atan(1.);
-		const int ns = lat.n_sites();
+		std::vector<const std::vector<std::pair<int, int>>*> bonds =
+			{&lat.bonds("nn_bond_2"), &lat.bonds("nn_bond_1"), &lat.bonds("nn_bond_3")};
+		const int N = bonds.size(), M = bonds[0]->size(), ns = lat.n_sites();
 		//std::array<double, 3> factor_in{1., -0.5, -0.5};
 		std::array<double, 3> factor_in{-1., 1., 1.};
 		std::array<double, 3> factor_out{-factor_in[0], -factor_in[2], -factor_in[1]};
-		for (int i = 0; i < lat.n_sites(); i+=2)
-		{
-			auto& r_i = lat.real_space_coord(i);
-			std::array<long unsigned int, 3> b_i{lat.site_at_position(r_i + lat.delta - lat.a1), lat.site_at_position(r_i + lat.delta), lat.site_at_position(r_i + lat.delta - lat.a1 + lat.a2)};
-			for (int nj = 0; nj < b_i.size(); ++nj)
+		for (int i = 0; i < N; ++i)
+			for (int j = 0; j < M; ++j)
 			{
-				auto j = b_i[nj];
-				for (int m = 0; m < lat.n_sites(); m+=2)
-				{
-					auto& r_m = lat.real_space_coord(m);
-					std::array<long unsigned int, 3> b_m{lat.site_at_position(r_m + lat.delta - lat.a1), lat.site_at_position(r_m + lat.delta), lat.site_at_position(r_m + lat.delta - lat.a1 + lat.a2)};
-					for (int nm = 0; nm < b_m.size(); ++nm)
+				auto& a = (*bonds[i])[j];
+				for (int m = 0; m < N; ++m)
+					for (int n = 0; n < M; ++n)
 					{
-						auto n = b_m[nm];
+						auto& b = (*bonds[m])[n];
 						
-						gm += factor_in[nj] * factor_in[nm] * (ca_et_gf_t[i*ns+j] * ca_et_gf_0[n*ns+m] + lat.parity(i) * lat.parity(m) * ca_td_gf[m*ns+i] * ca_td_gf[n*ns+j]);
-						gm += factor_out[nj] * factor_in[nm] * (ca_et_gf_t[j*ns+i] * ca_et_gf_0[n*ns+m] + lat.parity(j) * lat.parity(m) * ca_td_gf[m*ns+j] * ca_td_gf[n*ns+i]);
-						gm += factor_in[nj] * factor_out[nm] * (ca_et_gf_t[i*ns+j] * ca_et_gf_0[m*ns+n] + lat.parity(i) * lat.parity(n) * ca_td_gf[n*ns+i] * ca_td_gf[m*ns+j]);
-						gm += factor_out[nj] * factor_out[nm] * (ca_et_gf_t[j*ns+i] * ca_et_gf_0[m*ns+n] + lat.parity(j) * lat.parity(n) * ca_td_gf[n*ns+j] * ca_td_gf[m*ns+i]);
+						gm += factor_in[i] * factor_in[m] * (ca_et_gf_t[a.first*ns+a.second] * ca_et_gf_0[b.second*ns+b.first] + lat.parity(a.first) * lat.parity(b.first) * ca_td_gf[b.first*ns+a.first] * ca_td_gf[b.second*ns+a.second]);
+						gm += factor_out[i] * factor_in[m] * (ca_et_gf_t[a.second*ns+a.first] * ca_et_gf_0[b.second*ns+b.first] + lat.parity(a.second) * lat.parity(b.first) * ca_td_gf[b.first*ns+a.second] * ca_td_gf[b.second*ns+a.first]);
+						gm += factor_in[i] * factor_out[m] * (ca_et_gf_t[a.first*ns+a.second] * ca_et_gf_0[b.first*ns+b.second] + lat.parity(a.first) * lat.parity(b.second) * ca_td_gf[b.second*ns+a.first] * ca_td_gf[b.first*ns+a.second]);
+						gm += factor_out[i] * factor_out[m] * (ca_et_gf_t[a.second*ns+a.first] * ca_et_gf_0[b.first*ns+b.second] + lat.parity(a.second) * lat.parity(b.second) * ca_td_gf[b.second*ns+a.second] * ca_td_gf[b.first*ns+a.first]);
 					}
-				}
 			}
-		}
 		return std::real(gm) / std::pow(lat.n_bonds(), 2.);
 	}
 };

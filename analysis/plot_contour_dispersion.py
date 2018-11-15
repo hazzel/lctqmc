@@ -1,28 +1,16 @@
 import matplotlib
 matplotlib.use('TkAgg')
-from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+from matplotlib import cm
 from matplotlib.colors import BoundaryNorm
 from matplotlib.ticker import MaxNLocator
-import glob
-import sys
-import io
 import numpy as np
-sys.path.append("/home/stephan/mc/qising-SSE")
-sys.path.append("/net/home/lxtsfs1/tpc/hesselmann/mc/qising-SSE")
-from texify import *
 
 def f1(k):
 	return 1. + np.exp(1.j * np.dot(k, a1)) + np.exp(1.j * np.dot(k, a1 - a2))
 
 def f3(k):
-	'''
-	return np.exp(-1.j * np.dot(k, a2)) + np.exp(1.j * np.dot(k, a2)) + np.exp(1.j * np.dot(k, 2.*a1-a2)) \
-		+ np.exp(-1.j * np.dot(k, a1)) + np.exp(1.j * np.dot(k, a2-a1)) + np.exp(1.j * np.dot(k, a1+a2)) \
-		+ np.exp(1.j * np.dot(k, 2.*a1)) + np.exp(1.j * np.dot(k, 2.*a1-2.*a2)) + np.exp(1.j * np.dot(k, a1-2.*a2))
-	'''
-
 	return np.exp(-1.j * np.dot(k, a2)) + np.exp(1.j * np.dot(k, a2)) + np.exp(1.j * np.dot(k, 2.*a1-a2))
 
 a1 = np.array([3./2., np.sqrt(3.)/2.])
@@ -68,13 +56,7 @@ cmap = plt.get_cmap('PiYG')
 norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
 
 fig, ax = plt.subplots()
-
-#im = ax0.pcolormesh(x, y, z, cmap=cmap, norm=norm)
-#fig.colorbar(im, ax=ax0)
-#ax.set_title('pcolormesh with levels')
-
-# contours are *point* based plots, so convert our bound into point centers
-cf = ax.contourf(x[:-1, :-1] + dx/2., y[:-1, :-1] + dy/2., z, levels=levels, cmap=cmap)
+cf = ax.contourf(x[:-1, :-1] + dx/2., y[:-1, :-1] + dy/2., z, levels=levels, cmap=cmap, norm=norm)
 fig.colorbar(cf, ax=ax)
 
 ax.plot(corner[:,0], corner[:,1], marker="o", lw=4.0, ms=12.0, c="k")
