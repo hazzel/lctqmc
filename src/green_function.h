@@ -838,7 +838,7 @@ class green_function
 				
 				int k = i_upper - i_lower;
 				if (tau_block < param.ep_tau_steps)
-					hv_tau[tau_block] += 1. / param.V / param.V / param.ep_delta_tau * param.ep_window / param.theta / 2.;
+					hv_tau[tau_block] += 0.5 / param.ep_delta_tau * param.ep_window / param.theta * k / param.theta;
 			}
 				
 			/*

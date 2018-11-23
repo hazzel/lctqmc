@@ -5,7 +5,7 @@ import numpy as np
 
 regex_number = "((?:[-+]?(?:\d*\.\d+|\d+)(?:e[-+]?\d*)?)|(?:[-+]?nan))"
 def get_parameter(param, jobfile_string):
-	p = re.search(f"\s*{param}\s*=\s*{regex_number}", jobfile_string)
+	p = re.search(f"\s*{param}\s*=\s*{regex_number}\\n", jobfile_string)
 	if p==None:
 		return None
 	return p.groups()[0]

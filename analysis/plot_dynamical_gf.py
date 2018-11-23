@@ -59,7 +59,7 @@ marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
 
 filelist = []
 
-filelist.append(glob.glob("../job/*.out"))
+filelist.append(glob.glob("../job/*0001.out"))
 #filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/job_L5_ep/job_V1.0/*03.out"))
 #filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/job_L5_ep/job_V1.7/*02.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*.out"))
@@ -93,12 +93,12 @@ for f in filelist:
 	plist = ParseParameters(f)
 	elist = ParseEvalables(f)
 
-	obs = "M2"
+	obs = "Hv"
 	if obs == "M2":
 		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{cdw}(\tau) O_{cdw}^{\dag} \right \rangle$", fontsize=16)
 	elif obs == "epsilon_V" or obs == "Hv":
-		ed_n = 2
+		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{\epsilon_V}(\tau) O_{\epsilon_V}^{\dag} \right \rangle$", fontsize=16)
 	elif obs == "epsilon_as":
 		ed_n = 3
@@ -147,7 +147,7 @@ for f in filelist:
 		n_discrete_tau = float(plist[i]["dyn_tau_max"]) / dtau
 		if obs == "Hv":
 			dtau = float(plist[i]["ep_delta_tau"])
-			n_discrete_tau = float(plist[i]["ep_tau_max"]) / dtau
+			n_discrete_tau = float(plist[i]["ep_tau_max"]) / dtau + dtau/2.
 		P = "1" #plist[i]["inv_symmetry"]
 		
 		#if h > 1.:
@@ -172,6 +172,9 @@ for f in filelist:
 		
 		y_tau = np.array(ArrangePlot(elist[i], "dyn_"+obs+"_tau")[0])
 		err_tau = np.array(ArrangePlot(elist[i], "dyn_"+obs+"_tau")[1])
+		x_tau = np.array(range(0, len(y_tau))) * dtau
+		#y_tau = y_tau[:len(x_tau)]
+		#err_tau = err_tau[:len(x_tau)]
 
 		if obs == "epsilon":
 			#y_tau = np.abs((y_tau[numpy.isfinite(y_tau)] - (ArrangePlot(elist[i], "epsilon")[0][0])**2.))
@@ -217,6 +220,15 @@ for f in filelist:
 			
 			y_tau = np.abs(y_tau[numpy.isfinite(y_tau)])
 			err_tau = err_tau[numpy.isfinite(err_tau)]
+			
+			navg = 1
+			x_tau = np.mean(x_tau.reshape(-1, navg), axis=1)
+			y_tau = np.mean(y_tau.reshape(-1, navg), axis=1)
+			err_tau = np.sqrt(np.sum(err_tau.reshape(-1, navg)**2., axis=1)) / navg
+			
+			#y_tau = np.abs(y_tau - 11.24494344)
+			
+			#err_tau = np.mean(err_tau.reshape(-1, navg), axis=1)
 
 			#plt.axhline(e*e, color='r', linewidth=2.0, linestyle='--')
 			#plt.axhline(e*e+e*s, color='r', linewidth=1.0, linestyle='--')
@@ -225,10 +237,6 @@ for f in filelist:
 		else:
 			y_tau = np.abs(y_tau[numpy.isfinite(y_tau)])
 			err_tau = err_tau[numpy.isfinite(err_tau)]
-		
-		x_tau = np.array(range(0, len(y_tau))) * dtau
-		y_tau = y_tau[:len(x_tau)]
-		err_tau = err_tau[:len(x_tau)]
 		
 		'''
 		y_log = y_tau
@@ -245,13 +253,13 @@ for f in filelist:
 		ax.set_yscale("log")
 		
 		if cnt == 0:
-			ax.plot(x_tau, y_tau, marker="o", color="green", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+', P = ' + P + ', \Theta = ' + str(theta) + '$')
-			(_, caps, _) = ax.errorbar(x_tau, y_tau, yerr=err_tau, marker='None', capsize=8, color="green")
+			ax.plot(x_tau, y_tau, marker="o", color="green", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+', P = ' + P + ', \Theta = ' + str(theta) + '$', zorder=2)
+			(_, caps, _) = ax.errorbar(x_tau, y_tau, yerr=err_tau, marker='None', capsize=8, color="green", zorder=1)
 			for cap in caps:
 				cap.set_markeredgewidth(1.6)
 		else:
-			ax.plot(x_tau, y_tau, marker="o", color="red", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+', P = ' + P + ', \Theta = ' + str(theta) + '$')
-			(_, caps, _) = ax.errorbar(x_tau, y_tau, yerr=err_tau, marker='None', capsize=8, color="red")
+			ax.plot(x_tau, y_tau, marker="o", color="red", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+', P = ' + P + ', \Theta = ' + str(theta) + '$', zorder=2)
+			(_, caps, _) = ax.errorbar(x_tau, y_tau, yerr=err_tau, marker='None', capsize=8, color="red", zorder=1)
 			for cap in caps:
 				cap.set_markeredgewidth(1.6)
 
@@ -261,28 +269,29 @@ for f in filelist:
 			#ax.plot(ed_tau, np.flipud(ed_data[ed_n]), marker='o', color="b", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+'$')
 		
 		
-		nmin = 50; nmax = len(x_tau)-1
+		nmin = 0; nmax = len(x_tau)-1
 #		if cnt == 0:
 #			nmin = 50; nmax = len(x_tau)-1
 #		else:
 #			nmin *= 2
-		parameter, perr = fit_function( [1., 0.01, 1.], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
+		parameter, perr = fit_function( [10., 1., 2.], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
 		#parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[1., 0.01, 1.], method='trf')
 	
 		px = np.linspace(x_tau[nmin], x_tau[nmax], 1000)
 		ax.plot(px, FitFunctionL(px, *parameter), 'k-', linewidth=3.0)
 		
-		print(f"{int(L)}\t{h}\t\t{round(parameter[2] * (2.*L*L)**0.5, 5)}\t\t\t\t\t{round(perr[2] * (2.*L*L)**0.5, 5)}")
-		#print(f"{int(L)}\t {h}\t\t{round(parameter[2], 5)}\t\t\t\t\t{round(perr[2], 5)}")
-		
+		#print(f"{int(L)}\t{h}\t\t{round(parameter[2] * (2.*L*L)**0.5, 5)}\t\t\t\t\t{round(perr[2] * (2.*L*L)**0.5, 5)}")
+		print(f"{int(L)}\t {h}\t\t{round(parameter[2], 5)}\t\t\t\t\t{round(perr[2], 5)}")
+		#print(parameter)
+
 		#print(f"{int(L)}\t {h}\t\t{round(parameter[2], 5)}\t\t\t\t\t{round(perr[2,2]**0.5, 2)}")
 		#print(parameter)
 		
 		'''
 		j = 1
 		f_min = 0
-		f_max = 100
-		step = 2
+		f_max = 700
+		step = 50
 		fit_x = []
 		fit_y = []
 		fit_e = []
@@ -381,9 +390,9 @@ for f in filelist:
 		'''
 		
 		if len(ed_glob) > 0 and len(ed_data) > ed_n:
-			nmin = len(ed_tau) // 2
+			#nmin = len(ed_tau) // 2
 			nmax = len(ed_tau) - 1
-			#nmin = 1
+			nmin = 1
 			#nmax = 6
 			parameter_ed, perr_ed = scipy.optimize.curve_fit( FitFunctionL, ed_tau[nmin:nmax], ed_data[ed_n][nmin:nmax], p0=[0.1, 0.1, 1.])
 			px = np.linspace(ed_tau[nmin], ed_tau[nmax], 1000)
