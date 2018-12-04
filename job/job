@@ -25,7 +25,10 @@ method = projective
 
 tprime=0.
 
-L = 3
-inv_symmetry = -1
+L = 6
+inv_symmetry = 1
+{V = 1.355}
 
-{V = 0.5}
+L = 6
+inv_symmetry = -1
+{V = 1.355}

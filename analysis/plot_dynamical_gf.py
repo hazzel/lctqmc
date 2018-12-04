@@ -59,7 +59,7 @@ marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
 
 filelist = []
 
-filelist.append(glob.glob("../job/*0001.out"))
+filelist.append(glob.glob("../job/*0002.out"))
 #filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/job_L5_ep/job_V1.0/*03.out"))
 #filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/job_L5_ep/job_V1.7/*02.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*.out"))
@@ -165,7 +165,7 @@ for f in filelist:
 			if len(ed_data) > 0:
 				n_ed_tau = int(ed_data[0][9])
 				n_ed_mat = int(ed_data[0][10])
-				ed_tau = np.linspace(0., n_ed_tau * 0.2, n_ed_tau + 1)
+				ed_tau = np.linspace(0., n_ed_tau * 0.02, n_ed_tau + 1)
 		
 
 		figure.suptitle(r"$L = " + str(L) + ", V = " + str(h) + ", 2 \Theta = " + str(theta) + "$", fontsize=16)# + str(1./T/2.) + "$")
@@ -225,6 +225,9 @@ for f in filelist:
 			x_tau = np.mean(x_tau.reshape(-1, navg), axis=1)
 			y_tau = np.mean(y_tau.reshape(-1, navg), axis=1)
 			err_tau = np.sqrt(np.sum(err_tau.reshape(-1, navg)**2., axis=1)) / navg
+			norm = y_tau[0]
+			y_tau /= norm
+			err_tau /= norm
 			
 			#y_tau = np.abs(y_tau - 11.24494344)
 			
@@ -268,13 +271,13 @@ for f in filelist:
 			ax.plot(ed_tau, ed_data[ed_n], marker='o', color="b", markersize=10.0, linewidth=0.0, label=r'$L='+str(int(L))+'$')
 			#ax.plot(ed_tau, np.flipud(ed_data[ed_n]), marker='o', color="b", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+'$')
 		
-		
-		nmin = 0; nmax = len(x_tau)-1
+		'''
+		nmin = 30; nmax = len(x_tau)-1
 #		if cnt == 0:
 #			nmin = 50; nmax = len(x_tau)-1
 #		else:
 #			nmin *= 2
-		parameter, perr = fit_function( [10., 1., 2.], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
+		parameter, perr = fit_function( [1., 1., 1.], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
 		#parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[1., 0.01, 1.], method='trf')
 	
 		px = np.linspace(x_tau[nmin], x_tau[nmax], 1000)
@@ -282,15 +285,15 @@ for f in filelist:
 		
 		#print(f"{int(L)}\t{h}\t\t{round(parameter[2] * (2.*L*L)**0.5, 5)}\t\t\t\t\t{round(perr[2] * (2.*L*L)**0.5, 5)}")
 		print(f"{int(L)}\t {h}\t\t{round(parameter[2], 5)}\t\t\t\t\t{round(perr[2], 5)}")
-		#print(parameter)
+		print(parameter)
 
 		#print(f"{int(L)}\t {h}\t\t{round(parameter[2], 5)}\t\t\t\t\t{round(perr[2,2]**0.5, 2)}")
 		#print(parameter)
-		
 		'''
+		
 		j = 1
 		f_min = 0
-		f_max = 700
+		f_max = 1200
 		step = 50
 		fit_x = []
 		fit_y = []
@@ -327,7 +330,7 @@ for f in filelist:
 		(_, caps, _) = ax2.errorbar(fit_x, fit_y, yerr=fit_e, marker='None', capsize=8, color="k")
 		for cap in caps:
 			cap.set_markeredgewidth(1.6)
-		'''
+		
 		
 		#parameter, perr = scipy.optimize.curve_fit( DecayFunction, fit_x, fit_y, p0=[1., 0.5, 0.5, 0.1], method='trf')
 		#px = np.linspace(fit_x[0], fit_x[-1], 1000)
