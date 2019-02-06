@@ -9,6 +9,6 @@ struct parameters
 	int static_measure_cnt, rebuild_cnt, wrap_refresh_cnt;
 	std::vector<std::string> dyn_obs, static_obs;
 	double sign_phase=1.;
-	std::string trial_wave_function;
+	std::string trial_wave_function, geometry;
 	bool projective;
 };

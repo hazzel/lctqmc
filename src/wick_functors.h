@@ -362,7 +362,7 @@ struct wick_2d_rep
 		const matrix_t& td_gf)
 	{
 		const numeric_t *ca_et_gf_0 = et_gf_0.data(), *ca_et_gf_t = et_gf_t.data(), *ca_td_gf = td_gf.data();
-		std::complex<double> gm = 0.;
+		numeric_t gm = 0.;
 		double pi = 4. * std::atan(1.);
 		std::vector<const std::vector<std::pair<int, int>>*> bonds =
 			{&lat.bonds("nn_bond_2"), &lat.bonds("nn_bond_1"), &lat.bonds("nn_bond_3")};
@@ -381,11 +381,9 @@ struct wick_2d_rep
 						
 						gm += factor_in[i] * factor_in[m] * (ca_et_gf_t[a.first*ns+a.second] * ca_et_gf_0[b.second*ns+b.first] + lat.parity(a.first) * lat.parity(b.first) * ca_td_gf[b.first*ns+a.first] * ca_td_gf[b.second*ns+a.second]);
 						gm += factor_out[i] * factor_in[m] * (ca_et_gf_t[a.second*ns+a.first] * ca_et_gf_0[b.second*ns+b.first] + lat.parity(a.second) * lat.parity(b.first) * ca_td_gf[b.first*ns+a.second] * ca_td_gf[b.second*ns+a.first]);
-						gm += factor_in[i] * factor_out[m] * (ca_et_gf_t[a.first*ns+a.second] * ca_et_gf_0[b.first*ns+b.second] + lat.parity(a.first) * lat.parity(b.second) * ca_td_gf[b.second*ns+a.first] * ca_td_gf[b.first*ns+a.second]);
-						gm += factor_out[i] * factor_out[m] * (ca_et_gf_t[a.second*ns+a.first] * ca_et_gf_0[b.first*ns+b.second] + lat.parity(a.second) * lat.parity(b.second) * ca_td_gf[b.second*ns+a.second] * ca_td_gf[b.first*ns+a.first]);
 					}
 			}
-		return std::real(gm) / std::pow(lat.n_bonds(), 2.);
+		return std::real(2.*gm) / std::pow(lat.n_bonds(), 2.);
 	}
 };
 

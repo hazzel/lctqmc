@@ -59,7 +59,7 @@ marker_cycle = ['o', 'D', '<', 'p', '>', 'v', '*', '^', 's']
 
 filelist = []
 
-filelist.append(glob.glob("../job/*0002.out"))
+#filelist.append(glob.glob("../job/*0002.out"))
 #filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/job_L5_ep/job_V1.0/*03.out"))
 #filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/code/lctqmc/job_L5_ep/job_V1.7/*02.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/job/*.out"))
@@ -71,7 +71,6 @@ filelist.append(glob.glob("../job/*0002.out"))
 
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/K_point/theta160/old/lctqmc_ep_L9_as_theta160/*03.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/K_point/theta160/old/lctqmc_ep_L9_as_theta160/*04.out"))
-#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/K_point/theta160/lctqmc_L6_s_theta160/*05.out"))
 
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_ep_L8_theta40/*0005.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/epsilon/no_K_point/theta40/lctqmc_ep_L7_theta40/*0006.out"))
@@ -83,6 +82,17 @@ filelist.append(glob.glob("../job/*0002.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/K_point/lctqmc_2d_rep/*0003.out"))
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/K_point/theta160/lctqmc_chern_sp_q/*48.out"))
 
+#filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/cluster_work/code/lctqmc_epsilon/jobs/K_point/chern/lctqmc_chern_L6_s_theta160/*0008.out"))
+#filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/cluster_work/code/lctqmc_epsilon/jobs/K_point/chern/lctqmc_chern_L9_as_theta160/*0008.out"))
+#filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/cluster_work/code/lctqmc_epsilon/jobs/K_point/chern/lctqmc_chern_L12_s_theta160/*0008.out"))
+
+#filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/cluster_work/code/lctqmc_epsilon/jobs/K_point/theta160/lctqmc_ep_K_theta160/*06.out"))
+#filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/cluster_work/code/lctqmc_epsilon/jobs/K_point/theta160/lctqmc_ep_K_theta160/*04.out"))
+#filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/cluster_work/code/lctqmc_epsilon/jobs/K_point/theta160/lctqmc_ep_L6_s_theta160/*022.out"))
+
+#filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/K_point/epsilon/lctqmc_ep_K_L6_L9_theta160/*01.out"))
+filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/cluster_work/code/lctqmc_epsilon/jobs/K_point/chern/lctqmc_chern_theta160_checkpoint/*03.out"))
+
 filelist[0].sort()
 
 filelist = [item for sublist in filelist for item in sublist]
@@ -93,7 +103,7 @@ for f in filelist:
 	plist = ParseParameters(f)
 	elist = ParseEvalables(f)
 
-	obs = "Hv"
+	obs = "gamma_mod"
 	if obs == "M2":
 		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{cdw}(\tau) O_{cdw}^{\dag} \right \rangle$", fontsize=16)
@@ -271,8 +281,9 @@ for f in filelist:
 			ax.plot(ed_tau, ed_data[ed_n], marker='o', color="b", markersize=10.0, linewidth=0.0, label=r'$L='+str(int(L))+'$')
 			#ax.plot(ed_tau, np.flipud(ed_data[ed_n]), marker='o', color="b", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+'$')
 		
-		'''
-		nmin = 30; nmax = len(x_tau)-1
+		
+		nmin = 60; nmax = 150#len(x_tau)-1
+		#nmin = 50; nmax = len(x_tau)-1
 #		if cnt == 0:
 #			nmin = 50; nmax = len(x_tau)-1
 #		else:
@@ -283,17 +294,17 @@ for f in filelist:
 		px = np.linspace(x_tau[nmin], x_tau[nmax], 1000)
 		ax.plot(px, FitFunctionL(px, *parameter), 'k-', linewidth=3.0)
 		
-		#print(f"{int(L)}\t{h}\t\t{round(parameter[2] * (2.*L*L)**0.5, 5)}\t\t\t\t\t{round(perr[2] * (2.*L*L)**0.5, 5)}")
-		print(f"{int(L)}\t {h}\t\t{round(parameter[2], 5)}\t\t\t\t\t{round(perr[2], 5)}")
-		print(parameter)
+		print(f"{int(L)}\t{h}\t\t{round(parameter[2] * (2.*L*L)**0.5, 5)}\t\t\t\t\t{round(perr[2] * (2.*L*L)**0.5, 5)}")
+		#print(f"{int(L)}\t {h}\t\t{round(parameter[2], 5)}\t\t\t\t\t{round(perr[2], 5)}")
+		#print(parameter)
 
 		#print(f"{int(L)}\t {h}\t\t{round(parameter[2], 5)}\t\t\t\t\t{round(perr[2,2]**0.5, 2)}")
 		#print(parameter)
-		'''
 		
+		'''
 		j = 1
 		f_min = 0
-		f_max = 1200
+		f_max = 800
 		step = 50
 		fit_x = []
 		fit_y = []
@@ -306,8 +317,8 @@ for f in filelist:
 			try:
 				parameter, perr = fit_function( [10., 1., 1.], x_tau[nmin:nmax], y_tau[nmin:nmax], FitFunctionL, datayerrors=err_tau[nmin:nmax])
 				fit_x.append(nmin)
-				fit_y.append(parameter[2])
-				fit_e.append(perr[2])
+				fit_y.append(parameter[2] * (2.*L*L)**0.5)
+				fit_e.append(perr[2] * (2.*L*L)**0.5)
 				fit_re.append((perr[2] / parameter[2]))
 				
 				#parameter, perr = scipy.optimize.curve_fit( FitFunctionL, x_tau[nmin:nmax], y_tau[nmin:nmax], p0=[5., 0.5, 0.5], method='trf')
@@ -330,7 +341,7 @@ for f in filelist:
 		(_, caps, _) = ax2.errorbar(fit_x, fit_y, yerr=fit_e, marker='None', capsize=8, color="k")
 		for cap in caps:
 			cap.set_markeredgewidth(1.6)
-		
+		'''
 		
 		#parameter, perr = scipy.optimize.curve_fit( DecayFunction, fit_x, fit_y, p0=[1., 0.5, 0.5, 0.1], method='trf')
 		#px = np.linspace(fit_x[0], fit_x[-1], 1000)

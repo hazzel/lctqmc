@@ -43,7 +43,7 @@ struct wick_static_chi_cdw
 				{
 					auto& r_j = lat.real_space_coord((j/2)*2);
 					double qr = gamma_q.dot(r_i - r_j);
-					values[q] += std::cos(qr) * ca_et_gf_0[j * N + i] * ca_et_gf_0[j * N + i];
+					values[q] += std::cos(qr) * std::real(ca_et_gf_0[j * N + i] * ca_et_gf_0[j * N + i]);
 				}
 			}
 			values[q] /= N * N;

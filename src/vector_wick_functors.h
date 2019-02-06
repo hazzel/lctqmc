@@ -44,8 +44,8 @@ struct wick_chi_cdw
 				{
 					auto& r_j = lat.real_space_coord(j);
 					double qr = gamma_q.dot(r_i - r_j);
-					double aa = ca_td_gf[j * N + i], ab = ca_td_gf[(j+1) * N + i], ba = ca_td_gf[j * N + i+1], bb = ca_td_gf[(j+1) * N + (i+1)];
-					values[q] += std::cos(qr) * (aa*aa + ab*ab + ba*ba + bb*bb);
+					numeric_t aa = ca_td_gf[j * N + i], ab = ca_td_gf[(j+1) * N + i], ba = ca_td_gf[j * N + i+1], bb = ca_td_gf[(j+1) * N + (i+1)];
+					values[q] += std::cos(qr) * std::real(aa*aa + ab*ab + ba*ba + bb*bb);
 				}
 			}
 			values[q] /= N * N;
@@ -81,7 +81,7 @@ struct wick_sp_site
 				int i = b.first, j = b.second;
 				auto& r_i = lat.real_space_coord(i);
 				auto& r_j = lat.real_space_coord(j);
-				values[d] += ca_td_gf[j*N+i] * lat.parity(i)*lat.parity(j);
+				values[d] += std::real(ca_td_gf[j*N+i]) * lat.parity(i)*lat.parity(j);
 			}
 			values[d] /= d_bonds.size();
 		}
@@ -123,7 +123,7 @@ struct wick_sp_q
 						auto& r_j = lat.real_space_coord(j);
 						double kdot = K.dot(r_i - r_j);
 						//values[p*(nq+1)+q] += std::cos(kdot) * (ca_td_gf[(j+0)*N+(i+0)] + ca_td_gf[(j+1)*N+(i+1)] + ca_td_gf[(j+0)*N+(i+1)] + ca_td_gf[(j+1)*N+(i+0)]);
-						values[p*(nq+1)+q] += std::cos(kdot) * (ca_td_gf[(j+0)*N+(i+0)] + ca_td_gf[(j+1)*N+(i+1)]);
+						values[p*(nq+1)+q] += std::cos(kdot) * std::real(ca_td_gf[(j+0)*N+(i+0)] + ca_td_gf[(j+1)*N+(i+1)]);
 					}
 				}
 				values[p*(nq+1)+q] /= N;

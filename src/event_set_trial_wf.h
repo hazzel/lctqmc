@@ -332,10 +332,18 @@ struct event_set_trial_wf
 	matrix_t set_K_matrix()
 	{
 		matrix_t K = matrix_t::Zero(lat.n_sites(), lat.n_sites());
-		for (auto& a : lat.bonds("nearest neighbors"))
-			K(a.first, a.second) += -param.t;
-		for (auto& a : lat.bonds("t3_bonds"))
-			K(a.first, a.second) += -param.tprime;
+		if (param.geometry == "honeycomb")
+		{
+			for (auto& a : lat.bonds("nearest neighbors"))
+				K(a.first, a.second) += -param.t;
+			for (auto& a : lat.bonds("t3_bonds"))
+				K(a.first, a.second) += -param.tprime;
+		}
+		else if (param.geometry == "square")
+		{
+			for (auto& a : lat.bonds("nearest neighbors"))
+				K(a.first, a.second) += -param.t;
+		}
 		gf.set_K_matrix(K);
 		return K;
 	}
@@ -343,45 +351,91 @@ struct event_set_trial_wf
 	matrix_t set_twf_matrix()
 	{
 		matrix_t tw = matrix_t::Zero(lat.n_sites(), lat.n_sites());
-		if (param.trial_wave_function == "t_only")
+		if (param.geometry == "honeycomb")
 		{
-			for (auto& a : lat.bonds("nearest neighbors"))
-				tw(a.first, a.second) += -param.t;
+			if (param.trial_wave_function == "t_only")
+			{
+				for (auto& a : lat.bonds("nearest neighbors"))
+					tw(a.first, a.second) += -param.t;
 
-			/*
-			std::complex<double> im(0., 1.);
-			const double pi = std::atan(1.0)*4;
-			double theta_x = pi, theta_y = pi;
-			for (auto& a : lat.bonds("edge_x"))
-			{
-				tw(a.first, a.second) = -param.t * std::exp(im * theta_x);
-				tw(a.second, a.first) = -param.t * std::exp(-im * theta_x);
+				/*
+				std::complex<double> im(0., 1.);
+				const double pi = std::atan(1.0)*4;
+				double theta_x = pi, theta_y = pi;
+				for (auto& a : lat.bonds("edge_x"))
+				{
+					tw(a.first, a.second) = -param.t * std::exp(im * theta_x);
+					tw(a.second, a.first) = -param.t * std::exp(-im * theta_x);
+				}
+				for (auto& a : lat.bonds("edge_y"))
+				{
+					tw(a.first, a.second) = -param.t * std::exp(im * theta_y);
+					tw(a.second, a.first) = -param.t * std::exp(-im * theta_y);
+				}
+				*/
+				/*
+				for (auto& a : lat.bonds("edge_x"))
+				{
+					tw(a.first, a.second) = +param.t;
+					tw(a.second, a.first) = +param.t;
+				}
+				for (auto& a : lat.bonds("edge_y"))
+				{
+					tw(a.first, a.second) = +param.t;
+					tw(a.second, a.first) = +param.t;
+				}
+				*/
 			}
-			for (auto& a : lat.bonds("edge_y"))
+			else
 			{
-				tw(a.first, a.second) = -param.t * std::exp(im * theta_y);
-				tw(a.second, a.first) = -param.t * std::exp(-im * theta_y);
+				for (auto& a : lat.bonds("nearest neighbors"))
+					tw(a.first, a.second) += -param.t;
+				for (auto& a : lat.bonds("t3_bonds"))
+					tw(a.first, a.second) += -param.tprime;
 			}
-			*/
-			/*
-			for (auto& a : lat.bonds("edge_x"))
-			{
-				tw(a.first, a.second) = +param.t;
-				tw(a.second, a.first) = +param.t;
-			}
-			for (auto& a : lat.bonds("edge_y"))
-			{
-				tw(a.first, a.second) = +param.t;
-				tw(a.second, a.first) = +param.t;
-			}
-			*/
 		}
-		else
+		else if (param.geometry == "square")
 		{
 			for (auto& a : lat.bonds("nearest neighbors"))
 				tw(a.first, a.second) += -param.t;
-			for (auto& a : lat.bonds("t3_bonds"))
-				tw(a.first, a.second) += -param.tprime;
+			
+			int ns = lat.n_sites();
+			for (int i = 0; i < lat.Lx; ++i)
+				for (int j = 0; j < lat.Ly; ++j)
+				{
+					int n = j * lat.Lx + i;
+					/*
+					tw(n, (n+lat.Lx)%ns) += -param.t * (2*(i%2)-1);
+					tw((n+lat.Lx)%ns, n) += -param.t * (2*(i%2)-1);
+					
+					if (i == lat.Lx - 1)
+					{
+						tw(n, (n - lat.Lx + 1)%ns) += -param.t;
+						tw((n - lat.Lx + 1)%ns, n) += -param.t;
+					}
+					else
+					{
+						tw(n, (n + 1)%ns) += -param.t;
+						tw((n + 1)%ns, n) += -param.t;
+					}
+					*/
+					
+					std::complex<double> im(0., 1.);
+					const double pi = std::atan(1.0)*4;
+					tw(n, (n+lat.Lx)%ns) += -param.t * std::exp(im * pi/4.);
+					tw((n+lat.Lx)%ns, n) += -param.t * std::exp(-im * pi/4.);
+					
+					if (i == lat.Lx - 1)
+					{
+						tw(n, (n - lat.Lx + 1)%ns) += -param.t * std::exp(-im * pi/4.);
+						tw((n - lat.Lx + 1)%ns, n) += -param.t * std::exp(im * pi/4.);
+					}
+					else
+					{
+						tw(n, (n + 1)%ns) += -param.t * std::exp(-im * pi/4.);
+						tw((n + 1)%ns, n) += -param.t * std::exp(im * pi/4.);
+					}
+				}
 		}
 		return tw;
 	}
@@ -401,19 +455,24 @@ struct event_set_trial_wf
 			rot120_pm = matrix_t::Zero(lat.n_sites(), lat.n_sites()),
 			sv_pm = matrix_t::Zero(lat.n_sites(), lat.n_sites()),
 			sh_pm = matrix_t::Zero(lat.n_sites(), lat.n_sites());
+			
 		for (int i = 0; i < lat.n_sites(); ++i)
 		{
 			inv_pm(i, lat.inverted_site(i)) = 1.;
 			sv_pm(i, lat.reflected_v_site(i)) = 1.;
 			sh_pm(i, lat.reflected_h_site(i)) = 1.;
-			rot60_pm(i, lat.rotated_site(i, 60.)) = 1.;
-			rot120_pm(i, lat.rotated_site(i, 120.)) = 1.;
+			if (param.geometry == "honeycomb")
+			{
+				rot60_pm(i, lat.rotated_site(i, 60.)) = 1.;
+				rot120_pm(i, lat.rotated_site(i, 120.)) = 1.;
+			}
 			ph_pm(i, i) = lat.parity(i);
 		}
 		
-		//std::cout << solver.eigenvalues() << std::endl;
+		if (param.geometry == "square")
+			std::cout << solver.eigenvalues() << std::endl;
 		
-		if (lat.n_sites() % 3 != 0)
+		if (param.geometry == "honeycomb" && lat.n_sites() % 3 != 0)
 		{
 			std::vector<std::vector<int>> energy_levels = get_energy_levels(solver.eigenvalues());
 			auto S_f = solver.eigenvectors();
@@ -462,9 +521,14 @@ struct event_set_trial_wf
 		
 			S_f = project_symmetry(S_f, energy_levels, sh_pm);
 			split_quantum_numbers(energy_levels, S_f, sh_pm);
+			if (param.geometry == "square")
+				print_energy_levels(S_f, solver.eigenvalues(), energy_levels, inv_pm, sv_pm, sh_pm, rot60_pm, rot120_pm);
 			
-			S_f = project_symmetry(S_f, energy_levels, rot60_pm);
-			split_quantum_numbers(energy_levels, S_f, rot60_pm);
+			if (param.geometry == "honeycomb")
+			{
+				S_f = project_symmetry(S_f, energy_levels, rot60_pm);
+				split_quantum_numbers(energy_levels, S_f, rot60_pm);
+			}
 		
 			for (int i = 0; i < lat.n_sites()/2-2; ++i)
 			{

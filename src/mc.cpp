@@ -5,6 +5,7 @@
 #include <boost/algorithm/string.hpp>
 #include "mc.h"
 #include "honeycomb.h"
+#include "square.h"
 #include "move_functors.h"
 #include "measure_functors.h"
 #include "event_functors.h"
@@ -67,8 +68,17 @@ mc::mc(const std::string& dir)
 	qmc.add_measure(measure_M{measure, pars, param, gf}, "measurement");
 
 	//Initialize lattice
-	honeycomb hc(param.L, param.L);
-	lat.generate_graph(hc);
+	param.geometry = pars.value_or_default<std::string>("geometry", "honeycomb");
+	if (param.geometry == "honeycomb")
+	{
+		honeycomb hc(param.L, param.L);
+		lat.generate_graph(hc);
+	}
+	else if (param.geometry == "square")
+	{
+		square sq(param.L, param.L);
+		lat.generate_graph(sq);
+	}
 
 	//Set up events
 	qmc.add_event(event_set_trial_wf{rng, param, lat, gf}, "trial_wf");

@@ -62,8 +62,8 @@ struct vertex
 class green_function
 {
 	public:
-		using numeric_t = double;
-		//using numeric_t = std::complex<double>;
+		//using numeric_t = double;
+		using numeric_t = std::complex<double>;
 		using vector_t = Eigen::Matrix<numeric_t, Eigen::Dynamic, 1>;
 		using row_vector_t = Eigen::Matrix<numeric_t, 1, Eigen::Dynamic>;
 		using matrix_t = Eigen::Matrix<numeric_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>;
