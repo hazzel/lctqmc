@@ -33,8 +33,9 @@ struct wick_static_energy
 		for (auto& a : lat.bonds("nearest neighbors"))
 			energy += param.V * ((1. - et_gf(a.first, a.first)) * (1. - et_gf(a.second, a.second))
 				- et_gf(a.second, a.first) * et_gf(a.first, a.second) - (et_gf(a.first, a.first) + et_gf(a.second, a.second))/2. + 1./4.)/2.;
-		for (auto& a : lat.bonds("t3_bonds"))
-			energy += param.tprime * et_gf(a.second, a.first);
+		if (param.geometry == "honeycomb")
+			for (auto& a : lat.bonds("t3_bonds"))
+				energy += param.tprime * et_gf(a.second, a.first);
 		for (int i = 0; i < lat.n_sites(); ++i)
 			energy += -lat.parity(i) * param.stag_mu * et_gf(i, i);
 		return std::real(energy);

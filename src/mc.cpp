@@ -5,7 +5,7 @@
 #include <boost/algorithm/string.hpp>
 #include "mc.h"
 #include "honeycomb.h"
-#include "square.h"
+#include "pi_flux_square.h"
 #include "move_functors.h"
 #include "measure_functors.h"
 #include "event_functors.h"
@@ -74,9 +74,9 @@ mc::mc(const std::string& dir)
 		honeycomb hc(param.L, param.L);
 		lat.generate_graph(hc);
 	}
-	else if (param.geometry == "square")
+	else if (param.geometry == "pi_flux_square")
 	{
-		square sq(param.L, param.L);
+		pi_flux_square sq(param.L, param.L);
 		lat.generate_graph(sq);
 	}
 

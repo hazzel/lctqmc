@@ -54,7 +54,7 @@ struct event_set_trial_wf
 					S_so.col(j) -= S_so.col(k) * (S_so.col(k).adjoint() * S_s.col(j));
 					S_ao.col(j) -= S_ao.col(k) * (S_ao.col(k).adjoint() * S_a.col(j));
 				}
-				//std::cout << "E=" << en(i) << ", orth: i=" << i << ", j=" << j << ": " << S_so.col(j).norm() << " " << S_ao.col(j).norm() << std::endl;
+				std::cout << "E=" << en(i) << ", orth: i=" << i << ", j=" << j << ": " << S_so.col(j).norm() << " " << S_ao.col(j).norm() << std::endl;
 				if (S_so.col(j).norm() > param.epsilon)
 				{
 					S_so.col(j) /= S_so.col(j).norm();
@@ -237,7 +237,11 @@ struct event_set_trial_wf
 			//	std::cout << solver.eigenvalues()[j] << std::endl;
 			for (int j = 0; j < N; ++j)
 				for (int k = 0; k < N; ++k)
-					S_proj.col(j) += std::real(solver.eigenvectors()(k, j)) * S.col(energy_levels[i][k]);
+					#ifdef REAL_TYPE
+						S_proj.col(j) += std::real(solver.eigenvectors()(k, j)) * S.col(energy_levels[i][k]);
+					#else
+						S_proj.col(j) += solver.eigenvectors()(k, j) * S.col(energy_levels[i][k]);
+					#endif
 			S_proj = orthogonalize(S_proj);
 			for (int j = 0; j < N; ++j)
 				S_f.col(energy_levels[i][j]) = S_proj.col(j);
@@ -321,9 +325,9 @@ struct event_set_trial_wf
 				std::cout << "E(" << i << ") = " << eigen_energies[i]
 				<< ", P_inv = " << S.col(i).adjoint() * inv_pm * S.col(i)
 				<< ", P_rot60 = " << S.col(i).adjoint() * rot60_pm * S.col(i)
-				<< ", P_rot120 = " << S.conjugate().col(i).adjoint() * rot120_pm * S.conjugate().col(i)
-				<< ", P_sv = " << S.conjugate().col(i).adjoint() * sv_pm * S.conjugate().col(i) 
-				<< ", P_sh = " << S.conjugate().col(i).adjoint() * sh_pm * S.conjugate().col(i) << std::endl;
+				<< ", P_rot120 = " << S.col(i).adjoint() * rot120_pm * S.col(i)
+				<< ", P_sv = " << S.col(i).adjoint() * sv_pm * S.col(i) 
+				<< ", P_sh = " << S.col(i).adjoint() * sh_pm * S.col(i) << std::endl;
 			}
 			std::cout << "---" << std::endl;
 		}
@@ -339,7 +343,7 @@ struct event_set_trial_wf
 			for (auto& a : lat.bonds("t3_bonds"))
 				K(a.first, a.second) += -param.tprime;
 		}
-		else if (param.geometry == "square")
+		else if (param.geometry == "pi_flux_square")
 		{
 			for (auto& a : lat.bonds("nearest neighbors"))
 				K(a.first, a.second) += -param.t;
@@ -394,16 +398,12 @@ struct event_set_trial_wf
 					tw(a.first, a.second) += -param.tprime;
 			}
 		}
-		else if (param.geometry == "square")
+		else if (param.geometry == "pi_flux_square")
 		{
-			for (auto& a : lat.bonds("nearest neighbors"))
-				tw(a.first, a.second) += -param.t;
-			
-			int ns = lat.n_sites();
-			for (int i = 0; i < lat.Lx; ++i)
-				for (int j = 0; j < lat.Ly; ++j)
+			#ifndef REAL_TYPE
+				int ns = lat.n_sites();
+				for (int n = 0; n < ns; n+=2)
 				{
-					int n = j * lat.Lx + i;
 					/*
 					tw(n, (n+lat.Lx)%ns) += -param.t * (2*(i%2)-1);
 					tw((n+lat.Lx)%ns, n) += -param.t * (2*(i%2)-1);
@@ -421,21 +421,24 @@ struct event_set_trial_wf
 					*/
 					
 					std::complex<double> im(0., 1.);
-					const double pi = std::atan(1.0)*4;
-					tw(n, (n+lat.Lx)%ns) += -param.t * std::exp(im * pi/4.);
-					tw((n+lat.Lx)%ns, n) += -param.t * std::exp(-im * pi/4.);
+					const double pi = std::atan(1.0)*4.;
+					double phase = pi/4.;
 					
-					if (i == lat.Lx - 1)
-					{
-						tw(n, (n - lat.Lx + 1)%ns) += -param.t * std::exp(-im * pi/4.);
-						tw((n - lat.Lx + 1)%ns, n) += -param.t * std::exp(im * pi/4.);
-					}
-					else
-					{
-						tw(n, (n + 1)%ns) += -param.t * std::exp(-im * pi/4.);
-						tw((n + 1)%ns, n) += -param.t * std::exp(im * pi/4.);
-					}
+					auto Rn = lat.real_space_coord(n);
+					
+					tw(n, lat.site_at_position(Rn + lat.delta)) += -param.t * std::exp(-im * phase);
+					tw(lat.site_at_position(Rn + lat.delta), n) += -param.t * std::exp(im * phase);
+					
+					tw(n, lat.site_at_position(Rn - lat.delta)) += -param.t * std::exp(-im * phase);
+					tw(lat.site_at_position(Rn - lat.delta), n) += -param.t * std::exp(im * phase);
+					
+					tw(n, lat.site_at_position(Rn + lat.a1 - lat.delta)) += -param.t * std::exp(im * phase);
+					tw(lat.site_at_position(Rn + lat.a1 - lat.delta), n) += -param.t * std::exp(-im * phase);
+					
+					tw(n, lat.site_at_position(Rn + lat.a2 - lat.delta)) += -param.t * std::exp(im * phase);
+					tw(lat.site_at_position(Rn + lat.a2 - lat.delta), n) += -param.t * std::exp(-im * phase);
 				}
+			#endif
 		}
 		return tw;
 	}
@@ -469,8 +472,16 @@ struct event_set_trial_wf
 			ph_pm(i, i) = lat.parity(i);
 		}
 		
-		if (param.geometry == "square")
+		if (param.geometry == "pi_flux_square")
+		{
 			std::cout << solver.eigenvalues() << std::endl;
+			std::cout << "Inversion" << std::endl;
+			std::cout << inv_pm * tw - tw * inv_pm << std::endl;
+			std::cout << "Sv" << std::endl;
+			std::cout << sv_pm * tw - tw * sv_pm << std::endl;
+			std::cout << "Sh" << std::endl;
+			std::cout << sh_pm * tw - tw * sh_pm << std::endl;
+		}
 		
 		if (param.geometry == "honeycomb" && lat.n_sites() % 3 != 0)
 		{
@@ -521,8 +532,11 @@ struct event_set_trial_wf
 		
 			S_f = project_symmetry(S_f, energy_levels, sh_pm);
 			split_quantum_numbers(energy_levels, S_f, sh_pm);
-			if (param.geometry == "square")
+			if (param.geometry == "pi_flux_square")
+			{
 				print_energy_levels(S_f, solver.eigenvalues(), energy_levels, inv_pm, sv_pm, sh_pm, rot60_pm, rot120_pm);
+				print_representations(S_f, inv_pm, sv_pm, sh_pm, rot60_pm, rot120_pm, ph_pm);
+			}
 			
 			if (param.geometry == "honeycomb")
 			{

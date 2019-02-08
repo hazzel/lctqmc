@@ -14,6 +14,8 @@
 #include "wick_base.h"
 #include "vector_wick_base.h"
 
+#define COMPLEX_TYPE
+
 template<typename T, typename Pred>
 typename std::vector<T>::iterator insert_sorted(std::vector<T>& vec, const T& item, Pred pred)
 {
@@ -62,8 +64,11 @@ struct vertex
 class green_function
 {
 	public:
-		//using numeric_t = double;
-		using numeric_t = std::complex<double>;
+		#ifdef REAL_TYPE
+			using numeric_t = double;
+		#else
+			using numeric_t = std::complex<double>;
+		#endif
 		using vector_t = Eigen::Matrix<numeric_t, Eigen::Dynamic, 1>;
 		using row_vector_t = Eigen::Matrix<numeric_t, 1, Eigen::Dynamic>;
 		using matrix_t = Eigen::Matrix<numeric_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>;

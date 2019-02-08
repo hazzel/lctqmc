@@ -8,7 +8,7 @@
 #include "lattice.h"
 
 
-struct square
+struct pi_flux_square
 {
 	//typedef lattice::graph_t graph_t;
 	typedef boost::adjacency_list<boost::setS, boost::vecS,
@@ -29,41 +29,41 @@ struct square
 	Eigen::Vector2d center;
 	double pi = 4. * std::atan(1.);
 
-	square(int Lx_ = 6, int Ly_ = 6)
+	pi_flux_square(int Lx_ = 6, int Ly_ = 6)
 		: Lx(Lx_), Ly(Ly_),
-			a1(1., 0.), a2(0., 1.), delta(0., 0.)
+			a1(1., 1.), a2(1., -1.), delta(1., 0.)
 	{
-		b1 = Eigen::Vector2d(1., 0.);
-		b2 = Eigen::Vector2d(0., 1.);
-		center = Eigen::Vector2d(0.5, 0.5);
+		b1 = Eigen::Vector2d(1., 1.);
+		b2 = Eigen::Vector2d(-1., 1.);
+		center = Eigen::Vector2d(0., 0.);
 	}
 	
 	int neighbor_site(int site, int type)
 	{
-		int i = site % Lx, n_vertices = Lx * Ly;
+		int i = site % (2 * Lx) / 2, n_vertices = 2 * Lx * Ly;
 		if (type == 0)
-		{
-			if (i == Lx - 1)
-				return (site - Lx + 1 + n_vertices) % n_vertices;
-			else
-				return (site + 1 + n_vertices) % n_vertices;
-		}
+			return (site + 1 + n_vertices) % n_vertices;
 		else if (type == 1)
 		{
-			if (i == Lx - 1)
-				return (site + Lx - 1 + n_vertices) % n_vertices;
+			if (i == 0)
+				return (site - 1 + n_vertices) % n_vertices;
+			else
+				return (site - 2*Lx - 1 + n_vertices) % n_vertices;
+		}
+		else if (type == 2)
+			return (site - 2*Lx + 1 + n_vertices) % n_vertices;
+		else if (type == 3)
+		{
+			if (i == 0)
+				return (site + 2*Lx - 1 + n_vertices) % n_vertices;
 			else
 				return (site - 1 + n_vertices) % n_vertices;
 		}
-		else if (type == 2)
-			return (site + Lx + n_vertices) % n_vertices;
-		else if (type == 3)
-			return (site - Lx + n_vertices) % n_vertices;
 	}
 
 	graph_t* graph(lattice& l)
 	{
-		int n_sites = Lx * Ly;
+		int n_sites = 2 * Lx * Ly;
 		graph_t* g = new graph_t(n_sites);
 		add_edges(g);
 		
@@ -97,15 +97,27 @@ struct square
 		for (int j = 0; j < Ly; ++j)
 			for (int i = 0; i < Lx; ++i)
 			{
-				int n = j * Lx + i;
+				int n = j * 2 * Lx + i * 2;
 				
 				boost::add_edge(n, neighbor_site(n, 0), *g);
 				boost::add_edge(neighbor_site(n, 0), n, *g);
 				
+				boost::add_edge(n, neighbor_site(n, 1), *g);
+				boost::add_edge(neighbor_site(n, 1), n, *g);
+				
 				boost::add_edge(n, neighbor_site(n, 2), *g);
 				boost::add_edge(neighbor_site(n, 2), n, *g);
 				
+				boost::add_edge(n, neighbor_site(n, 3), *g);
+				boost::add_edge(neighbor_site(n, 3), n, *g);
+				
+				std::cout << n << " <-> " << neighbor_site(n, 0) << std::endl;
+				std::cout << n << " <-> " << neighbor_site(n, 1) << std::endl;
+				std::cout << n << " <-> " << neighbor_site(n, 2) << std::endl;
+				std::cout << n << " <-> " << neighbor_site(n, 3) << std::endl;
+				
 				real_space_map.push_back(Eigen::Vector2d{i * a1 + j * a2});
+				real_space_map.push_back(Eigen::Vector2d{i * a1 + j * a2 + delta});
 			}
 	}
 
