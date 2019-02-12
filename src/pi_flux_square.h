@@ -111,11 +111,6 @@ struct pi_flux_square
 				boost::add_edge(n, neighbor_site(n, 3), *g);
 				boost::add_edge(neighbor_site(n, 3), n, *g);
 				
-				std::cout << n << " <-> " << neighbor_site(n, 0) << std::endl;
-				std::cout << n << " <-> " << neighbor_site(n, 1) << std::endl;
-				std::cout << n << " <-> " << neighbor_site(n, 2) << std::endl;
-				std::cout << n << " <-> " << neighbor_site(n, 3) << std::endl;
-				
 				real_space_map.push_back(Eigen::Vector2d{i * a1 + j * a2});
 				real_space_map.push_back(Eigen::Vector2d{i * a1 + j * a2 + delta});
 			}

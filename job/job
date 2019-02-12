@@ -1,8 +1,8 @@
-SWEEPS = 1
+SWEEPS = 2
 warmup = 1
-prebin = 10
+prebin = 1
 
-geometry = pi_flux_square
+geometry = honeycomb
 
 trial_wave_function = t_and_tprime
 block_size = 0.1
@@ -27,6 +27,6 @@ method = projective
 
 tprime=0.
 
-L = 2
+L = 3
 inv_symmetry = 1
 {V = 1.0}

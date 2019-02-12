@@ -54,7 +54,7 @@ struct event_set_trial_wf
 					S_so.col(j) -= S_so.col(k) * (S_so.col(k).adjoint() * S_s.col(j));
 					S_ao.col(j) -= S_ao.col(k) * (S_ao.col(k).adjoint() * S_a.col(j));
 				}
-				std::cout << "E=" << en(i) << ", orth: i=" << i << ", j=" << j << ": " << S_so.col(j).norm() << " " << S_ao.col(j).norm() << std::endl;
+				//std::cout << "E=" << en(i) << ", orth: i=" << i << ", j=" << j << ": " << S_so.col(j).norm() << " " << S_ao.col(j).norm() << std::endl;
 				if (S_so.col(j).norm() > param.epsilon)
 				{
 					S_so.col(j) /= S_so.col(j).norm();
@@ -78,6 +78,7 @@ struct event_set_trial_wf
 		return S_f.leftCols(S.cols());
 	}
 	
+	/*
 	matrix_t ph_symmetrize_EV(const matrix_t& S, const matrix_t& pm)
 	{
 		matrix_t S_s(lat.n_sites(), 2), S_a(lat.n_sites(), 2);
@@ -136,6 +137,7 @@ struct event_set_trial_wf
 		S_f.rightCols(cnt_a) = S_af.leftCols(cnt_a);
 		return S_f.leftCols(S.cols());
 	}
+	*/
 	
 	std::vector<std::vector<int>> get_energy_blocks(const Eigen::VectorXd& en)
 	{
@@ -174,7 +176,7 @@ struct event_set_trial_wf
 		return qr_solver.matrixQ();
 	}
 	
-	void split_quantum_numbers(std::vector<std::vector<int>>& energy_levels, const matrix_t& S, const matrix_t& pm)
+	void split_quantum_numbers(const matrix_t& S, std::vector<std::vector<int>>& energy_levels, const matrix_t& pm)
 	{
 		for (int i = 0; i < energy_levels.size(); ++i)
 		{
@@ -191,7 +193,9 @@ struct event_set_trial_wf
 			{
 				numeric_t q = S.col(energy_levels[i][j])
 					.adjoint() * pm * S.col(energy_levels[i][j]);
-				q = std::real(q);
+				#ifdef REAL_TYPE
+					q = std::real(q);
+				#endif
 				//std::cout << "level " << i << ", state " << j
 				//	<< ", q = " << q << std::endl;
 				int k;
@@ -250,9 +254,9 @@ struct event_set_trial_wf
 	}
 
 	void print_representations(const matrix_t& S, const matrix_t& inv_pm, const matrix_t& sv_pm, const matrix_t& sh_pm,
-		const matrix_t& rot60_pm, const matrix_t& rot120_pm, const matrix_t& ph_pm)
+		const matrix_t& rot60_pm, const matrix_t& rot90_pm, const matrix_t& rot120_pm, const matrix_t& ph_pm)
 	{
-		std::vector<matrix_t> rep(6, matrix_t::Zero(S.cols(), S.cols()));
+		std::vector<matrix_t> rep(7, matrix_t::Zero(S.cols(), S.cols()));
 		for (int i = 0; i < S.cols(); ++i)
 			for (int j = 0; j < S.cols(); ++j)
 			{
@@ -260,10 +264,11 @@ struct event_set_trial_wf
 				rep[1](i, j) = S.col(i).adjoint() * sv_pm * S.col(j);
 				rep[2](i, j) = S.col(i).adjoint() * sh_pm * S.col(j);
 				rep[3](i, j) = S.col(i).adjoint() * rot60_pm * S.col(j);
-				rep[4](i, j) = S.col(i).adjoint() * rot120_pm * S.col(j);
-				rep[5](i, j) = S.col(i).adjoint() * ph_pm * S.col(j);
+				rep[4](i, j) = S.col(i).adjoint() * rot90_pm * S.col(j);
+				rep[5](i, j) = S.col(i).adjoint() * rot120_pm * S.col(j);
+				rep[6](i, j) = S.col(i).adjoint() * ph_pm * S.col(j);
 				
-				for (int k = 0; k < 6; ++k)
+				for (int k = 0; k < 7; ++k)
 					if (std::abs(rep[k](i, j)) < 1E-14)
 						rep[k](i, j) = 0.;
 			}
@@ -295,18 +300,25 @@ struct event_set_trial_wf
 				std::cout << rep[3](i, j) << " ";
 			std::cout << std::endl;
 		}
-		std::cout << "rep rot120_pm" << std::endl;
+		std::cout << "rep rot90_pm" << std::endl;
 		for (int i = 0; i < rep[0].rows(); ++i)
 		{
 			for (int j = 0; j < rep[0].rows(); ++j)
 				std::cout << rep[4](i, j) << " ";
 			std::cout << std::endl;
 		}
-		std::cout << "rep ph_pm" << std::endl;
+		std::cout << "rep rot120_pm" << std::endl;
 		for (int i = 0; i < rep[0].rows(); ++i)
 		{
 			for (int j = 0; j < rep[0].rows(); ++j)
 				std::cout << rep[5](i, j) << " ";
+			std::cout << std::endl;
+		}
+		std::cout << "rep ph_pm" << std::endl;
+		for (int i = 0; i < rep[0].rows(); ++i)
+		{
+			for (int j = 0; j < rep[0].rows(); ++j)
+				std::cout << rep[6](i, j) << " ";
 			std::cout << std::endl;
 		}
 	}
@@ -455,6 +467,7 @@ struct event_set_trial_wf
 		matrix_t inv_pm = matrix_t::Zero(lat.n_sites(), lat.n_sites()),
 			ph_pm = matrix_t::Zero(lat.n_sites(), lat.n_sites()),
 			rot60_pm = matrix_t::Zero(lat.n_sites(), lat.n_sites()),
+			rot90_pm = matrix_t::Zero(lat.n_sites(), lat.n_sites()),
 			rot120_pm = matrix_t::Zero(lat.n_sites(), lat.n_sites()),
 			sv_pm = matrix_t::Zero(lat.n_sites(), lat.n_sites()),
 			sh_pm = matrix_t::Zero(lat.n_sites(), lat.n_sites());
@@ -469,9 +482,12 @@ struct event_set_trial_wf
 				rot60_pm(i, lat.rotated_site(i, 60.)) = 1.;
 				rot120_pm(i, lat.rotated_site(i, 120.)) = 1.;
 			}
+			if (param.geometry == "pi_flux_square")
+				rot90_pm(i, lat.rotated_site(i, 90.)) = 1.;
 			ph_pm(i, i) = lat.parity(i);
 		}
 		
+		/*
 		if (param.geometry == "pi_flux_square")
 		{
 			std::cout << solver.eigenvalues() << std::endl;
@@ -482,25 +498,26 @@ struct event_set_trial_wf
 			std::cout << "Sh" << std::endl;
 			std::cout << sh_pm * tw - tw * sh_pm << std::endl;
 		}
+		*/
 		
 		if (param.geometry == "honeycomb" && lat.n_sites() % 3 != 0)
 		{
 			std::vector<std::vector<int>> energy_levels = get_energy_levels(solver.eigenvalues());
 			auto S_f = solver.eigenvectors();
 			S_f = project_symmetry(S_f, energy_levels, inv_pm);
-			split_quantum_numbers(energy_levels, S_f, inv_pm);
+			split_quantum_numbers(S_f, energy_levels, inv_pm);
 			//print_energy_levels(S_f, solver.eigenvalues(), energy_levels, inv_pm, sv_pm, sh_pm, rot60_pm, rot120_pm);
 			
 			S_f = project_symmetry(S_f, energy_levels, sv_pm);
-			split_quantum_numbers(energy_levels, S_f, sv_pm);
+			split_quantum_numbers(S_f, energy_levels, sv_pm);
 			//print_energy_levels(S_f, solver.eigenvalues(), energy_levels, inv_pm, sv_pm, sh_pm, rot60_pm, rot120_pm);
 		
 			S_f = project_symmetry(S_f, energy_levels, sh_pm);
-			split_quantum_numbers(energy_levels, S_f, sh_pm);
+			split_quantum_numbers(S_f, energy_levels, sh_pm);
 			//print_energy_levels(S_f, solver.eigenvalues(), energy_levels, inv_pm, sv_pm, sh_pm, rot60_pm, rot120_pm);
 			
 			S_f = project_symmetry(S_f, energy_levels, rot60_pm);
-			split_quantum_numbers(energy_levels, S_f, rot60_pm);
+			split_quantum_numbers(S_f, energy_levels, rot60_pm);
 			//print_energy_levels(S_f, solver.eigenvalues(), energy_levels, inv_pm, sv_pm, sh_pm, rot60_pm, rot120_pm);
 			
 			P = S_f.leftCols(lat.n_sites()/2);
@@ -525,24 +542,28 @@ struct event_set_trial_wf
 			
 			auto S_f = solver.eigenvectors();
 			S_f = project_symmetry(S_f, energy_levels, inv_pm);
-			split_quantum_numbers(energy_levels, S_f, inv_pm);
+			split_quantum_numbers(S_f, energy_levels, inv_pm);
 			
 			S_f = project_symmetry(S_f, energy_levels, sv_pm);
-			split_quantum_numbers(energy_levels, S_f, sv_pm);
+			split_quantum_numbers(S_f, energy_levels, sv_pm);
 		
 			S_f = project_symmetry(S_f, energy_levels, sh_pm);
-			split_quantum_numbers(energy_levels, S_f, sh_pm);
-			if (param.geometry == "pi_flux_square")
-			{
-				print_energy_levels(S_f, solver.eigenvalues(), energy_levels, inv_pm, sv_pm, sh_pm, rot60_pm, rot120_pm);
-				print_representations(S_f, inv_pm, sv_pm, sh_pm, rot60_pm, rot120_pm, ph_pm);
-			}
+			split_quantum_numbers(S_f, energy_levels, sh_pm);
 			
 			if (param.geometry == "honeycomb")
 			{
 				S_f = project_symmetry(S_f, energy_levels, rot60_pm);
-				split_quantum_numbers(energy_levels, S_f, rot60_pm);
+				split_quantum_numbers(S_f, energy_levels, rot60_pm);
 			}
+			
+			if (param.geometry == "pi_flux_square")
+			{
+				S_f = project_symmetry(S_f, energy_levels, rot90_pm);
+				split_quantum_numbers(S_f, energy_levels, rot90_pm);
+			}
+			
+			//print_energy_levels(S_f, solver.eigenvalues(), energy_levels, inv_pm, sv_pm, sh_pm, rot60_pm, rot90_pm, rot120_pm);
+			//print_representations(S_f, inv_pm, sv_pm, sh_pm, rot60_pm, rot90_pm, rot120_pm, ph_pm);
 		
 			for (int i = 0; i < lat.n_sites()/2-2; ++i)
 			{
@@ -552,17 +573,64 @@ struct event_set_trial_wf
 				total_quantum_numbers[3] *= (S_f.col(i).adjoint() * rot60_pm * S_f.col(i)).trace();
 				total_quantum_numbers[4] *= (S_f.col(i).adjoint() * rot120_pm * S_f.col(i)).trace();
 			}
-		
+			
+			/*
 			matrix_t ph_1p_block = S_f.block(0, lat.n_sites()/2-2, lat.n_sites(), 4);
 			Eigen::VectorXd ph_ev = Eigen::VectorXd::Zero(4);
 			
-			ph_1p_block = symmetrize_EV(ph_1p_block, ph_ev, ph_pm);
-			ph_1p_block = ph_symmetrize_EV(ph_1p_block, ph_pm);
-
-			for (int i = 0; i < ph_1p_block.cols(); ++i)
-				ph_2p_parity[i] = ph_1p_block.col(i).adjoint() * ph_pm * ph_1p_block.col(i);
-			std::vector<matrix_t> ph_2p_block(4, matrix_t(lat.n_sites(), 2));
+			std::cout << "Dirac block before PH" << std::endl;
+			print_representations(ph_1p_block, inv_pm, sv_pm, sh_pm, rot60_pm, rot90_pm, rot120_pm, ph_pm);
 			
+			ph_1p_block = symmetrize_EV(ph_1p_block, ph_ev, ph_pm);
+			
+			std::cout << "Dirac block before PH after ph_pm" << std::endl;
+			print_representations(ph_1p_block, inv_pm, sv_pm, sh_pm, rot60_pm, rot90_pm, rot120_pm, ph_pm);
+			
+			ph_1p_block = ph_symmetrize_EV(ph_1p_block, ph_pm);
+			
+			std::cout << "Dirac block after sym_ph" << std::endl;
+			print_representations(ph_1p_block, inv_pm, sv_pm, sh_pm, rot60_pm, rot90_pm, rot120_pm, ph_pm);
+			
+			std::vector<matrix_t> ph_2p_block(4, matrix_t(lat.n_sites(), 2));
+			//PH = -1
+			ph_2p_block[0].col(0) = ph_1p_block.col(0);
+			ph_2p_block[0].col(1) = ph_1p_block.col(3);
+			ph_2p_block[1].col(0) = ph_1p_block.col(1);
+			ph_2p_block[1].col(1) = ph_1p_block.col(2);
+			//PH = 1
+			ph_2p_block[2].col(0) = ph_1p_block.col(0);
+			ph_2p_block[2].col(1) = ph_1p_block.col(1);
+			ph_2p_block[3].col(0) = ph_1p_block.col(2);
+			ph_2p_block[3].col(1) = ph_1p_block.col(3);
+			*/
+			
+			matrix_t ph_1p_block = S_f.block(0, lat.n_sites()/2-2, lat.n_sites(), 4);
+			
+			std::cout << "Dirac block before PH" << std::endl;
+			print_representations(ph_1p_block, inv_pm, sv_pm, sh_pm, rot60_pm, rot90_pm, rot120_pm, ph_pm);
+			
+			std::vector<std::vector<int>> dirac_levels = { { 0, 1, 2, 3 } };
+			ph_1p_block = project_symmetry(ph_1p_block, dirac_levels, ph_pm);
+			split_quantum_numbers(ph_1p_block, dirac_levels, ph_pm);
+			matrix_t ph_1p_block_buf = ph_1p_block;
+			int cnt = 0;
+			for (int i = 0; i < dirac_levels.size(); ++i)
+				for (int j = 0; j < dirac_levels[i].size(); ++j)
+				{
+					std::cout << cnt << " , " << i << " , " << j << std::endl;
+					ph_1p_block.col(cnt) = ph_1p_block_buf.col(dirac_levels[i][j]);
+					++cnt;
+				}
+			ph_1p_block_buf = ph_1p_block;
+			ph_1p_block.col(0) = (ph_1p_block_buf.col(2) + ph_1p_block_buf.col(0))/std::sqrt(2);
+			ph_1p_block.col(1) = (ph_1p_block_buf.col(3) + ph_1p_block_buf.col(1))/std::sqrt(2);
+			ph_1p_block.col(2) = (ph_1p_block_buf.col(2) - ph_1p_block_buf.col(0))/std::sqrt(2);
+			ph_1p_block.col(3) = (ph_1p_block_buf.col(3) - ph_1p_block_buf.col(1))/std::sqrt(2);
+			
+			std::cout << "Dirac block before PH after ph_pm" << std::endl;
+			print_representations(ph_1p_block, inv_pm, sv_pm, sh_pm, rot60_pm, rot90_pm, rot120_pm, ph_pm);
+
+			std::vector<matrix_t> ph_2p_block(4, matrix_t(lat.n_sites(), 2));
 			//PH = -1
 			ph_2p_block[0].col(0) = ph_1p_block.col(0);
 			ph_2p_block[0].col(1) = ph_1p_block.col(3);
@@ -609,7 +677,8 @@ struct event_set_trial_wf
 						total_quantum_numbers[j] *= e0_quantum_numbers[i][j];
 					break;
 				}
-			//print_representations(P, inv_pm, sv_pm, sh_pm, rot60_pm, rot120_pm, ph_pm);
+			
+			//print_representations(P, inv_pm, sv_pm, sh_pm, rot60_pm, rot90_pm, rot120_pm, ph_pm);
 			
 			if (std::abs(param.inv_symmetry - total_quantum_numbers[0]) > param.epsilon)
 			{
