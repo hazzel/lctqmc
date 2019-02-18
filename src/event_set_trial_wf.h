@@ -78,7 +78,6 @@ struct event_set_trial_wf
 		return S_f.leftCols(S.cols());
 	}
 	
-	/*
 	matrix_t ph_symmetrize_EV(const matrix_t& S, const matrix_t& pm)
 	{
 		matrix_t S_s(lat.n_sites(), 2), S_a(lat.n_sites(), 2);
@@ -137,7 +136,6 @@ struct event_set_trial_wf
 		S_f.rightCols(cnt_a) = S_af.leftCols(cnt_a);
 		return S_f.leftCols(S.cols());
 	}
-	*/
 	
 	std::vector<std::vector<int>> get_energy_blocks(const Eigen::VectorXd& en)
 	{
@@ -574,7 +572,7 @@ struct event_set_trial_wf
 				total_quantum_numbers[4] *= (S_f.col(i).adjoint() * rot120_pm * S_f.col(i)).trace();
 			}
 			
-			/*
+			
 			matrix_t ph_1p_block = S_f.block(0, lat.n_sites()/2-2, lat.n_sites(), 4);
 			Eigen::VectorXd ph_ev = Eigen::VectorXd::Zero(4);
 			
@@ -602,8 +600,9 @@ struct event_set_trial_wf
 			ph_2p_block[2].col(1) = ph_1p_block.col(1);
 			ph_2p_block[3].col(0) = ph_1p_block.col(2);
 			ph_2p_block[3].col(1) = ph_1p_block.col(3);
-			*/
 			
+
+			/*
 			matrix_t ph_1p_block = S_f.block(0, lat.n_sites()/2-2, lat.n_sites(), 4);
 			
 			std::cout << "Dirac block before PH" << std::endl;
@@ -641,6 +640,7 @@ struct event_set_trial_wf
 			ph_2p_block[2].col(1) = ph_1p_block.col(1);
 			ph_2p_block[3].col(0) = ph_1p_block.col(2);
 			ph_2p_block[3].col(1) = ph_1p_block.col(3);
+			*/
 			
 			ph_2p_parity = {-1., -1., 1., 1.};
 			std::vector<std::vector<numeric_t>> e0_quantum_numbers = {4, std::vector<numeric_t>()};
