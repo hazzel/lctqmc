@@ -2,8 +2,6 @@ SWEEPS = 2
 warmup = 1
 prebin = 1
 
-geometry = honeycomb
-
 trial_wave_function = t_and_tprime
 block_size = 0.1
 
@@ -13,7 +11,7 @@ wrap_refresh_interval = 2
 
 static_measure_interval = 2
 
-dyn_tau_max = 10
+dyn_tau_max = 2
 dyn_delta_tau = 0.1
 
 ep_tau_max = 8
@@ -22,11 +20,12 @@ ep_delta_tau = 0.005
 static_obs = energy,Hv,epsilon,M2,S_cdw_q,S_cdw_q20,S_cdw_q11
 obs = M2,epsilon,sp,sp_q,tp
 
-theta = 40
+theta = 10
 method = projective
 
 tprime=0.
 
-L = 3
+geometry = pi_flux_square
+L = 2
 inv_symmetry = 1
 {V = 1.0}

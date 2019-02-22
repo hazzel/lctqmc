@@ -91,7 +91,7 @@ filelist = []
 #filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/cluster_work/code/lctqmc_epsilon/jobs/K_point/theta160/lctqmc_ep_L6_s_theta160/*022.out"))
 
 #filelist.append(glob.glob("/scratch/work/hesselmann/lctqmc/cluster/K_point/epsilon/lctqmc_ep_K_L6_L9_theta160/*01.out"))
-filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/cluster_work/code/lctqmc_epsilon/jobs/K_point/chern/lctqmc_chern_theta160_checkpoint/*03.out"))
+filelist.append(glob.glob("/net/home/lxtsfs1/tpc/hesselmann/cluster_work_1/code/lctqmc_epsilon/jobs/K_point/chern/lctqmc_chern_theta160_checkpoint/*.out"))
 
 filelist[0].sort()
 
@@ -103,7 +103,7 @@ for f in filelist:
 	plist = ParseParameters(f)
 	elist = ParseEvalables(f)
 
-	obs = "gamma_mod"
+	obs = "sp"
 	if obs == "M2":
 		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{cdw}(\tau) O_{cdw}^{\dag} \right \rangle$", fontsize=16)
@@ -282,7 +282,7 @@ for f in filelist:
 			#ax.plot(ed_tau, np.flipud(ed_data[ed_n]), marker='o', color="b", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+'$')
 		
 		
-		nmin = 60; nmax = 150#len(x_tau)-1
+		nmin = 150; nmax = len(x_tau)-1
 		#nmin = 50; nmax = len(x_tau)-1
 #		if cnt == 0:
 #			nmin = 50; nmax = len(x_tau)-1

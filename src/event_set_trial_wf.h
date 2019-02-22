@@ -41,7 +41,7 @@ struct event_set_trial_wf
 				S_a.col(i) *= 0.;
 		}
 
-		int cnt = 0;
+		int cnt_so = 0, cnt_ao = 0;
 		for (int i = 0; i < S_s.cols(); ++i)
 		{
 			int j;
@@ -58,21 +58,23 @@ struct event_set_trial_wf
 				if (S_so.col(j).norm() > param.epsilon)
 				{
 					S_so.col(j) /= S_so.col(j).norm();
-					S_f.col(cnt) = S_so.col(j);
-					++cnt;
+					++cnt_so;
 				}
 				if (S_ao.col(j).norm() > param.epsilon)
 				{
 					S_ao.col(j) /= S_ao.col(j).norm();
-					S_f.col(cnt) = S_ao.col(j);
-					++cnt;
+					++cnt_ao;
 				}
 			}
 			i = j - 1;
 		}
-		if (cnt != S.cols())
+		for (int i = 0; i < cnt_so; ++i)
+			S_f.col(i) = S_so.col(i);
+		for (int i = 0; i < cnt_ao; ++i)
+			S_f.col(i+cnt_so) = S_ao.col(i);
+		if (cnt_so + cnt_ao != S.cols())
 		{
-			std::cout << "Error! Found " << cnt << " out of " << 2*S.cols() << std::endl;
+			std::cout << "Error! Found " << cnt_so + cnt_ao << " out of " << 2*S.cols() << std::endl;
 			throw(std::runtime_error("Error in symmetrization. Wrong number of states."));
 		}
 		return S_f.leftCols(S.cols());
@@ -578,16 +580,19 @@ struct event_set_trial_wf
 			
 			std::cout << "Dirac block before PH" << std::endl;
 			print_representations(ph_1p_block, inv_pm, sv_pm, sh_pm, rot60_pm, rot90_pm, rot120_pm, ph_pm);
+			std::cout << std::endl;
 			
 			ph_1p_block = symmetrize_EV(ph_1p_block, ph_ev, ph_pm);
 			
 			std::cout << "Dirac block before PH after ph_pm" << std::endl;
 			print_representations(ph_1p_block, inv_pm, sv_pm, sh_pm, rot60_pm, rot90_pm, rot120_pm, ph_pm);
+			std::cout << std::endl;
 			
 			ph_1p_block = ph_symmetrize_EV(ph_1p_block, ph_pm);
 			
 			std::cout << "Dirac block after sym_ph" << std::endl;
 			print_representations(ph_1p_block, inv_pm, sv_pm, sh_pm, rot60_pm, rot90_pm, rot120_pm, ph_pm);
+			std::cout << std::endl;
 			
 			std::vector<matrix_t> ph_2p_block(4, matrix_t(lat.n_sites(), 2));
 			//PH = -1
