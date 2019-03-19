@@ -14,7 +14,8 @@
 #include "wick_base.h"
 #include "vector_wick_base.h"
 
-#define COMPLEX_TYPE
+//#define COMPLEX_TYPE
+#define REAL_TYPE
 
 template<typename T, typename Pred>
 typename std::vector<T>::iterator insert_sorted(std::vector<T>& vec, const T& item, Pred pred)

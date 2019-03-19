@@ -58,20 +58,22 @@ struct event_set_trial_wf
 				if (S_so.col(j).norm() > param.epsilon)
 				{
 					S_so.col(j) /= S_so.col(j).norm();
+					S_f.col(cnt_so+cnt_ao) = S_so.col(j);
 					++cnt_so;
 				}
 				if (S_ao.col(j).norm() > param.epsilon)
 				{
 					S_ao.col(j) /= S_ao.col(j).norm();
+					S_f.col(cnt_so+cnt_ao) = S_ao.col(j);
 					++cnt_ao;
 				}
 			}
 			i = j - 1;
 		}
-		for (int i = 0; i < cnt_so; ++i)
-			S_f.col(i) = S_so.col(i);
-		for (int i = 0; i < cnt_ao; ++i)
-			S_f.col(i+cnt_so) = S_ao.col(i);
+		//for (int i = 0; i < cnt_so; ++i)
+		//	S_f.col(i) = S_so.col(i);
+		//for (int i = 0; i < cnt_ao; ++i)
+		//	S_f.col(i+cnt_so) = S_ao.col(i);
 		if (cnt_so + cnt_ao != S.cols())
 		{
 			std::cout << "Error! Found " << cnt_so + cnt_ao << " out of " << 2*S.cols() << std::endl;
@@ -325,7 +327,7 @@ struct event_set_trial_wf
 	
 	void print_energy_levels(const matrix_t& S, const Eigen::VectorXd& eigen_energies,
 		const std::vector<std::vector<int>>& energy_levels,
-		const matrix_t& inv_pm, const matrix_t& sv_pm, const matrix_t& sh_pm, const matrix_t& rot60_pm, const matrix_t& rot120_pm)
+		const matrix_t& inv_pm, const matrix_t& sv_pm, const matrix_t& sh_pm, const matrix_t& rot60_pm, const matrix_t& rot90_pm, const matrix_t& rot120_pm)
 	{
 		std::cout << "Single particle eigenvalues:" << std::endl;
 		for (int k = 0; k < energy_levels.size(); ++k)
@@ -337,6 +339,7 @@ struct event_set_trial_wf
 				std::cout << "E(" << i << ") = " << eigen_energies[i]
 				<< ", P_inv = " << S.col(i).adjoint() * inv_pm * S.col(i)
 				<< ", P_rot60 = " << S.col(i).adjoint() * rot60_pm * S.col(i)
+				<< ", P_rot90 = " << S.col(i).adjoint() * rot90_pm * S.col(i)
 				<< ", P_rot120 = " << S.col(i).adjoint() * rot120_pm * S.col(i)
 				<< ", P_sv = " << S.col(i).adjoint() * sv_pm * S.col(i) 
 				<< ", P_sh = " << S.col(i).adjoint() * sh_pm * S.col(i) << std::endl;
@@ -562,6 +565,7 @@ struct event_set_trial_wf
 				split_quantum_numbers(S_f, energy_levels, rot90_pm);
 			}
 			
+			
 			//print_energy_levels(S_f, solver.eigenvalues(), energy_levels, inv_pm, sv_pm, sh_pm, rot60_pm, rot90_pm, rot120_pm);
 			//print_representations(S_f, inv_pm, sv_pm, sh_pm, rot60_pm, rot90_pm, rot120_pm, ph_pm);
 		
@@ -578,21 +582,21 @@ struct event_set_trial_wf
 			matrix_t ph_1p_block = S_f.block(0, lat.n_sites()/2-2, lat.n_sites(), 4);
 			Eigen::VectorXd ph_ev = Eigen::VectorXd::Zero(4);
 			
-			std::cout << "Dirac block before PH" << std::endl;
-			print_representations(ph_1p_block, inv_pm, sv_pm, sh_pm, rot60_pm, rot90_pm, rot120_pm, ph_pm);
-			std::cout << std::endl;
+			//std::cout << "Dirac block before PH" << std::endl;
+			//print_representations(ph_1p_block, inv_pm, sv_pm, sh_pm, rot60_pm, rot90_pm, rot120_pm, ph_pm);
+			//std::cout << std::endl;
 			
 			ph_1p_block = symmetrize_EV(ph_1p_block, ph_ev, ph_pm);
 			
-			std::cout << "Dirac block before PH after ph_pm" << std::endl;
-			print_representations(ph_1p_block, inv_pm, sv_pm, sh_pm, rot60_pm, rot90_pm, rot120_pm, ph_pm);
-			std::cout << std::endl;
+			//std::cout << "Dirac block before PH after ph_pm" << std::endl;
+			//print_representations(ph_1p_block, inv_pm, sv_pm, sh_pm, rot60_pm, rot90_pm, rot120_pm, ph_pm);
+			//std::cout << std::endl;
 			
 			ph_1p_block = ph_symmetrize_EV(ph_1p_block, ph_pm);
 			
-			std::cout << "Dirac block after sym_ph" << std::endl;
-			print_representations(ph_1p_block, inv_pm, sv_pm, sh_pm, rot60_pm, rot90_pm, rot120_pm, ph_pm);
-			std::cout << std::endl;
+			//std::cout << "Dirac block after sym_ph" << std::endl;
+			//print_representations(ph_1p_block, inv_pm, sv_pm, sh_pm, rot60_pm, rot90_pm, rot120_pm, ph_pm);
+			//std::cout << std::endl;
 			
 			std::vector<matrix_t> ph_2p_block(4, matrix_t(lat.n_sites(), 2));
 			//PH = -1

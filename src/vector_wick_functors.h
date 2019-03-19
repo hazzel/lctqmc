@@ -54,17 +54,28 @@ struct wick_chi_cdw
 	}
 };
 
-struct wick_sp_site
+struct wick_sp_k
 {
 	Random& rng;
 	parameters& param;
 	lattice& lat;
 	std::vector<double> values;
+	std::vector<double> fourier_coeff;
 
-	wick_sp_site(Random& rng_, parameters& param_, lattice& lat_)
+	wick_sp_k(Random& rng_, parameters& param_, lattice& lat_)
 		: rng(rng_), param(param_), lat(lat_)
 	{
-		values.resize(lat.max_distance());
+		values.resize(lat.Lx * lat.Ly);
+		
+		double a1b1 = lat.a1.dot(lat.b1) / lat.Lx;
+		double a1b2 = lat.a1.dot(lat.b2) / lat.Ly;
+		double a2b1 = lat.a2.dot(lat.b1) / lat.Lx;
+		double a2b2 = lat.a2.dot(lat.b2) / lat.Ly;
+		for (int kx = 0; kx < lat.Lx; ++kx)
+			for (int ky = 0; ky < lat.Ly; ++ky)
+				for (int ix = -lat.Lx; ix <= lat.Lx; ++ix)
+					for (int iy = -lat.Ly; iy <= lat.Ly; ++iy)
+						fourier_coeff.emplace_back(std::cos(ix * (kx * a1b1 + ky * a1b2) + iy * (kx * a2b1 + ky * a2b2)));
 	}
 	
 	std::vector<double>& get_obs(const matrix_t& et_gf_0, const matrix_t& et_gf_t,
@@ -73,19 +84,31 @@ struct wick_sp_site
 		const numeric_t *ca_td_gf = td_gf.data();
 		const int N = lat.n_sites();
 		std::fill(values.begin(), values.end(), 0.);
-		for (int d = 0; d < lat.max_distance(); ++d)
-		{
-			auto& d_bonds = lat.bonds("d" + std::to_string(d) + "_bonds");
-			for (auto& b : d_bonds)
+		
+		for (int kx = 0; kx < lat.Lx; ++kx)
+			for (int ky = 0; ky < lat.Ly; ++ky)
 			{
-				int i = b.first, j = b.second;
-				auto& r_i = lat.real_space_coord(i);
-				auto& r_j = lat.real_space_coord(j);
-				values[d] += std::real(ca_td_gf[j*N+i]) * lat.parity(i)*lat.parity(j);
+				for (int ix = 0; ix < lat.Lx; ++ix)
+					for (int iy = 0; iy < lat.Ly; ++iy)
+					{
+						int i = ix * lat.Ly + iy;
+						for (int jx = 0; jx < lat.Lx; ++jx)
+							for (int jy = 0; jy < lat.Ly; ++jy)
+							{
+								int j = jx * lat.Ly + jy;
+								values[kx*lat.Ly+ky] += get_fourier_coeff(kx, ky, ix, jx, iy, jy) * std::real(ca_td_gf[(j+0)*N+(i+0)] + ca_td_gf[(j+1)*N+(i+1)]);
+							}
+					}
+				values[kx*lat.Ly+ky] /= N;
 			}
-			values[d] /= d_bonds.size();
-		}
 		return values;
+	}
+	
+	double get_fourier_coeff(int kx, int ky, int ix, int jx, int iy, int jy)
+	{
+		int x = ix - jx + lat.Lx;
+		int y = iy - jy + lat.Ly;
+		return fourier_coeff[kx*lat.Ly*(2*lat.Lx+1)*(2*lat.Ly+1) + ky*(2*lat.Lx+1)*(2*lat.Ly+1) + x*(2*lat.Ly+1) + y];
 	}
 };
 
@@ -107,7 +130,6 @@ struct wick_sp_q
 		const matrix_t& td_gf)
 	{
 		const numeric_t *ca_td_gf = td_gf.data();
-		numeric_t sp = 0.;
 		const int N = lat.n_sites();
 		std::fill(values.begin(), values.end(), 0.);
 		for (int p = 0; p <= nq; ++p)
