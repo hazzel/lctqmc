@@ -5,16 +5,21 @@ import glob
 import sys
 import io
 import numpy as np
-sys.path.append("/home/stephan/mc/qising-SSE")
-sys.path.append("/net/home/lxtsfs1/tpc/hesselmann/mc/qising-SSE")
-from texify import *
+import scipy.optimize
+
+def f1(k):
+	return 1. + np.exp(1.j * np.dot(k, a1)) + np.exp(1.j * np.dot(k, a1 - a2))
+def f3(k):
+	return np.exp(-1.j * np.dot(k, a2)) + np.exp(1.j * np.dot(k, a2)) + np.exp(1.j * np.dot(k, 2.*a1-a2))
+def FitFunction(x, a, b, c):
+	return a*x*x + c
 
 #latexify()
 fig, ax = plt.subplots()
 ax.set_aspect("equal")
 
-Lx = 6
-Ly = 6
+Lx = 21
+Ly = 21
 
 
 # BZ:
@@ -32,8 +37,6 @@ K = np.array([2.*np.pi/3., 2.*np.pi/3./np.sqrt(3.)])
 Kp = np.array([2.*np.pi/3., -2.*np.pi/3./np.sqrt(3.)])
 M = np.array([2.*np.pi/3., 0.])
 Gamma = np.array([0., 0.])
-
-print(np.linalg.norm(b1) * 3./2. * 2.**0.5)
 
 '''
 # BZ:
@@ -66,11 +69,28 @@ ax.arrow(0, 0, b2[0], b2[1], head_width=0.25, head_length=0.25, fc='k', ec='k')
 ax.arrow(b1[0], b1[1], b2[0], b2[1], head_width=0., head_length=0., fc='k', ec='k')
 ax.arrow(b2[0], b2[1], b1[0], b1[1], head_width=0., head_length=0., fc='k', ec='k')
 
-print(4.*2.**0.5*Lx * 3./2*np.linalg.norm(K - (Lx//3+1)*2*b1/Lx - (Lx//3+1)*b2/Lx))
-
-#for kx, ky in sorted(zip(x, y), key=lambda n: n[0]):
-#	print(kx, ky)
-
 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+
+#######################
+
+fig2, ax2 = plt.subplots()
+ax2.set_aspect("equal")
+
+t1 = 1.
+t3 = 0.5
+
+q_abs = []
+E_q = []
+n_fit = Lx//8
+
+for i in range(-Lx//2 + Lx%2, Lx//2 + 1):
+	q = K + i*b1 / Lx
+	q_abs.append(np.sign(i) * np.linalg.norm(K-q))
+	E_q.append(np.linalg.norm(t1*f1(q) + t3*f3(q)))
+ax2.plot(q_abs, E_q, c="k", marker="o", markersize=15, fillstyle="top", lw=3.)
+parameter, perr = scipy.optimize.curve_fit( FitFunction, q_abs[len(q_abs)//2-n_fit:len(q_abs)//2+n_fit], E_q[len(q_abs)//2-n_fit:len(q_abs)//2+n_fit], p0=[0.1, 0.1, 1.], method='trf')
+xnew = np.linspace(q_abs[len(q_abs)//2-n_fit], q_abs[len(q_abs)//2+n_fit], 10000)
+ax2.plot( xnew, FitFunction(xnew, *parameter), color="r", markersize=0.0, linewidth=3.0, ls="--")
+
 plt.show()

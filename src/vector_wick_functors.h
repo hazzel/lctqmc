@@ -96,7 +96,7 @@ struct wick_sp_k
 							for (int jy = 0; jy < lat.Ly; ++jy)
 							{
 								int j = jx * lat.Ly + jy;
-								values[kx*lat.Ly+ky] += get_fourier_coeff(kx, ky, ix, jx, iy, jy) * std::real(ca_td_gf[(j+0)*N+(i+0)] + ca_td_gf[(j+1)*N+(i+1)]);
+								values[kx*lat.Ly+ky] += get_fourier_coeff(kx, ky, ix, jx, iy, jy) * std::real(ca_td_gf[(2*j+0)*N+(2*i+0)] + ca_td_gf[(2*j+1)*N+(2*i+1)]);
 							}
 					}
 				values[kx*lat.Ly+ky] /= N;

@@ -14,7 +14,6 @@ sys.path.append("/net/home/lxtsfs1/tpc/hesselmann/mc/qising-SSE")
 sys.path.append("/home/stephan/mc/qising-SSE")
 from Fit import *
 from texify import *
-import scipy.integrate
 
 def FitFunctionL(x, a, b, c):
 	if obs == "Hv":
@@ -103,7 +102,7 @@ for f in filelist:
 	plist = ParseParameters(f)
 	elist = ParseEvalables(f)
 
-	obs = "sp_k_3"
+	obs = "sp_k_5"
 	if obs == "M2":
 		ed_n = 1
 		ax.set_ylabel(r"$\left \langle O_{cdw}(\tau) O_{cdw}^{\dag} \right \rangle$", fontsize=16)
@@ -282,7 +281,7 @@ for f in filelist:
 			#ax.plot(ed_tau, np.flipud(ed_data[ed_n]), marker='o', color="b", markersize=10.0, linewidth=2.0, label=r'$L='+str(int(L))+'$')
 		
 		
-		nmin = 1; nmax = len(x_tau)-1
+		nmin = 1; nmax = 20#len(x_tau)-1
 		#nmin = 50; nmax = len(x_tau)-1
 #		if cnt == 0:
 #			nmin = 50; nmax = len(x_tau)-1

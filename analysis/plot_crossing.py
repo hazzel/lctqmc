@@ -58,7 +58,7 @@ for filename in list_of_files:
 		for cap in caps:
 			cap.set_markeredgewidth(1.6)
 	
-		n = min(len(data_filter), 4)
+		n = min(len(data_filter), 5)
 		parameter, perr = scipy.optimize.curve_fit( FitFunction, 1./data_filter[-n:,0], data_filter[-n:,2], p0=[0.1, 0.1, 1.], method='trf')
 		xnew = np.linspace(0, 1./data_filter[-n,0], 300)
 		ax1.plot( xnew, FitFunction(xnew, *parameter), color=ecolor[cnt], markersize=0.0, linewidth=2.0, ls="--")

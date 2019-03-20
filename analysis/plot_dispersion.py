@@ -14,7 +14,6 @@ from texify import *
 
 def f1(k):
 	return 1. + np.exp(1.j * np.dot(k, a1)) + np.exp(1.j * np.dot(k, a1 - a2))
-
 def f3(k):
 	'''
 	return np.exp(-1.j * np.dot(k, a2)) + np.exp(1.j * np.dot(k, a2)) + np.exp(1.j * np.dot(k, 2.*a1-a2)) \
