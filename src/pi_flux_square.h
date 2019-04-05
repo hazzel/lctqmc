@@ -33,9 +33,9 @@ struct pi_flux_square
 		: Lx(Lx_), Ly(Ly_),
 			a1(1., 1.), a2(1., -1.), delta(1., 0.)
 	{
-		b1 = Eigen::Vector2d(1., 1.);
-		b2 = Eigen::Vector2d(-1., 1.);
-		center = Eigen::Vector2d(0., 0.);
+		b1 = Eigen::Vector2d(1., 1.) * std::sqrt(2.) * pi;
+		b2 = Eigen::Vector2d(-1., 1.) * std::sqrt(2.) * pi;
+		center = Eigen::Vector2d(0.5, 0.);
 	}
 	
 	int neighbor_site(int site, int type)
@@ -79,13 +79,13 @@ struct pi_flux_square
 		//Symmetry points
 		std::map<std::string, Eigen::Vector2d> points;
 
-		points["K"] = closest_k_point({0.5, 0.});
-		points["Kp"] = closest_k_point({0., 0.5});
+		points["K"] = closest_k_point({pi, 0.5*pi});
+		points["Kp"] = closest_k_point({pi, -0.5*pi});
 		points["Gamma"] = closest_k_point({0., 0.});
 		points["q"] = closest_k_point(b1 / Lx);
 		points["q20"] = closest_k_point(2. * b2 / Ly);
 		points["q11"] = closest_k_point(b1 / Lx + b2 / Ly);
-		points["Kq"] = closest_k_point(b1 / Lx + Eigen::Vector2d{0.5, 0.});
+		points["Kq"] = closest_k_point(b1 / Lx + Eigen::Vector2d{pi, 0.5*pi});
 		l.add_symmetry_points(points);
 		
 		return g;

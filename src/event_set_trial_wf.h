@@ -415,32 +415,17 @@ struct event_set_trial_wf
 		}
 		else if (param.geometry == "pi_flux_square")
 		{
-			#ifndef REAL_TYPE
+			//#ifndef REAL_TYPE
 				int ns = lat.n_sites();
 				for (int n = 0; n < ns; n+=2)
-				{
-					/*
-					tw(n, (n+lat.Lx)%ns) += -param.t * (2*(i%2)-1);
-					tw((n+lat.Lx)%ns, n) += -param.t * (2*(i%2)-1);
-					
-					if (i == lat.Lx - 1)
-					{
-						tw(n, (n - lat.Lx + 1)%ns) += -param.t;
-						tw((n - lat.Lx + 1)%ns, n) += -param.t;
-					}
-					else
-					{
-						tw(n, (n + 1)%ns) += -param.t;
-						tw((n + 1)%ns, n) += -param.t;
-					}
-					*/
-					
+				{			
 					std::complex<double> im(0., 1.);
 					const double pi = std::atan(1.0)*4.;
 					double phase = pi/4.;
 					
 					auto Rn = lat.real_space_coord(n);
 					
+					/*
 					tw(n, lat.site_at_position(Rn + lat.delta)) += -param.t * std::exp(-im * phase);
 					tw(lat.site_at_position(Rn + lat.delta), n) += -param.t * std::exp(im * phase);
 					
@@ -452,8 +437,23 @@ struct event_set_trial_wf
 					
 					tw(n, lat.site_at_position(Rn + lat.a2 - lat.delta)) += -param.t * std::exp(im * phase);
 					tw(lat.site_at_position(Rn + lat.a2 - lat.delta), n) += -param.t * std::exp(-im * phase);
+					*/
+					
+					
+					tw(n, lat.site_at_position(Rn + lat.delta)) += param.t;
+					tw(lat.site_at_position(Rn + lat.delta), n) += param.t;
+				
+					tw(n, lat.site_at_position(Rn - lat.delta)) += -param.t;
+					tw(lat.site_at_position(Rn - lat.delta), n) += -param.t;
+					
+					tw(n, lat.site_at_position(Rn + lat.a1 - lat.delta)) += -param.t;
+					tw(lat.site_at_position(Rn + lat.a1 - lat.delta), n) += -param.t;
+					
+					tw(n, lat.site_at_position(Rn + lat.a2 - lat.delta)) += -param.t;
+					tw(lat.site_at_position(Rn + lat.a2 - lat.delta), n) += -param.t;
+					
 				}
-			#endif
+			//#endif
 		}
 		return tw;
 	}
@@ -485,8 +485,8 @@ struct event_set_trial_wf
 				rot60_pm(i, lat.rotated_site(i, 60.)) = 1.;
 				rot120_pm(i, lat.rotated_site(i, 120.)) = 1.;
 			}
-			if (param.geometry == "pi_flux_square")
-				rot90_pm(i, lat.rotated_site(i, 90.)) = 1.;
+			//if (param.geometry == "pi_flux_square")
+			//	rot90_pm(i, lat.rotated_site(i, 90.)) = 1.;
 			ph_pm(i, i) = lat.parity(i);
 		}
 		
@@ -503,37 +503,54 @@ struct event_set_trial_wf
 		}
 		*/
 		
-		if (param.geometry == "honeycomb" && lat.n_sites() % 3 != 0)
+		
+		if ((param.geometry == "honeycomb" && lat.n_sites() % 3 != 0) ||
+			(param.geometry == "pi_flux_square" && lat.Lx % 4 != 0))
 		{
 			std::vector<std::vector<int>> energy_levels = get_energy_levels(solver.eigenvalues());
 			auto S_f = solver.eigenvectors();
+			
 			S_f = project_symmetry(S_f, energy_levels, inv_pm);
 			split_quantum_numbers(S_f, energy_levels, inv_pm);
-			//print_energy_levels(S_f, solver.eigenvalues(), energy_levels, inv_pm, sv_pm, sh_pm, rot60_pm, rot120_pm);
 			
 			S_f = project_symmetry(S_f, energy_levels, sv_pm);
 			split_quantum_numbers(S_f, energy_levels, sv_pm);
-			//print_energy_levels(S_f, solver.eigenvalues(), energy_levels, inv_pm, sv_pm, sh_pm, rot60_pm, rot120_pm);
 		
 			S_f = project_symmetry(S_f, energy_levels, sh_pm);
 			split_quantum_numbers(S_f, energy_levels, sh_pm);
-			//print_energy_levels(S_f, solver.eigenvalues(), energy_levels, inv_pm, sv_pm, sh_pm, rot60_pm, rot120_pm);
 			
-			S_f = project_symmetry(S_f, energy_levels, rot60_pm);
-			split_quantum_numbers(S_f, energy_levels, rot60_pm);
-			//print_energy_levels(S_f, solver.eigenvalues(), energy_levels, inv_pm, sv_pm, sh_pm, rot60_pm, rot120_pm);
+			if (param.geometry == "honeycomb")
+			{
+				S_f = project_symmetry(S_f, energy_levels, rot60_pm);
+				split_quantum_numbers(S_f, energy_levels, rot60_pm);
+			}
 			
+			//if (param.geometry == "pi_flux_square")
+			//{
+			//	S_f = project_symmetry(S_f, energy_levels, rot90_pm);
+			//	split_quantum_numbers(S_f, energy_levels, rot90_pm);
+			//}
+			
+			/*
+			int N = energy_levels.size();
+			for (int k = 0; k < energy_levels.size()/2; ++k)
+			{
+				int Nk = energy_levels[k].size();
+				matrix_t S_ph(lat.n_sites(), 2*Nk);
+				for (int m = 0; m < Nk; ++m)
+				{
+					S_ph.col(m) = S_f.col(energy_levels[k][m]);
+					S_ph.col(Nk+m) = S_f.col(energy_levels[N-1-k][m]);
+				}
+				print_representations(S_ph, inv_pm, sv_pm, sh_pm, rot60_pm, rot90_pm, rot120_pm, ph_pm);
+				std::cout << "-------" << std::endl;
+			}
+			print_representations(S_f, inv_pm, sv_pm, sh_pm, rot60_pm, rot90_pm, rot120_pm, ph_pm);
+			*/
+
 			P = S_f.leftCols(lat.n_sites()/2);
-			
 			//P = S_f.rightCols(lat.n_sites()/2);
 			//P.col(P.cols()-1) = S_f.col(0);
-			
-			//double qn_P{1.};
-			//for (int i = 0; i < P.cols(); ++i)
-			//	qn_P *= (P.col(i).adjoint() * inv_pm * P.col(i)).trace();
-			//std::cout << "qn_P = " << qn_P << std::endl;
-			
-			//P = solver.eigenvectors().leftCols(lat.n_sites()/2);
 		}
 		else
 		{
@@ -559,11 +576,11 @@ struct event_set_trial_wf
 				split_quantum_numbers(S_f, energy_levels, rot60_pm);
 			}
 			
-			if (param.geometry == "pi_flux_square")
-			{
-				S_f = project_symmetry(S_f, energy_levels, rot90_pm);
-				split_quantum_numbers(S_f, energy_levels, rot90_pm);
-			}
+			//if (param.geometry == "pi_flux_square")
+			//{
+			//	S_f = project_symmetry(S_f, energy_levels, rot90_pm);
+			//	split_quantum_numbers(S_f, energy_levels, rot90_pm);
+			//}
 			
 			
 			//print_energy_levels(S_f, solver.eigenvalues(), energy_levels, inv_pm, sv_pm, sh_pm, rot60_pm, rot90_pm, rot120_pm);

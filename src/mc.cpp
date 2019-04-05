@@ -207,7 +207,7 @@ void mc::do_update()
 			qmc.trigger_event("_static measure");
 			qmc.trigger_event("dynamic measure");
 		}
-		t0 = std::chrono::steady_clock::now();
+		//t0 = std::chrono::steady_clock::now();
 		for (int n = 0; n < param.n_updates_per_block; ++n)
 		{
 			qmc.do_update();
@@ -231,7 +231,7 @@ void mc::do_update()
 			qmc.trigger_event("_static measure");
 			qmc.trigger_event("dynamic measure");
 		}
-		t0 = std::chrono::steady_clock::now();
+		//t0 = std::chrono::steady_clock::now();
 		for (int n = 0; n < param.n_updates_per_block; ++n)
 		{
 			qmc.do_update();
