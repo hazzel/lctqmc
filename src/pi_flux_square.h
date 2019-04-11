@@ -33,8 +33,8 @@ struct pi_flux_square
 		: Lx(Lx_), Ly(Ly_),
 			a1(1., 1.), a2(1., -1.), delta(1., 0.)
 	{
-		b1 = Eigen::Vector2d(1., 1.) * std::sqrt(2.) * pi;
-		b2 = Eigen::Vector2d(-1., 1.) * std::sqrt(2.) * pi;
+		b1 = Eigen::Vector2d(pi, pi);
+		b2 = Eigen::Vector2d(pi, -pi);
 		center = Eigen::Vector2d(0.5, 0.);
 	}
 	

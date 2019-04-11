@@ -22,8 +22,8 @@ def FitFunction(x, a, b, c):
 fig, ax = plt.subplots()
 ax.set_aspect("equal")
 
-Lx = 6
-Ly = 6
+Lx = 7
+Ly = 7
 
 
 # BZ:
@@ -79,12 +79,18 @@ Gamma = (0., 0.)
 
 x = []
 y = []
+d = []
 for i in range(Lx + 1):
 	for j in range(Ly + 1):
 		x.append(float(i) / Lx * b1[0] + float(j) / Ly * b2[0])
 		y.append(float(i) / Lx * b1[1] + float(j) / Ly * b2[1])
 		q = np.array([x[-1], y[-1]])
-		print(np.linalg.norm(f_pi_flux(q)))
+		d.append(np.linalg.norm(q-K) / np.pi * Lx)
+		#print(i*(Ly+1) + j)
+		#print(q)
+		#print("|K-q| = ", np.linalg.norm(q-K)*Lx)
+		#print("E = ", np.linalg.norm(f_pi_flux(q)))
+print("|K-q| = ", min(d))
 
 ax.scatter(x, y, s=125, c="k")
 ax.plot([K[0]], [K[1]], c="r", marker="o", markersize=15, fillstyle="top", label="X")
