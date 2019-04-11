@@ -24,7 +24,7 @@ struct event_build
 
 	void trigger()
 	{
-		int Nv = 0.05 * std::abs(param.theta * lat.n_sites() * param.V);
+		int Nv = 0.15 * std::abs(param.theta * lat.n_sites() * param.V);
 		//int Nv = 2*param.theta;
 		green_function::vlist_t vlist;
 		for (int i = 0; i < Nv; ++i)
