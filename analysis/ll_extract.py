@@ -20,6 +20,8 @@ jobname = sys.argv[1]
 filenames = glob.glob(jobname + ".task*.out")
 filenames.sort()
 
+print(sys.argv)
+
 for filename in filenames:
 	with open(filename) as f:
 		jobfile_string = f.read()

@@ -1,13 +1,13 @@
-SWEEPS = 100
-warmup = 50
-prebin = 64
+SWEEPS = 50000000
+warmup = 500
+prebin = 1000
 
 trial_wave_function = t_and_tprime
-block_size = 0.2
 
 updates_per_block = 2
 rebuild_interval = 2
 wrap_refresh_interval = 2
+block_size = 0.1
 
 static_measure_interval = 2
 
@@ -20,12 +20,25 @@ ep_delta_tau = 0.005
 static_obs = energy,Hv,epsilon,M2,S_cdw_q,S_cdw_q20,S_cdw_q11
 obs = M2,sp_k,tp
 
-theta = 320
+theta = 160
 method = projective
 
 tprime=0.
 
-geometry = pi_flux_square
-L = 4
+geometry = honeycomb
+
+L = 6
+
 inv_symmetry = 1
-{V = 1.}
+{V = 1.355}
+
+inv_symmetry = -1
+{V = 1.355}
+
+L = 9
+
+inv_symmetry = 1
+{V = 1.355}
+
+inv_symmetry = -1
+{V = 1.355}

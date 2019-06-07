@@ -77,7 +77,7 @@ class green_function
 		using vlist_t = std::vector<vertex>;
 
 		green_function(Random& rng_, parameters& param_, lattice& lat_)
-			: rng(rng_), param(param_), lat(lat_), norm_error_sum(0.), norm_error_cnt(0), dyn_norm_error_sum(0.), dyn_norm_error_cnt(0), dyn_measure_active(false)
+			: rng(rng_), param(param_), lat(lat_), norm_error_sum(0.), norm_error_cnt(0), dyn_norm_error_sum(0.), dyn_norm_error_cnt(0), dyn_measure_active(false), has_changed(false)
 		{}
 		
 		void set_K_matrix(const matrix_t& K)
@@ -342,10 +342,12 @@ class green_function
 		
 		void rebuild()
 		{
-			
+			//if (!has_changed)
+			//	return;
 			matrix_t g_stab = g_stable();
 			double err = ((g_tau - g_stab).cwiseAbs()).maxCoeff();
 			g_tau = g_stab;
+			has_changed = false;
 			
 			
 			/*
@@ -641,6 +643,7 @@ class green_function
 			{
 				update(v.si, v.sj, G, G);
 				insert_sorted<vertex, vertex::less>(vlist, v, vertex::less());
+				has_changed = true;
 			}
 			return ratio;
 		}
@@ -665,6 +668,7 @@ class green_function
 			{
 				update(vpos->si, vpos->sj, G, G); 
 				vlist.erase(vpos);
+				has_changed = true;
 			}
 			return ratio; 
 		}
@@ -689,6 +693,7 @@ class green_function
 			{
 				update(vpos->sj, sj_prime, G, -G);
 				vpos->sj = sj_prime;
+				has_changed = true;
 			}
 			return ratio; 
 		}
@@ -944,6 +949,7 @@ class green_function
 		double dyn_norm_error_sum;
 		int dyn_norm_error_cnt;
 		bool dyn_measure_active;
+		bool has_changed;
 		
 		matrix_t g_tau;
 		matrix_t L_tau;
