@@ -27,5 +27,6 @@ for filename in filenames:
 		for i in range(2, len(sys.argv) - 1):
 			output_string += f"{get_parameter(sys.argv[i], jobfile_string)} "
 		for obs in sys.argv[-1].split():
+			print(obs)
 			output_string += f"{get_observable(obs, jobfile_string)} "
 		print(output_string)
