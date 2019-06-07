@@ -20,13 +20,12 @@ jobname = sys.argv[1]
 filenames = glob.glob(jobname + ".task*.out")
 filenames.sort()
 
-print(sys.argv)
-
 for filename in filenames:
 	with open(filename) as f:
 		jobfile_string = f.read()
 		output_string = ""
 		for i in range(2, len(sys.argv) - 1):
 			output_string += f"{get_parameter(sys.argv[i], jobfile_string)} "
-		output_string += f"{get_observable(sys.argv[-1], jobfile_string)} "
+		for obs in sys.argv[-1].split():
+			output_string += f"{get_observable(obs, jobfile_string)} "
 		print(output_string)
